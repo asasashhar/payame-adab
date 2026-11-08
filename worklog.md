@@ -252,3 +252,33 @@ Stage Summary:
 - Generated the required development report (spec final instruction): download/Payam-e-Adab-Development-Report.docx (+ PDF companion), 8 pages: cover (R1, green/gold identity), TOC, and the 5 mandated sections — features implemented (20-row spec-coverage table), problems repaired (8), tests passed (100/100 table), external configuration needed (SMTP/siteUrl/font file/push token), remaining limitations
 - postcheck: 0 errors; TOC default-entry dedup fixed via scripts/fix-toc-dup.py (docx-js ships a cached "Executive Summary" hyperlink that duplicated the first real entry)
 - Final git state: efde35a (spec pass) → 0e1db84 (mockup redesign) → b3ae613 (platform); 259 files, 0 sensitive; remote main at b3ae613, fast-forward ready, push still blocked by token (403)
+
+## Task ID: 12-navy-reference-redesign (2026-11-08 17:20)
+**Goal:** Design-only redesign per the new reference set (mawraa.com presentation + official Payam-e-Adab identity: dark navy/black background, royal blue + gold accents). Content, features, functionality, routes and settings mechanism untouched.
+
+### CRITICAL RECOVERY (sandbox recycle wiped db/custom.db again)
+- DB was empty (fresh schema only); db/backups/*.db also empty (backup taken post-wipe)
+- Recovered full DB from git dangling commit a2f331c (Nov 1 snapshot: 5 users, 17 poems, 7 articles, 8 real books + 8 E2E-residue books, 44 settings)
+- ALTERed User table: +resetAttempts, +resetRequestedAt, +socials (schema drift since Nov 1)
+- Re-applied design settings: themePreset=navy, designOverride=A, designRotation=1, tz Asia/Kolkata, contactEmail=payameadab@gmail.com, heroImage=/brand/hero-banner.jpg, homeSections=8-section default order
+- post-e2e-cleanup removed residue books/articles/users → final 5 users (3 admins, sadaeqbal+payameadab mustChange=true), 17 poems, 7 articles, 8 books, 5 news
+- RECREATED src/app/api/upload/route.ts (vanished again; was never committed) — auth-gated (getSessionUser), allowlist jpg/jpeg/png/webp/gif/pdf/svg, 10MB cap, public/uploads/<YYYY-MM>/<ts>-<rand>.<ext>, 201 {url}; committed this time
+
+### Design changes (presentation only)
+- THEME_PRESETS.navy = full official identity: bg #0a1120 (dark navy/black), ivory content #0d1524, cards #121c31, royal blue #24558e primary/ink #0c1d42, gold #d4a937 / soft #e9cf8e; dark:true flag; site default themePreset → navy
+- design.ts: Design D gets dark:true + adaptive accent vars + sidebar-primary; navy preset gains sidebar-primary royal
+- globals.css: --accent-text/--accent-text-hover adaptive vars (:root default = primary hue); @media screen pea-dark override block re-maps text-primary/text-emerald-deep/text-emerald-ink (+hover/group-hover/text-primary\/90) to gold sitewide on dark identities — print pages unaffected; .accent-brand utility; neutral navy-tinted manuscript-frame/pdf shadows; scrollbar thumb = var(--border)
+- layout.tsx: body gets pea-dark class when preset or active design is dark
+- SectionHeading: reference anatomy — bold gold title (start) + thin twin-rule (flex) + "view all" (end) on one line; center/light variants preserved
+- PoemCard/ArticleCard: reference card anatomy — cover/verse panel with calligraphy overlay (pattern-emerald fallback), 2-line title, author avatar+name+views row, gold outline read link; BookCard "بہ قلم:" author line; StatusBadge PUBLISHED royal-tint readable
+- FeaturedPoemPanel: "Poem of the Week" split pattern (verse visual + gold chip + title/poet + royal CTA, button mt-auto)
+- Poet avatars: gold rings; header logo on ivory plate (blue/gold lockup readable on navy); gold-bg buttons (register/submit/newspaper/dictionary chips) → literal #101d38 text (avoid gold-on-gold); checkboxes accent-brand; analytics charts royal #24558e; appearance page navy swatch/label
+- FIXED PRE-EXISTING BUG: CSS order accepts integers only — decimal orders (2.5, 3.5…) were silently dropped so ALL homepage dividers stacked below the hero (masked historically by different DB section configs); now sections ×10, dividers 25…75
+
+### DB settings changed (design application, admin-reversible)
+- themePreset emerald → **navy**; designOverride=A kept (pins the official identity; admin → appearance → restore-auto resumes A/B/C/D monthly rotation)
+
+### Verification
+- tsc clean (src), production build OK, standalone server on :3000 (static+public copied in)
+- E2E: test-upgrade 38/38, test-auth-otp 32/32, test-gaps 30/30 → **100/100 PASS** (run twice: dev + standalone)
+- Visual: homepage 4 scroll positions, poetry cards, articles, trio, newspaper, competitions, books grid, footer, admin dashboard (navy sidebar/royal active item), admin login, mobile 390px = 0 overflow, 0 JS/hydration errors

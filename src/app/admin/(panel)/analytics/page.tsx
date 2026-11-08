@@ -103,8 +103,8 @@ export default function AnalyticsPage() {
             <AreaChart data={data?.series ?? []} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06422a" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="#06422a" stopOpacity={0.04} />
+                  <stop offset="0%" stopColor="#24558e" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="#24558e" stopOpacity={0.04} />
                 </linearGradient>
                 <linearGradient id="gu" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#b5891e" stopOpacity={0.5} />
@@ -119,7 +119,7 @@ export default function AnalyticsPage() {
                 formatter={(value: number, name: string) => [value, name === "views" ? "مشاہدات" : "منفرد زائرین"]}
               />
               <Legend formatter={(v: string) => (v === "views" ? "مشاہدات" : "منفرد زائرین")} wrapperStyle={{ fontFamily: "inherit", fontSize: 13 }} />
-              <Area type="monotone" dataKey="views" stroke="#06422a" strokeWidth={2} fill="url(#gv)" />
+              <Area type="monotone" dataKey="views" stroke="#24558e" strokeWidth={2} fill="url(#gv)" />
               <Area type="monotone" dataKey="visitors" stroke="#b5891e" strokeWidth={2} fill="url(#gu)" />
             </AreaChart>
           </ResponsiveContainer>

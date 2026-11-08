@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Urdu section heading with the brand's twin decorative rules and endpoint
- * dots. The two lines and the dots are structurally separated so they can
- * never overlap (fixed 3px gap, dots offset clear of the lower line).
+ * Section heading in the reference presentation (mawraa-inspired, brand
+ * adapted): bold Urdu title at the start, a thin twin gold rule filling the
+ * middle, and the "view all" link anchored at the far end — all on one line.
+ * Kept API-compatible: title, subtitle, href, linkLabel, light, center.
  */
 export function SectionHeading({
   title,
@@ -20,46 +21,68 @@ export function SectionHeading({
   light?: boolean;
   center?: boolean;
 }) {
-  return (
-    <div className={cn("mb-6", center && "text-center")}>
-      <div className={cn("flex items-end gap-4", center && "justify-center")}>
-        <div className="decor-rule flex-1" aria-hidden>
-          <span className="rule-dot rule-dot-dot" />
-          <span className="rule-track">
-            <span className="rule-line" />
-            <span className="rule-line opacity-50" />
-          </span>
+  if (center) {
+    /* centered variant: title flanked by the twin decorative rules */
+    return (
+      <div className="mb-6 text-center">
+        <div className="flex items-center justify-center gap-4">
+          <div className="decor-rule flex-1" aria-hidden>
+            <span className="rule-dot rule-dot-dot" />
+            <span className="rule-track">
+              <span className="rule-line" />
+              <span className="rule-line opacity-50" />
+            </span>
+          </div>
+          <h2
+            className={cn(
+              "whitespace-nowrap font-nastaliq-tight text-3xl md:text-[2rem]",
+              light ? "text-[#f3ead2]" : "text-[color:var(--accent-text)]"
+            )}
+          >
+            {title}
+          </h2>
+          <div className="decor-rule flex-1" aria-hidden>
+            <span className="rule-track">
+              <span className="rule-line" />
+              <span className="rule-line opacity-50" />
+            </span>
+            <span className="rule-dot" />
+          </div>
         </div>
+        {subtitle && (
+          <p className={cn("mt-1 text-sm", light ? "text-[#e2c57c]" : "text-muted-foreground")}>{subtitle}</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-4">
         <h2
           className={cn(
-            "font-nastaliq-tight text-3xl md:text-[2rem] whitespace-nowrap",
-            light ? "text-[#f3ead2]" : "text-primary"
+            "shrink-0 whitespace-nowrap font-nastaliq-tight text-[1.7rem] md:text-[2rem]",
+            light ? "text-[#f3ead2]" : "text-[color:var(--accent-text)]"
           )}
         >
           {title}
         </h2>
-        <div className="decor-rule flex-1" aria-hidden>
+        <div className="decor-rule min-w-8 flex-1 opacity-70" aria-hidden>
           <span className="rule-track">
             <span className="rule-line" />
-            <span className="rule-line opacity-50" />
           </span>
-          <span className="rule-dot" />
         </div>
-      </div>
-      {subtitle && (
-        <p className={cn("mt-1 text-sm", light ? "text-[#e2c57c]" : "text-muted-foreground", center && "text-center")}>
-          {subtitle}
-        </p>
-      )}
-      {href && !center && (
-        <div className="mt-1 text-left">
+        {href && (
           <a
             href={href}
-            className="text-sm text-gold hover:text-emerald-deep underline underline-offset-4 decoration-dotted transition-colors"
+            className="shrink-0 text-sm font-naskh text-gold transition-colors hover:text-[color:var(--accent-text-hover)]"
           >
-            {linkLabel} ←
+            {linkLabel} <span aria-hidden>←</span>
           </a>
-        </div>
+        )}
+      </div>
+      {subtitle && (
+        <p className={cn("mt-1 text-sm", light ? "text-[#e2c57c]" : "text-muted-foreground")}>{subtitle}</p>
       )}
     </div>
   );

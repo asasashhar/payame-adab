@@ -65,7 +65,7 @@ export default async function HomePage() {
   const adsMax = Math.min(Math.max(Number(settings.adsMaxWidth ?? 300) || 300, 160), 360);
   const order = (key: string) => sections.findIndex((s) => s.key === key);
   const isVisible = (key: string) => sections.find((s) => s.key === key)?.visible === true;
-  const sectionProps = (key: string) => ({ className: "mx-auto w-full max-w-7xl px-4", style: { order: order(key) < 0 ? 99 : order(key) } });
+  const sectionProps = (key: string) => ({ className: "mx-auto w-full max-w-7xl px-4", style: { order: order(key) < 0 ? 990 : order(key) * 10 } });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -105,9 +105,9 @@ export default async function HomePage() {
                 >
                   {p.photoUrl ? (
                      
-                    <img src={p.photoUrl} alt={p.name} className="h-20 w-20 rounded-full border-2 border-gold/50 object-cover" />
+                    <img src={p.photoUrl} alt={p.name} className="h-20 w-20 rounded-full border-2 border-gold/60 object-cover shadow-md" />
                   ) : (
-                    <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold/50 bg-secondary font-nastaliq-tight text-2xl text-primary">
+                    <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold/60 bg-secondary font-nastaliq-tight text-2xl text-[color:var(--accent-text)] shadow-md">
                       {p.takhallus?.[0] || p.name[0]}
                     </span>
                   )}
@@ -173,7 +173,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 2.5 } } />
+        <Divider style={{ order: 25 } } />
 
         {/* ============ تازہ شاعری ============ */}
         {isVisible("latestPoems") && (
@@ -202,7 +202,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 3.5 } } />
+        <Divider style={{ order: 35 } } />
 
         {/* ============ تازہ مضامین ============ */}
         {isVisible("latestArticles") && (
@@ -331,7 +331,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 4.5 } } />
+        <Divider style={{ order: 45 } } />
 
         {/* ============ ادبی خبریں ============ */}
         {isVisible("news") && (
@@ -368,7 +368,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 5.5 } } />
+        <Divider style={{ order: 55 } } />
 
         {/* ============ نئی کتب / نمایاں شعرا و ادبا / مقبول تحریریں (mockup trio) ============ */}
         {isVisible("booksPopular") && (
@@ -428,9 +428,9 @@ export default async function HomePage() {
                         <li key={p.id}>
                           <Link href={`/poets/${p.id}`} className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent/60">
                             {p.photoUrl ? (
-                              <img src={p.photoUrl} alt={p.name} className="h-12 w-12 shrink-0 rounded-full border-2 border-gold/50 object-cover" loading="lazy" />
+                              <img src={p.photoUrl} alt={p.name} className="h-12 w-12 shrink-0 rounded-full border-2 border-gold/60 object-cover" loading="lazy" />
                             ) : (
-                              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold/50 bg-secondary font-nastaliq-tight text-lg text-primary">
+                              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold/60 bg-secondary font-nastaliq-tight text-lg text-[color:var(--accent-text)]">
                                 {p.takhallus?.[0] || p.name[0]}
                               </span>
                             )}
@@ -497,7 +497,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 6.5 } } />
+        <Divider style={{ order: 65 } } />
 
         {/* ============ ڈیجیٹل اخبار ============ */}
         {isVisible("newspaper") && (
@@ -532,7 +532,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 7.5 } } />
+        <Divider style={{ order: 75 } } />
 
         {/* ============ ادبی مقابلے ============ */}
         {isVisible("competitions") && (
@@ -576,27 +576,48 @@ export default async function HomePage() {
 
 /* -------- featured half-preview panels (مزید پڑھیے) -------- */
 
-function FeaturedPoemPanel({ poem }: { poem: { id: string; title: string; content: string; poetName?: string | null; user?: { penName: string | null; name: string } | null } }) {
+function FeaturedPoemPanel({ poem }: { poem: { id: string; title: string; content: string; poetName?: string | null; user?: { penName: string | null; name: string } | null; coverUrl?: string | null; topicImageUrl?: string | null } }) {
   const half = poemPreview(poem.content, 1);
+  const cover = poem.coverUrl || poem.topicImageUrl;
   return (
-    <div className="manuscript-frame relative h-full overflow-hidden rounded-xl bg-card p-5">
-      <span className="absolute start-3 top-3 rounded-full bg-gold/15 px-2.5 py-0.5 text-[11px] font-naskh text-gold">نمایاں نظم</span>
-      <div className="mt-6">
-        <h3 className="text-center font-nastaliq-tight text-xl leading-9 text-emerald-ink">{poem.title}</h3>
-        <p className="text-center text-xs font-naskh text-gold">
+    <div className="manuscript-frame relative h-full overflow-hidden rounded-xl bg-card">
+      {/* visual half — cover artwork or calligraphy verse panel (reference "poem of the week" split) */}
+      <div className="relative">
+        {cover ? (
+          <>
+            <img src={cover} alt={poem.title} className="h-44 w-full object-cover" />
+            <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10" aria-hidden />
+            <span className="absolute inset-x-4 bottom-3 line-clamp-3 whitespace-pre-line text-center font-nastaliq text-[13.5px] leading-7 text-white/95 drop-shadow-md">
+              {half}
+            </span>
+          </>
+        ) : (
+          <div className="flex h-44 w-full flex-col items-center justify-center gap-2 pattern-emerald px-5 text-center">
+            <Quote className="h-5 w-5 text-[#e9cf8e]/80" />
+            <p className="line-clamp-3 whitespace-pre-line font-nastaliq text-[15px] leading-8 text-[#f3ead2]">
+              {half}
+            </p>
+          </div>
+        )}
+        <span className="absolute start-3 top-3 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-naskh font-semibold text-[#101d38]">
+          نمایاں نظم
+        </span>
+      </div>
+      {/* text half — title, poet, call to action */}
+      <div className="flex flex-1 flex-col p-5 text-center">
+        <h3 className="font-nastaliq-tight text-xl leading-9 text-[color:var(--accent-text)]">
+          <Link href={`/poetry/${poem.id}`} className="hover:text-[color:var(--accent-text-hover)]">{poem.title}</Link>
+        </h3>
+        <p className="mt-0.5 text-[13px] font-naskh text-gold">
           {poem.poetName ?? poem.user?.penName ?? poem.user?.name ?? ""}
         </p>
-        <p className="mt-3 whitespace-pre-line text-center font-nastaliq text-[15px] leading-8 text-foreground/85">
-          {half}
-        </p>
-        <p className="pointer-events-none relative mt-0 h-14 bg-gradient-to-t from-card to-transparent" />
+        <Link
+          href={`/poetry/${poem.id}`}
+          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-naskh text-sm font-semibold text-primary-foreground transition-colors hover:bg-emerald-deep"
+        >
+          مزید پڑھیے <ArrowLeft className="h-4 w-4" />
+        </Link>
       </div>
-      <Link
-        href={`/poetry/${poem.id}`}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-naskh text-sm font-semibold text-primary-foreground hover:bg-emerald-deep"
-      >
-        مزید پڑھیے <ArrowLeft className="h-4 w-4" />
-      </Link>
     </div>
   );
 }

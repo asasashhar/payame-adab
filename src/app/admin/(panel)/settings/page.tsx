@@ -267,7 +267,7 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={p.visible}
                         onChange={(e) => setPages(pages.map((x, j) => (j === i ? { ...x, visible: e.target.checked } : x)))}
-                        className="h-4 w-4 accent-[#06422a]"
+                        className="h-4 w-4 accent-brand"
                       />
                       نظر آئے
                     </label>

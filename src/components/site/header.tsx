@@ -210,7 +210,9 @@ export function SiteHeader() {
       {/* ── strip 2 · ivory brand bar: logo + centered tagline + actions ── */}
       <div className="border-b border-gold/25 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
-          <BrandLock />
+          <span className="rounded-xl bg-[#f6f1e4] px-3 py-1.5 shadow-sm">
+            <BrandLock />
+          </span>
 
           {/* decorative center tagline */}
           <div className="hidden min-w-0 flex-1 flex-col items-center lg:flex" aria-hidden>
@@ -273,7 +275,7 @@ export function SiteHeader() {
           ) : (
             !loading && (
               <div className="hidden items-center gap-2 sm:flex">
-                <Button asChild size="sm" className="hidden bg-gold font-naskh text-[13px] font-semibold text-emerald-ink hover:bg-[#e2c57c] md:inline-flex">
+                <Button asChild size="sm" className="hidden bg-gold font-naskh text-[13px] font-semibold text-[#101d38] hover:bg-[#e2c57c] md:inline-flex">
                   <Link href="/register" className="gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" /> رکن بنیں
                   </Link>
@@ -333,7 +335,7 @@ export function SiteHeader() {
                 </div>
                 {!me && (
                   <div className="mt-4 grid gap-2">
-                    <Button asChild className="w-full bg-gold font-naskh font-semibold text-emerald-ink hover:bg-[#e2c57c]">
+                    <Button asChild className="w-full bg-gold font-naskh font-semibold text-[#101d38] hover:bg-[#e2c57c]">
                       <Link href="/register">رکن بنیں</Link>
                     </Button>
                     <Button asChild className="w-full bg-primary font-naskh">

@@ -18,7 +18,7 @@ export const DESIGN_ORDER: DesignVersion[] = ["A", "B", "C", "D"];
 
 export const DESIGN_META: Record<
   DesignVersion,
-  { labelUrdu: string; labelEn: string; scheduleUrdu: string; vars: Record<string, string> }
+  { labelUrdu: string; labelEn: string; scheduleUrdu: string; dark?: boolean; vars: Record<string, string> }
 > = {
   A: {
     labelUrdu: "کلاسیکی ادبی",
@@ -74,6 +74,7 @@ export const DESIGN_META: Record<
     labelUrdu: "عصری معیاری",
     labelEn: "Contemporary Premium",
     scheduleUrdu: "21 تا مہینے کے آخر تک",
+    dark: true,
     vars: {
       "--primary": "#24558e",
       "--emerald-deep": "#24558e",
@@ -81,6 +82,8 @@ export const DESIGN_META: Record<
       "--sidebar": "#0c1d42",
       "--sidebar-accent": "#122a5c",
       "--sidebar-border": "#122a5c",
+      "--sidebar-primary": "#24558e",
+      "--sidebar-primary-foreground": "#f3ead2",
       "--background": "#0b1322",
       "--ivory": "#0d1626",
       "--card": "#111c2f",
@@ -97,6 +100,8 @@ export const DESIGN_META: Record<
       "--input": "#24334d",
       "--primary-foreground": "#f3ead2",
       "--paper-dot": "#16233a",
+      "--accent-text": "#e9cf8e",
+      "--accent-text-hover": "#f4dfa5",
     },
   },
 };

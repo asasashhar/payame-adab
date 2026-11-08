@@ -94,7 +94,7 @@ export function HeroCarousel({
           </Link>
           <Link
             href="/submit"
-            className="inline-flex h-[46px] items-center gap-2 rounded-full bg-gold px-7 font-naskh text-[15px] font-semibold text-emerald-ink shadow-md shadow-black/25 transition-colors hover:bg-[#e2c57c] md:h-[50px] md:px-9 md:text-[17px]"
+            className="inline-flex h-[46px] items-center gap-2 rounded-full bg-gold px-7 font-naskh text-[15px] font-semibold text-[#101d38] shadow-md shadow-black/25 transition-colors hover:bg-[#e2c57c] md:h-[50px] md:px-9 md:text-[17px]"
           >
             اپنی تحریر بھیجیں
           </Link>

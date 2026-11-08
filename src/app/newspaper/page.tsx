@@ -73,7 +73,7 @@ export default async function NewspaperPage() {
                 <p className="text-sm font-naskh text-muted-foreground">
                   {current.weekLabel} {current.editionNumber && `· شمارہ ${current.editionNumber}`}
                 </p>
-                <span className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gold px-5 py-2 font-naskh text-sm font-semibold text-emerald-ink">
+                <span className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gold px-5 py-2 font-naskh text-sm font-semibold text-[#101d38]">
                   <Newspaper className="h-4 w-4" /> شمارہ پڑھیں
                 </span>
               </div>

@@ -82,7 +82,7 @@ export default function LoginPage() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="flex cursor-pointer select-none items-center gap-2 font-naskh text-sm text-muted-foreground">
-                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-[#06422a]" />
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-brand" />
                 مجھے یاد رکھیں
               </label>
               <Link href="/forgot-password" className="font-naskh text-sm font-semibold text-gold underline hover:text-primary">

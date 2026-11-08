@@ -50,7 +50,7 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   heroImage: "/brand/hero-banner.jpg",
   heroBadge: "پیامِ ادب · Payam-e-Adab",
   // appearance
-  themePreset: "emerald",
+  themePreset: "navy",
   fontBody: "jameel-noori-nastaleeq",
   fontHeading: "jameel-noori-nastaleeq",
   // per-area fonts (empty/default = follow the approved 10-font list)
@@ -194,9 +194,9 @@ export function csvCategories(value: string | undefined, fallback: string[]): st
 
 export type ThemePreset = "emerald" | "navy" | "maroon";
 
-export const THEME_PRESETS: Record<ThemePreset, { label: string; vars: Record<string, string> }> = {
+export const THEME_PRESETS: Record<ThemePreset, { label: string; dark?: boolean; vars: Record<string, string> }> = {
   emerald: {
-    label: "زمرد و سنہری (موجود)",
+    label: "زمرد و سنہری",
     vars: {
       "--primary": "#06422a",
       "--emerald-deep": "#06422a",
@@ -208,17 +208,43 @@ export const THEME_PRESETS: Record<ThemePreset, { label: string; vars: Record<st
       "--gold-soft": "#e2c57c",
     },
   },
+  /* Official Payam-e-Adab identity: dark navy/black background, royal blue
+     and gold accents (brand emblem colors). Text roles that used the primary
+     hue switch to gold via --accent-text for legibility on the dark surfaces. */
   navy: {
-    label: "نیلا سنہری (برانڈ لاگو کے مطابق)",
+    label: "نیلا سنہری (سرکاری شناخت)",
+    dark: true,
     vars: {
-      "--primary": "#122a5c",
-      "--emerald-deep": "#122a5c",
+      "--primary": "#24558e",
+      "--emerald-deep": "#24558e",
       "--emerald-ink": "#0c1d42",
-      "--sidebar": "#122a5c",
-      "--sidebar-accent": "#0c1d42",
-      "--sidebar-border": "#0c1d42",
-      "--gold": "#b5891e",
-      "--gold-soft": "#e2c57c",
+      "--sidebar": "#0c1d42",
+      "--sidebar-accent": "#122a5c",
+      "--sidebar-border": "#122a5c",
+      "--sidebar-primary": "#24558e",
+      "--sidebar-primary-foreground": "#f3ead2",
+      "--background": "#0a1120",
+      "--ivory": "#0d1524",
+      "--card": "#121c31",
+      "--popover": "#121c31",
+      "--foreground": "#ece7d4",
+      "--card-foreground": "#ece7d4",
+      "--popover-foreground": "#ece7d4",
+      "--primary-foreground": "#f3ead2",
+      "--secondary": "#1a2540",
+      "--secondary-foreground": "#ece7d4",
+      "--muted": "#1a2540",
+      "--muted-foreground": "#a8b3c4",
+      "--accent": "#16233c",
+      "--accent-foreground": "#ece7d4",
+      "--border": "#263452",
+      "--input": "#263452",
+      "--ring": "#d4a937",
+      "--gold": "#d4a937",
+      "--gold-soft": "#e9cf8e",
+      "--paper-dot": "#182338",
+      "--accent-text": "#e9cf8e",
+      "--accent-text-hover": "#f4dfa5",
     },
   },
   maroon: {

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const THEMES = [
   { key: "emerald", label: "زمرد و سنہری", swatch: "#06422a" },
-  { key: "navy", label: "نیلا سنہری (لاگو کے رنگ)", swatch: "#122a5c" },
+  { key: "navy", label: "نیلا سنہری (سرکاری شناخت)", swatch: "#24558e" },
   { key: "maroon", label: "عنابی سنہری", swatch: "#6d1f2c" },
 ];
 

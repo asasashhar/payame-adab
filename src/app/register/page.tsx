@@ -158,7 +158,7 @@ export default function RegisterPage() {
               />
             </div>
             <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-accent/60 px-3 py-3">
-              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#06422a]" />
+              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-brand" />
               <span className="font-naskh text-[13px] leading-6 text-foreground">
                 میں سائٹ کی <Link href="/about" className="font-semibold text-primary underline">اصطلاحات و ضوابط</Link> اور <Link href="/submit" className="font-semibold text-primary underline">تحریری رہنمائی</Link> سے اتفاق کرتا/کرتی ہوں، اور یہ تصدیق کرتا/کرتی ہوں کہ میری تحریریں اصل ہوں گی۔
               </span>

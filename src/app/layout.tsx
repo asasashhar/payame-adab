@@ -85,6 +85,10 @@ export default async function RootLayout({
   // ---- theme preset + four-design monthly rotation ----
   const preset = (s.themePreset ?? "emerald") as ThemePreset;
   const design = activeDesign(s);
+  // dark royal identities (navy preset / Design D) get adaptive gold accent text
+  const darkIdentity =
+    Boolean((THEME_PRESETS[preset] as { dark?: boolean } | undefined)?.dark) ||
+    Boolean(DESIGN_META[design.version].dark);
   const themeVars: Record<string, string> = {
     ...(THEME_PRESETS[preset] ?? THEME_PRESETS.emerald).vars,
     ...DESIGN_META[design.version].vars,
@@ -119,7 +123,10 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: fontFaces + "\n" + cssVars }}
         />
       </head>
-      <body data-design={design.version} className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+      <body
+        data-design={design.version}
+        className={`antialiased bg-background text-foreground min-h-screen flex flex-col${darkIdentity ? " pea-dark" : ""}`}
+      >
         {children}
         <Toaster />
       </body>

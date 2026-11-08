@@ -33,7 +33,7 @@ export default async function DictionaryPage() {
                   className={`manuscript-frame rounded-xl p-5 ${idx === 0 ? "bg-accent/70 ring-1 ring-gold/40" : "bg-card"}`}
                 >
                   {idx === 0 && (
-                    <span className="mb-2 inline-block rounded-full bg-gold px-3 py-0.5 text-[11px] font-naskh font-semibold text-emerald-ink">
+                    <span className="mb-2 inline-block rounded-full bg-gold px-3 py-0.5 text-[11px] font-naskh font-semibold text-[#101d38]">
                       آج کا لفظ
                     </span>
                   )}
