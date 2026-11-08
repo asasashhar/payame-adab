@@ -247,3 +247,8 @@ Stage Summary:
 - New suite scripts/test-auth-otp.js: 32/32 PASS (strength, welcome mail, remember login, rate limits, wrong attempts, verify, single-use ticket, reset, confirmation mail, change-password, profile+socials, liked list, admin force-change); regression test-upgrade 38/38, test-gaps 30/30 → 100/100 total
 - DB cleaned of all test residue: final 5 users (3 admins, mustChange: sadaeqbal+payameadab true), 17 poems, 7 articles, 16 books, 1 legit mail log
 - Verified visually: register, login, forgot-OTP (wrong-code toast + attempts counted), admin gate, dashboard tabs, homepage (0 JS errors)
+
+## Task ID: 11-development-report (2026-11-08 16:00)
+- Generated the required development report (spec final instruction): download/Payam-e-Adab-Development-Report.docx (+ PDF companion), 8 pages: cover (R1, green/gold identity), TOC, and the 5 mandated sections — features implemented (20-row spec-coverage table), problems repaired (8), tests passed (100/100 table), external configuration needed (SMTP/siteUrl/font file/push token), remaining limitations
+- postcheck: 0 errors; TOC default-entry dedup fixed via scripts/fix-toc-dup.py (docx-js ships a cached "Executive Summary" hyperlink that duplicated the first real entry)
+- Final git state: efde35a (spec pass) → 0e1db84 (mockup redesign) → b3ae613 (platform); 259 files, 0 sensitive; remote main at b3ae613, fast-forward ready, push still blocked by token (403)
