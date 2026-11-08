@@ -174,3 +174,60 @@ Work Log:
 Stage Summary:
 - PAYAM-E-ADAB v3.1 — every item of the 11-section spec now has a working, tested implementation with no placeholder buttons; backup safety net added (manual + automatic daily).
 - Still pending ONE user action: Gmail SMTP App Password in Admin → ای میل سینٹر to switch queued notifications to real delivery (resend button ready).
+
+## Task ID: 6-github-push (2026-11-01 15:55)
+- Prepared repo for GitHub: https://github.com/mdnematullah1343-star/Payame-adab.git
+- Security cleanup: untracked .env (DATABASE_URL) and db/*.db + db/backups/ (user emails, password hashes); added gitignore rules
+- Rebuilt history as single clean commit b3ae613 (old auto-UUID commits containing .env discarded so no secret can leak)
+- Identity: mdnematullah1343-star + noreply email; remote origin added; ls-remote connectivity OK
+- PUSHED: user PAT granted Contents Read+Write; pushed main (b3ae613) then force-pushed to drop sandbox auto-sync UUID commit; remote verified via API: 21 top-level items, 238 files, .env absent, db absent
+
+## Task ID: 7-mockup-redesign (2026-11-08 06:02)
+- User approved new mockup set (homepage/admin/library + 2 logo images + premium banner) with instruction "make like it"
+- Brand assets replaced from owner artwork (badge/horizontal/banner/og/favicon; backups in db/backups/brand-v1-2026-11-08)
+- Header rebuilt (3-tier mockup structure), light ivory hero, featured-article + تازہ ترین sidebar + pills, PageBanner on books/poetry/articles, admin colorful stat cards, footer tweaks
+- themePreset navy→emerald (mockup green)
+- CRITICAL FIX: /api/upload route had been deleted from disk (broke all image uploads) — restored from git history; rebuilt standalone
+- CRITICAL: sandbox restart wiped db/custom.db — restored from git blob a2f331c (Nov 1 snapshot) + replayed residue cleanup; final: 3 admins+2 users, 17 poems, 7 articles, 4 news, 8 books, 0 ads/mail/comments
+- Verified: lint clean, 38/38 E2E PASS, desktop+mobile screenshots 0 JS errors
+
+## Task ID: 8-mockup-fidelity-pass (2026-11-08 06:55)
+- User re-sent blueprint + 5 mockups ("Make like it ok") — refined green/gold/ivory look to match mockup 1/2/3 exactly
+- Homepage: new full-bleed HeroCarousel (real admin-banner slides, dots only when >1 banner, 7s crossfade); replaced ivory two-box hero
+- Recomposed official banner into public/brand/hero-banner.jpg (books left + clean stage center + quill right) via scripts/make-hero-banner.py — emblem no longer collides with headline; emblem stays in logo/watermark assets
+- Homepage bottom: mockup trio نئی کتب / نمایاں شعرا و ادبا / مقبول تحریریں (side-banners strip kept below); standalone poets grid retired (strict section visibility: missing key = hidden)
+- Featured article: author avatar + Urdu date chip
+- Fixed flex-column shrink bug (mx-auto prevented stretch) — all home sections now full width
+- Books page: library hero with banner image, category chips with icons, BookCard green کتاب پڑھیں button
+- Admin: desktop top bar (logo + tagline + سائٹ دیکھیں + alert bell with REAL pending count → submissions + admin chip); dashboard فوری ایکشن quick-actions (6 real links) + live Urdu date chip
+- FOUR-DESIGN MONTHLY ROTATION implemented (blueprint Part 3): src/lib/design.ts — A(1-6 emerald)/B(7-13 royal)/C(14-20 ivory heritage)/D(21-end dark midnight), tz-configurable (Asia/Kolkata default), manual override = recorded preview, restore-auto button; live-tested: D override → body bg #0b1322 ✓, restore → schedule B (day 8) ✓, then pinned override A (mockup green) per user's mockup choice
+- Verified: tsc clean (src), build OK, server restarted, screenshots (home A, home D, books, admin dash, rotation card, mobile 390px) — 0 JS errors, no horizontal overflow
+
+## Task ID: 7-mockup-fidelity-redesign
+**Date:** 2026-11-08
+**Goal:** Final mockup-fidelity pass — green/gold/ivory literary identity per the 5 approved design images (homepage, library showcase, admin dashboard, two new logos) + blueprint Part 3 rotation.
+
+### Work done
+1. **Route fix:** removed legacy duplicate admin routes (`admin/page.tsx`, `admin/[resource]`, `admin/settings`, `admin/submissions`) that crashed dev/build with "two parallel pages" (the `(panel)` group is canonical). Restored accidentally-deleted `src/app/api/upload/route.ts` from HEAD.
+2. **New logos integrated:** cropped circular badge + horizontal lockup from the uploaded logo sheet (`scripts/crop_logos.py`), made backgrounds transparent (`scripts/logo_transparency.py`), updated `public/brand/logo-badge.png`, `logo-horizontal.png`, `watermark.png`, `public/icon.png` + `src/app/icon.png` (favicon) + `src/app/icon.svg`. Header `BrandLock` now shows badge seal + full horizontal lockup artwork.
+3. **Palette tuned to mockup-sampled colors** (`scripts/cluster_mockup_colors.py`): deep forest green `#06422a` / `#03301c`, amber gold `#b5891e` / soft `#e2c57c`, warm ivory `#f8f1e7`. Replaced all hardcoded old-palette hexes across 12 files. THEME_PRESETS.emerald + globals.css :root updated.
+4. **Design rotation:** rotation was showing Design B (royal navy) on day 8; set `themePreset=emerald` + `designOverride=A` so the green mockup identity shows now. Admin can restore auto-rotation with one click (appearance page); four-design scheduler unchanged (A 1–6, B 7–13, C 14–20, D 21+).
+5. **Homepage per mockup:** hero title/subtitle set to the mockup welcome lines; "مقبول تحریریں" sidebar with thumbnails+dates; green "مزید پڑھیں" buttons on all poem/article cards; hero-emblem artwork kept (blue/gold matches new logo).
+6. **Verified pages:** homepage (full-page render), /books (library showcase layout), /admin (green sidebar, colored real-data stat cards, quick actions, audit log) — screenshots via agent-browser.
+7. **Production:** webpack build OK, standalone server on :3000, E2E suite **38/38 PASS**.
+
+### DB setting changes (admin-editable)
+- `themePreset`: navy → **emerald**
+- `designOverride`: → **A** (rotation override; clear it in admin → appearance to resume automatic monthly rotation)
+- `heroTitle` / `heroSubtitle`: mockup welcome text
+
+### Status
+- GitHub push still pending a writable token (commit ready on `main`).
+
+## Task ID: 9-redesign-verify-push-prep (2026-11-08 08:10)
+- Sandbox recycled → restarted checks: server :3000 OK (all key pages 200), admin login verified
+- Visual re-verification vs 5 approved mockups: homepage (hero carousel, featured+sidebar, آج کا لفظ, category pills, trio row, footer), books showcase (library hero + chips + cards), admin dashboard (green sidebar, gradient stat cards, quick actions, activity feed) — all mockup-aligned; 0 JS errors; mobile 390px NO-OVERFLOW
+- E2E regression: test-upgrade.js 38/38 PASS
+- Git: discovered remote main already at b3ae613 (earlier push succeeded); local was ahead 7 (incl. 4 sandbox UUID auto-sync commits that had accidentally tracked upload/ ~12MB raw uploads)
+- Cleaned: untracked upload/ + gitignore rule; squashed b3ae613..HEAD into single commit 850ea3d (mockup redesign record above); final tree 255 files, no .env/db/upload
+- PUSH BLOCKED AGAIN: fine-grained PAT write test 403 "Resource not accessible by personal access token" (Contents still Read-only); push command ready — needs classic token (repo/public_repo scope) at https://github.com/settings/tokens/new

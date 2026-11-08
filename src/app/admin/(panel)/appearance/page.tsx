@@ -8,14 +8,22 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { URDU_FONTS } from "@/lib/fonts";
-import { Loader2, Save, Palette, Droplets, Type, Upload, CheckCircle2, XCircle } from "lucide-react";
+import { DESIGN_META, DESIGN_ORDER, activeDesign, type DesignVersion } from "@/lib/design";
+import { Loader2, Save, Palette, Droplets, Type, Upload, CheckCircle2, XCircle, RefreshCcw, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const THEMES = [
-  { key: "emerald", label: "زمرد و سنہری", swatch: "#0e5b43" },
+  { key: "emerald", label: "زمرد و سنہری", swatch: "#06422a" },
   { key: "navy", label: "نیلا سنہری (لاگو کے رنگ)", swatch: "#122a5c" },
   { key: "maroon", label: "عنابی سنہری", swatch: "#6d1f2c" },
 ];
+
+const DESIGN_SWATCH: Record<DesignVersion, string> = {
+  A: "#06422a",
+  B: "#24558e",
+  C: "#a8871f",
+  D: "#0b1322",
+};
 
 const WATERMARK_POSITIONS = [
   { key: "center", label: "درمیان" },
@@ -80,6 +88,23 @@ export default function AppearancePage() {
   };
 
   const set = (key: string, value: string) => setS((prev) => (prev ? { ...prev, [key]: value } : prev));
+
+  const applyDesign = async (v: string) => {
+    setSaving("design");
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ designOverride: v }),
+      });
+      if (res.ok) {
+        toast({ title: v ? `ڈیزائن ${v} عارضی طور پر لاگو ہو گیا` : "خودکار روٹیشن بحال ہو گئی" });
+        await load();
+      } else toast({ title: "لاگو نہیں ہوا", variant: "destructive" });
+    } finally {
+      setSaving(null);
+    }
+  };
 
   if (s === null) {
     return <div><AdminPageHeader title="ظاہری شکل" /><Skeleton className="h-96 rounded-xl" /></div>;
@@ -273,8 +298,8 @@ export default function AppearancePage() {
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {([
-              { key: "colorPrimary", label: "مرکزی رنگ (ہیڈر، بٹن)", placeholder: "#0e5b43" },
-              { key: "colorGold", label: "سنہری رنگ (نمایاں حصے)", placeholder: "#b8922e" },
+              { key: "colorPrimary", label: "مرکزی رنگ (ہیڈر، بٹن)", placeholder: "#06422a" },
+              { key: "colorGold", label: "سنہری رنگ (نمایاں حصے)", placeholder: "#b5891e" },
               { key: "colorBackground", label: "پس منظر", placeholder: "#f7f1e1" },
               { key: "colorForeground", label: "تحریر کا رنگ", placeholder: "#242424" },
             ] as const).map((c) => (
@@ -307,6 +332,77 @@ export default function AppearancePage() {
           <Button onClick={() => save(["colorPrimary", "colorGold", "colorBackground", "colorForeground"], "colors")} disabled={saving === "colors"} className="mt-4 gap-2 bg-primary font-naskh hover:bg-emerald-deep">
             {saving === "colors" && <Loader2 className="h-4 w-4 animate-spin" />} رنگ محفوظ کریں
           </Button>
+        </div>
+      </section>
+
+      {/* ---------- FOUR-DESIGN MONTHLY ROTATION ---------- */}
+      <section className="manuscript-frame mt-6 rounded-xl bg-card p-5">
+        <h2 className="mb-1 flex items-center gap-2 font-nastaliq-tight text-xl text-primary">
+          <RefreshCcw className="h-5 w-5 text-gold" /> چار ڈیزائن ماہانہ روٹیشن
+        </h2>
+        <p className="mb-4 font-naskh text-xs leading-6 text-muted-foreground">
+          ہر مہینے 1، 7، 14 اور 21 تاریخ کو ڈیزائن خود بخود بدل جاتا ہے — مواد، روابط اور تمام خصوصیات ویسے ہی رہتے ہیں۔
+        </p>
+        {(() => {
+          const d = activeDesign(s);
+          return (
+            <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl bg-accent/70 px-4 py-3 font-naskh text-sm">
+              <span className="text-muted-foreground">اس وقت فعال:</span>
+              <span className="rounded-full bg-emerald-deep px-3 py-0.5 font-latin text-xs font-bold text-white" dir="ltr">Design {d.version}</span>
+              <span className="font-semibold text-primary">{DESIGN_META[d.version].labelUrdu}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <Clock3 className="h-3.5 w-3.5 text-gold" />
+                {d.source === "override"
+                  ? "دستی منتخب (شیڈول معطل)"
+                  : `خودکار شیڈول · اگلی تبدیلی: ${
+                      d.scheduled === "A" ? "7 تاریخ — ڈیزائن B"
+                      : d.scheduled === "B" ? "14 تاریخ — ڈیزائن C"
+                      : d.scheduled === "C" ? "21 تاریخ — ڈیزائن D"
+                      : "1 تاریخ — ڈیزائن A"
+                    }`}
+              </span>
+            </div>
+          );
+        })()}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {DESIGN_ORDER.map((v) => {
+            const m = DESIGN_META[v];
+            const active = (s.designOverride ?? "") === v;
+            return (
+              <div key={v} className={cn("rounded-xl border p-4 transition-colors", active ? "border-emerald-deep bg-accent" : "border-gold/40 bg-card")}>
+                <div className="flex items-center justify-between">
+                  <span className="h-8 w-8 rounded-full border border-gold/50" style={{ backgroundColor: DESIGN_SWATCH[v] }} />
+                  <span className="rounded-full bg-secondary px-2 py-0.5 font-latin text-[11px] font-bold text-primary" dir="ltr">{v}</span>
+                </div>
+                <p className="mt-2 font-nastaliq-tight text-base leading-8 text-foreground">{m.labelUrdu}</p>
+                <p className="font-latin text-[10px] text-muted-foreground" dir="ltr">{m.labelEn}</p>
+                <p className="mt-1 text-[11px] font-naskh text-gold">{m.scheduleUrdu}</p>
+                <Button
+                  variant={active ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => applyDesign(v)}
+                  disabled={saving === "design"}
+                  className={cn("mt-3 w-full gap-1.5 font-naskh text-[13px]", !active && "bg-primary hover:bg-emerald-deep")}
+                >
+                  {saving === "design" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {active ? "فعال ہے" : "پیش منظر / عارضی لاگو"}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-gold/20 pt-4">
+          <Button onClick={() => applyDesign("")} disabled={saving === "design"} className="gap-2 bg-primary font-naskh hover:bg-emerald-deep">
+            <RefreshCcw className="h-4 w-4" /> خودکار روٹیشن بحال کریں
+          </Button>
+          <div className="flex items-center gap-2">
+            <Label className="shrink-0 font-naskh">شیڈول کا ٹائم زون:</Label>
+            <Input value={s.designTimezone ?? ""} onChange={(e) => set("designTimezone", e.target.value)} dir="ltr" className="w-52 font-latin text-xs" />
+            <Button onClick={() => save(["designTimezone"], "tz")} disabled={saving === "tz"} variant="outline" className="shrink-0 font-naskh">
+              {saving === "tz" && <Loader2 className="h-4 w-4 animate-spin" />} محفوظ
+            </Button>
+          </div>
         </div>
       </section>
 

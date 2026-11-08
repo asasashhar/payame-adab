@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings, THEME_PRESETS, type ThemePreset } from "@/lib/site";
+import { activeDesign, DESIGN_META } from "@/lib/design";
 import { URDU_FONTS, getFontById, FONT_FALLBACK_CHAIN } from "@/lib/fonts";
 import fs from "fs";
 import path from "path";
@@ -80,10 +81,12 @@ export default async function RootLayout({
   // admin-controlled global typography scale (percent, default 112 → noticeably larger)
   const fontScale = Math.min(150, Math.max(85, Number(s.fontScale ?? 112) || 112)) / 100;
 
-  // ---- theme preset ----
+  // ---- theme preset + four-design monthly rotation ----
   const preset = (s.themePreset ?? "emerald") as ThemePreset;
+  const design = activeDesign(s);
   const themeVars: Record<string, string> = {
     ...(THEME_PRESETS[preset] ?? THEME_PRESETS.emerald).vars,
+    ...DESIGN_META[design.version].vars,
   };
   // admin custom color overrides (non-empty values win over the preset)
   const hex = (v: string | undefined) =>
@@ -115,7 +118,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: fontFaces + "\n" + cssVars }}
         />
       </head>
-      <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+      <body data-design={design.version} className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         {children}
         <Toaster />
       </body>

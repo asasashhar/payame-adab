@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getSettings, homeSectionsFromSettings, watermarkFromSettings, publishDueSchedules } from "@/lib/site";
+import { getSettings, homeSectionsFromSettings, watermarkFromSettings, publishDueSchedules, ARTICLE_CATEGORIES } from "@/lib/site";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { SectionHeading, Divider } from "@/components/site/section-heading";
 import { PoemCard, ArticleCard, BookCard, PosterCard, poemPreview, excerptPreview } from "@/components/site/cards";
 import { AdRail } from "@/components/site/ad-rail";
-import { LogoMark } from "@/components/site/logo";
+import { HeroCarousel } from "@/components/site/hero-carousel";
 import { PageViewTracker } from "@/components/site/view-tracker";
-import { Button } from "@/components/ui/button";
-import { Feather, BookOpen, Newspaper, ArrowLeft, Flame, Quote, Megaphone, Eye } from "lucide-react";
+import { Feather, BookOpen, Newspaper, ArrowLeft, Flame, Quote, Megaphone, Eye, CalendarDays } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +24,7 @@ export default async function HomePage() {
   const featuredBookId = settings.featuredBookId || null;
 
   const [
-    heroBanner, sideBanners, featuredPoets,
+    heroBanners, sideBanners, featuredPoets,
     dailySher, wordOfDay,
     latestPoems, featuredPoemPicked, latestPoemsFallback,
     latestArticles, featuredArticlePicked, latestArticlesFallback,
@@ -34,7 +33,7 @@ export default async function HomePage() {
     newBooks, featuredBookPicked,
     latestEdition, competitions,
   ] = await Promise.all([
-    db.banner.findFirst({ where: { position: "HERO", active: true }, orderBy: { sortOrder: "asc" } }),
+    db.banner.findMany({ where: { position: "HERO", active: true }, orderBy: { sortOrder: "asc" }, take: 5 }),
     db.banner.findMany({ where: { position: "SIDE", active: true }, orderBy: { sortOrder: "asc" }, take: 3 }),
     db.poet.findMany({ where: { featured: true }, take: 8, orderBy: { createdAt: "asc" } }),
     db.dailySher.findFirst({ where: { active: true }, orderBy: { date: "desc" } }),
@@ -61,12 +60,12 @@ export default async function HomePage() {
 
   const heroTitle = settings.heroTitle ?? "اردو ادب کا ڈیجیٹل سرمایہ";
   const heroSubtitle = settings.heroSubtitle ?? "اردو زبان و ادب کے فروغ، تحفظ، اشاعت اور نئی نسل تک رسائی کا ایک جدید پلیٹ فارم۔";
-  const heroImage = settings.heroImage ?? "/brand/hero-emblem.jpg";
+  const heroImage = settings.heroImage ?? "/brand/hero-banner.jpg";
   const heroBadge = settings.heroBadge ?? "پیامِ ادب · Payam-e-Adab";
   const adsMax = Math.min(Math.max(Number(settings.adsMaxWidth ?? 300) || 300, 160), 360);
   const order = (key: string) => sections.findIndex((s) => s.key === key);
-  const isVisible = (key: string) => sections.find((s) => s.key === key)?.visible !== false;
-  const sectionProps = (key: string) => ({ className: "mx-auto max-w-7xl px-4", style: { order: order(key) < 0 ? 99 : order(key) } });
+  const isVisible = (key: string) => sections.find((s) => s.key === key)?.visible === true;
+  const sectionProps = (key: string) => ({ className: "mx-auto w-full max-w-7xl px-4", style: { order: order(key) < 0 ? 99 : order(key) } });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -82,62 +81,20 @@ export default async function HomePage() {
           <main className="flex min-w-0 flex-1 flex-col" style={{ display: "flex", flexDirection: "column" }}>
         {/* ============ HERO ============ */}
         {isVisible("hero") && (
-          <section {...sectionProps("hero")}>
-            <div className="relative overflow-hidden pattern-emerald">
-              {heroBanner && (
-                <div className="absolute inset-0">
-                  { }
-                  <img src={heroBanner.imageUrl} alt={heroBanner.title} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-l from-emerald-ink/90 via-emerald-ink/60 to-emerald-ink/80" />
-                </div>
-              )}
-              <div className="relative mx-auto max-w-7xl px-4 py-14 md:py-20">
-                <div className="grid items-center gap-10 lg:grid-cols-2">
-                  {/* text column */}
-                  <div className="text-center lg:text-start">
-                    <div className="mb-5 flex justify-center lg:justify-start">
-                      <LogoMark size={104} className="rounded-xl shadow-lg shadow-black/25" />
-                    </div>
-                    <p className="mb-4 inline-block rounded-full border border-gold/40 bg-emerald-ink/40 px-5 py-1.5 font-naskh text-[15px] text-[#d9bc6a]">
-                      {heroBadge}
-                    </p>
-                    <h1 className="font-nastaliq-tight text-4xl leading-[1.8] text-[#f3ead2] md:text-5xl md:leading-[1.8]">
-                      {heroTitle}
-                    </h1>
-                    <p className="mx-auto mt-5 max-w-2xl font-naskh text-lg leading-9 text-[#e5dfc9]/90 md:text-xl lg:mx-0">
-                      {heroSubtitle}
-                    </p>
-                    <div className="mt-9 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-                      <Button asChild size="lg" className="h-[52px] bg-gold px-10 font-naskh text-[17px] font-semibold text-emerald-ink shadow-md shadow-black/20 hover:bg-[#d9bc6a]">
-                        <Link href="/poetry">ادب پڑھیں</Link>
-                      </Button>
-                      <Button asChild size="lg" variant="outline" className="h-[52px] border-[#d9bc6a] bg-emerald-ink/40 px-10 font-naskh text-[17px] font-semibold text-[#f3ead2] hover:bg-emerald-ink/70 hover:text-[#f3ead2]">
-                        <Link href="/submit">اپنی تحریر بھیجیں</Link>
-                      </Button>
-                    </div>
-                  </div>
-                  {/* official promotional image — preserved aspect ratio, no distortion */}
-                  <div className="mx-auto w-full max-w-xl">
-                    <div className="overflow-hidden rounded-2xl border border-gold/40 shadow-2xl shadow-black/30">
-                      { }
-                      <img
-                        src={heroImage}
-                        alt="پیامِ ادب — سرمایہ ادب"
-                        className="h-auto w-full object-contain"
-                        loading="eager"
-                        fetchPriority="high"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <section {...sectionProps("hero")} className="mx-auto w-full max-w-7xl px-4 pt-6">
+            <HeroCarousel
+              slides={heroBanners.map((b) => ({ id: b.id, imageUrl: b.imageUrl, title: b.title, linkUrl: b.linkUrl }))}
+              badge={heroBadge}
+              title={heroTitle}
+              subtitle={heroSubtitle}
+              fallbackImage={heroImage}
+            />
           </section>
         )}
 
         {/* ============ نمایاں شعرا و ادبا ============ */}
         {isVisible("poets") && featuredPoets.length > 0 && (
-          <section {...sectionProps("poets")} className="mx-auto max-w-7xl px-4 pt-10">
+          <section {...sectionProps("poets")} className="mx-auto w-full max-w-7xl px-4 pt-10">
             <SectionHeading title="نمایاں شعرا و ادبا" href="/poets" />
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {featuredPoets.slice(0, 4).map((p) => (
@@ -168,7 +125,7 @@ export default async function HomePage() {
 
         {/* ============ آج کا شعر + آج کا لفظ ============ */}
         {isVisible("sherWord") && (
-          <section {...sectionProps("sherWord")} className="mx-auto max-w-7xl px-4 pt-10">
+          <section {...sectionProps("sherWord")} className="mx-auto w-full max-w-7xl px-4 pt-10">
             <div className="grid gap-5 lg:grid-cols-2">
               <div className="manuscript-frame relative overflow-hidden rounded-2xl bg-card p-7">
                 <Quote className="mb-2 h-6 w-6 text-gold" />
@@ -252,7 +209,71 @@ export default async function HomePage() {
           <section {...sectionProps("latestArticles")}>
             <SectionHeading title="تازہ مضامین" href="/articles" />
             <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+              <div className="min-w-0 lg:col-span-2">
+                {featuredArticle && (
+                  <Link
+                    href={`/articles/${featuredArticle.id}`}
+                    className="manuscript-frame group relative mb-5 flex flex-col-reverse overflow-hidden rounded-xl bg-card transition-shadow hover:shadow-lg sm:flex-row"
+                  >
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="font-nastaliq-tight text-2xl leading-10 text-emerald-ink group-hover:text-primary">
+                        {featuredArticle.title}
+                      </h3>
+                      <div className="mt-2 flex items-center gap-2.5">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-emerald-deep/10 font-nastaliq-tight text-lg text-primary">
+                          {(featuredArticle.authorName ?? "?").trim().charAt(0)}
+                        </span>
+                        <span>
+                          {featuredArticle.authorName && (
+                            <span className="block text-sm font-naskh font-semibold text-gold">از قلم: {featuredArticle.authorName}</span>
+                          )}
+                          <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-naskh text-muted-foreground">
+                            <CalendarDays className="h-3.5 w-3.5 text-gold" /> {urduDate(featuredArticle.createdAt)}
+                          </span>
+                        </span>
+                      </div>
+                      <p className="mt-3 font-naskh text-[15px] leading-8 text-foreground/75">
+                        {excerptPreview(featuredArticle.excerpt || featuredArticle.content, 30)}
+                      </p>
+                      <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-naskh font-semibold text-primary-foreground transition-colors group-hover:bg-emerald-deep">
+                        مزید پڑھیں <ArrowLeft className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <div className="relative shrink-0 sm:w-2/5">
+                      <span className="absolute start-0 top-0 z-10 rounded-br-lg bg-emerald-ink px-3 py-1.5 text-xs font-naskh font-semibold text-[#e9c979]">
+                        آج کی منتخب تحریر
+                      </span>
+                      {featuredArticle.coverUrl || featuredArticle.topicImageUrl ? (
+                        <img
+                          src={(featuredArticle.coverUrl || featuredArticle.topicImageUrl)!}
+                          alt={featuredArticle.title}
+                          className="h-44 w-full object-cover sm:h-full"
+                        />
+                      ) : (
+                        <div className="flex h-44 w-full items-center justify-center bg-secondary sm:h-full">
+                          <BookOpen className="h-10 w-10 text-gold" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )}
+
+                {/* category pills */}
+                <div className="mb-5 flex flex-wrap gap-2">
+                  <Link href="/articles" className="rounded-lg bg-emerald-deep px-4 py-1.5 text-sm font-naskh text-[#f3ead2] shadow-sm transition-colors hover:bg-emerald-ink">
+                    تمام تحریریں
+                  </Link>
+                  {ARTICLE_CATEGORIES.slice(0, 7).map((c) => (
+                    <Link
+                      key={c}
+                      href={`/articles?category=${encodeURIComponent(c)}`}
+                      className="rounded-lg border border-gold/30 bg-card px-4 py-1.5 text-sm font-naskh text-foreground/80 transition-colors hover:border-gold hover:text-primary"
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+
                 {latestArticles.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-gold/40 bg-card p-10 text-center font-naskh text-sm text-muted-foreground">
                     ابھی کوئی مضمون شائع نہیں ہوا۔ نئی تحریریں جلد آ رہی ہیں۔
@@ -265,10 +286,46 @@ export default async function HomePage() {
                   </div>
                 )}
               </div>
+
               <aside className="lg:col-span-1">
-                {(featuredArticle || latestArticles[0]) && (
-                  <FeaturedArticlePanel article={featuredArticle ?? latestArticles[0]} />
-                )}
+                <div className="manuscript-frame overflow-hidden rounded-xl bg-card">
+                  <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
+                    <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e2c57c]">
+                      <Flame className="h-4.5 w-4.5" /> مقبول تحریریں
+                    </h3>
+                    <Link href="/search" className="text-xs font-naskh text-[#e5dfc9]/80 hover:text-[#e2c57c]">
+                      تلاش ←
+                    </Link>
+                  </div>
+                  {popularArticles.length === 0 ? (
+                    <p className="p-6 text-center font-naskh text-sm text-muted-foreground">مقبول تحریریں کا ریکارڈ جلد مرتب ہوگا۔</p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {popularArticles.slice(0, 3).map((a) => (
+                        <li key={a.id}>
+                          <Link href={`/articles/${a.id}`} className="group flex items-center gap-3 p-3 transition-colors hover:bg-accent/60">
+                            <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary">
+                              {a.coverUrl || a.topicImageUrl ? (
+                                <img src={(a.coverUrl || a.topicImageUrl)!} alt={a.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <BookOpen className="h-5 w-5 text-gold" />
+                              )}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="line-clamp-2 block font-nastaliq-tight text-[15px] leading-7 text-foreground group-hover:text-primary">
+                                {a.title}
+                              </span>
+                              <span className="mt-0.5 block text-[11px] font-naskh text-muted-foreground">
+                                {urduDate(a.createdAt)}
+                                {showViews && a.views > 0 ? ` · ${a.views} ${"مشاہدات"}` : ""}
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </aside>
             </div>
           </section>
@@ -313,108 +370,130 @@ export default async function HomePage() {
 
         <Divider style={{ order: 5.5 } } />
 
-        {/* ============ نئی کتب + مقبول تحریریں ============ */}
+        {/* ============ نئی کتب / نمایاں شعرا و ادبا / مقبول تحریریں (mockup trio) ============ */}
         {isVisible("booksPopular") && (
-          <section {...sectionProps("booksPopular")}>
-            <SectionHeading title="نئی کتب" href="/books" />
-            <div className="grid gap-6 lg:grid-cols-4">
-              <div className="lg:col-span-3">
-                {newBooks.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-gold/40 bg-card p-10 text-center font-naskh text-sm text-muted-foreground">
-                    کتب خانہ میں جلد اضافہ ہوگا۔
-                  </div>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {newBooks.slice(0, 3).map((b) => (
-                      <BookCard key={b.id} book={b} showViews={showViews} />
-                    ))}
-                  </div>
-                )}
-
-                {/* مقبول تحریریں */}
-                <div className="mt-8">
-                  <h3 className="mb-4 flex items-center gap-2 font-nastaliq-tight text-2xl text-primary">
-                    <Flame className="h-6 w-6 text-gold" /> مقبول تحریریں
+          <section {...sectionProps("booksPopular")} className="mx-auto w-full max-w-7xl px-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* نئی کتب */}
+              <div className="manuscript-frame overflow-hidden rounded-xl bg-card">
+                <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
+                  <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e9c979]">
+                    <BookOpen className="h-4.5 w-4.5" /> نئی کتب
                   </h3>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    {popularPoems.slice(0, 3).map((p) => (
-                      <Link key={`p-${p.id}`} href={`/poetry/${p.id}`} className="manuscript-frame group rounded-xl bg-card p-4 transition-shadow hover:shadow-md">
-                        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-naskh text-primary">{p.category}</span>
-                        <h4 className="mt-2 line-clamp-1 font-nastaliq-tight text-lg leading-8 group-hover:text-primary">{p.title}</h4>
-                        <p className="text-sm font-naskh text-gold">{p.poetName ?? p.user?.penName ?? p.user?.name ?? "—"}</p>
-                        <p className="mt-1 line-clamp-2 font-nastaliq text-sm leading-7 text-foreground/60">{poemPreview(p.content)}</p>
-                        {showViews && (
-                          <p className="mt-1.5 inline-flex items-center gap-1 font-latin text-[10px] text-muted-foreground" dir="ltr">
-                            <Eye className="h-3 w-3" /> {p.views}
-                          </p>
-                        )}
-                      </Link>
-                    ))}
-                    {popularArticles.slice(0, 2).map((a) => (
-                      <Link key={`a-${a.id}`} href={`/articles/${a.id}`} className="manuscript-frame group rounded-xl bg-card p-4 transition-shadow hover:shadow-md">
-                        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-naskh text-primary">{a.category}</span>
-                        <h4 className="mt-2 line-clamp-2 font-nastaliq-tight text-lg leading-8 group-hover:text-primary">{a.title}</h4>
-                        <p className="mt-1 line-clamp-2 text-sm leading-7 text-foreground/60 font-naskh">{excerptPreview(a.excerpt || a.content, 16)}</p>
-                        {showViews && (
-                          <p className="mt-1.5 inline-flex items-center gap-1 font-latin text-[10px] text-muted-foreground" dir="ltr">
-                            <Eye className="h-3 w-3" /> {a.views}
-                          </p>
-                        )}
-                      </Link>
-                    ))}
-                    {popularBooks.slice(0, 1).map((b) => (
-                      <Link key={`b-${b.id}`} href={`/books/${b.id}`} className="manuscript-frame group rounded-xl bg-card p-4 transition-shadow hover:shadow-md">
-                        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-naskh text-primary">{b.category}</span>
-                        <h4 className="mt-2 line-clamp-1 font-nastaliq-tight text-lg leading-8 group-hover:text-primary">{b.title}</h4>
-                        <p className="text-sm font-naskh text-gold">{b.author}</p>
-                        <p className="mt-1 line-clamp-2 text-sm leading-7 text-foreground/60 font-naskh">{excerptPreview(b.description ?? "", 16)}</p>
-                        {showViews && (
-                          <p className="mt-1.5 inline-flex items-center gap-1 font-latin text-[10px] text-muted-foreground" dir="ltr">
-                            <Eye className="h-3 w-3" /> {b.views}
-                          </p>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
+                  <Link href="/books" className="text-xs font-naskh text-[#e5dfc9]/80 hover:text-[#e9c979]">
+                    مزید دیکھیں ←
+                  </Link>
+                </div>
+                <div className="p-3">
+                  {newBooks.length === 0 ? (
+                    <p className="py-8 text-center font-naskh text-sm text-muted-foreground">کتب خانہ میں جلد اضافہ ہوگا۔</p>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2.5">
+                      {(featuredBook ? [featuredBook, ...newBooks.filter((b) => b.id !== featuredBook.id)] : newBooks).slice(0, 3).map((b) => (
+                        <Link key={b.id} href={`/books/${b.id}`} className="group block">
+                          <span className="block overflow-hidden rounded-lg border border-gold/25">
+                            {b.coverUrl ? (
+                              <img src={b.coverUrl} alt={b.title} className="aspect-[3/4] w-full object-cover transition-transform group-hover:scale-[1.03]" loading="lazy" />
+                            ) : (
+                              <span className="flex aspect-[3/4] w-full items-center justify-center bg-secondary">
+                                <BookOpen className="h-7 w-7 text-gold" />
+                              </span>
+                            )}
+                          </span>
+                          <span className="mt-1.5 line-clamp-1 block font-nastaliq-tight text-[13px] leading-6 text-foreground group-hover:text-primary">{b.title}</span>
+                          <span className="line-clamp-1 block text-[11px] font-naskh text-gold">{b.author}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* featured book + side banners column */}
-              <aside className="flex flex-col gap-4">
-                {(featuredBook || newBooks[0]) && (
-                  <div className="manuscript-frame rounded-xl bg-card p-4">
-                    <h3 className="mb-3 flex items-center gap-2 font-nastaliq-tight text-lg text-primary">
-                      <BookOpen className="h-4.5 w-4.5 text-gold" /> نمایاں کتاب
-                    </h3>
-                    <Link href={`/books/${(featuredBook ?? newBooks[0]).id}`} className="group block">
-                      {(featuredBook ?? newBooks[0]).coverUrl ? (
-                         
-                        <img src={(featuredBook ?? newBooks[0]).coverUrl!} alt={(featuredBook ?? newBooks[0]).title} className="mb-3 h-48 w-full rounded-lg object-cover" />
-                      ) : (
-                        <div className="mb-3 flex h-48 w-full items-center justify-center rounded-lg bg-secondary">
-                          <BookOpen className="h-10 w-10 text-gold" />
-                        </div>
-                      )}
-                      <h4 className="line-clamp-1 font-nastaliq-tight text-lg leading-8 group-hover:text-primary">{(featuredBook ?? newBooks[0]).title}</h4>
-                      <p className="text-sm font-naskh text-gold">{(featuredBook ?? newBooks[0]).author}</p>
-                      <p className="mt-1 line-clamp-3 text-xs leading-6 text-foreground/70 font-naskh">
-                        {excerptPreview((featuredBook ?? newBooks[0]).description ?? "", 24)}
-                      </p>
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-naskh text-primary">
-                        مزید پڑھیے <ArrowLeft className="h-3.5 w-3.5" />
-                      </span>
-                    </Link>
-                  </div>
-                )}
+              {/* نمایاں شعرا و ادبا */}
+              <div className="manuscript-frame overflow-hidden rounded-xl bg-card">
+                <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
+                  <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e9c979]">
+                    <Feather className="h-4.5 w-4.5" /> نمایاں شعرا و ادبا
+                  </h3>
+                  <Link href="/poets" className="text-xs font-naskh text-[#e5dfc9]/80 hover:text-[#e9c979]">
+                    سب دیکھیں ←
+                  </Link>
+                </div>
+                <div className="p-3">
+                  {featuredPoets.length === 0 ? (
+                    <p className="py-8 text-center font-naskh text-sm text-muted-foreground">شعرا و ادبا کی فہرست جلد شائع ہوگی۔</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {featuredPoets.slice(0, 3).map((p) => (
+                        <li key={p.id}>
+                          <Link href={`/poets/${p.id}`} className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent/60">
+                            {p.photoUrl ? (
+                              <img src={p.photoUrl} alt={p.name} className="h-12 w-12 shrink-0 rounded-full border-2 border-gold/50 object-cover" loading="lazy" />
+                            ) : (
+                              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold/50 bg-secondary font-nastaliq-tight text-lg text-primary">
+                                {p.takhallus?.[0] || p.name[0]}
+                              </span>
+                            )}
+                            <span className="min-w-0 flex-1">
+                              <span className="block font-nastaliq-tight text-[15px] leading-7 text-foreground group-hover:text-primary">{p.name}</span>
+                              <span className="line-clamp-1 block text-[11px] font-naskh text-muted-foreground">
+                                {p.takhallus ? `تخلص: ${p.takhallus}` : (p.era ?? "")}
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
 
+              {/* مقبول تحریریں */}
+              <div className="manuscript-frame overflow-hidden rounded-xl bg-card">
+                <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
+                  <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e9c979]">
+                    <Flame className="h-4.5 w-4.5" /> مقبول تحریریں
+                  </h3>
+                </div>
+                <div className="p-3">
+                  {popularPoems.length === 0 && popularArticles.length === 0 ? (
+                    <p className="py-8 text-center font-naskh text-sm text-muted-foreground">مقبول تحریریں کا ریکارڈ جلد مرتب ہوگا۔</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {[
+                        ...popularPoems.slice(0, 2).map((p) => ({ href: `/poetry/${p.id}`, title: p.title, views: p.views, author: p.poetName ?? p.user?.penName ?? p.user?.name ?? "" })),
+                        ...popularArticles.slice(0, 1).map((a) => ({ href: `/articles/${a.id}`, title: a.title, views: a.views, author: a.authorName ?? "" })),
+                      ].map((item) => (
+                        <li key={item.href}>
+                          <Link href={item.href} className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-accent/60">
+                            <span className="min-w-0 flex-1">
+                              <span className="line-clamp-1 block font-nastaliq-tight text-[14px] leading-7 text-foreground group-hover:text-primary">{item.title}</span>
+                              <span className="line-clamp-1 block text-[11px] font-naskh text-muted-foreground">{item.author}</span>
+                            </span>
+                            {showViews && (
+                              <span className="inline-flex shrink-0 items-center gap-1 font-latin text-[11px] text-muted-foreground" dir="ltr">
+                                <Eye className="h-3 w-3" /> {item.views}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* admin side banners (بینر میڈیا) — kept, now below the trio */}
+            {sideBanners.length > 0 && (
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 {sideBanners.map((b) => (
                   <Link key={b.id} href={b.linkUrl || "#"} className="group block overflow-hidden rounded-xl border border-gold/30 shadow-sm">
-                    { }
                     <img src={b.imageUrl} alt={b.title} className="w-full object-cover transition-transform group-hover:scale-[1.02]" />
                   </Link>
                 ))}
-              </aside>
-            </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -457,7 +536,7 @@ export default async function HomePage() {
 
         {/* ============ ادبی مقابلے ============ */}
         {isVisible("competitions") && (
-          <section {...sectionProps("competitions")} className="mx-auto max-w-7xl px-4 pb-14">
+          <section {...sectionProps("competitions")} className="mx-auto w-full max-w-7xl px-4 pb-14">
             <SectionHeading title="ادبی مقابلے" href="/competitions" />
             {competitions.length === 0 ? (
               <div className="rounded-xl border border-dashed border-gold/40 bg-card p-10 text-center font-naskh text-sm text-muted-foreground">
@@ -522,24 +601,11 @@ function FeaturedPoemPanel({ poem }: { poem: { id: string; title: string; conten
   );
 }
 
-function FeaturedArticlePanel({ article }: { article: { id: string; title: string; excerpt?: string | null; content: string; authorName?: string | null } }) {
-  return (
-    <div className="manuscript-frame relative h-full overflow-hidden rounded-xl bg-card p-5">
-      <span className="absolute start-3 top-3 rounded-full bg-gold/15 px-2.5 py-0.5 text-[11px] font-naskh text-gold">نمایاں مضمون</span>
-      <div className="mt-6">
-        <h3 className="font-nastaliq-tight text-xl leading-9 text-emerald-ink line-clamp-2">{article.title}</h3>
-        <p className="text-xs font-naskh text-gold">{article.authorName ?? ""}</p>
-        <p className="mt-3 font-naskh text-sm leading-7 text-foreground/85">
-          {excerptPreview(article.excerpt || article.content, 40)}
-        </p>
-        <p className="pointer-events-none relative mt-0 h-12 bg-gradient-to-t from-card to-transparent" />
-      </div>
-      <Link
-        href={`/articles/${article.id}`}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-naskh text-sm font-semibold text-primary-foreground hover:bg-emerald-deep"
-      >
-        مزید پڑھیے <ArrowLeft className="h-4 w-4" />
-      </Link>
-    </div>
-  );
+/** Urdu date (server-rendered, deterministic) with graceful fallback */
+function urduDate(d: Date | string): string {
+  try {
+    return new Intl.DateTimeFormat("ur", { day: "numeric", month: "long", year: "numeric" }).format(new Date(d));
+  } catch {
+    return new Date(d).toLocaleDateString("en-GB");
+  }
 }

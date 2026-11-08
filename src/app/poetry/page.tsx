@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { POEM_CATEGORIES } from "@/lib/site";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
-import { SectionHeading } from "@/components/site/section-heading";
+import { PageBanner } from "@/components/site/page-banner";
 import { PoemCard } from "@/components/site/cards";
 import { cn } from "@/lib/utils";
 import { Feather } from "lucide-react";
@@ -28,11 +28,12 @@ export default async function PoetryPage({
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1 paper-bg">
-        <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading
-            title="شاعری"
-            subtitle="غزل، نظم، رباعی اور اردو شاعری کی اصناف کا مکمل ذخیرہ"
-          />
+        <PageBanner
+          title="شاعری"
+          subtitle="غزل، نظم، رباعی اور اردو شاعری کی اصناف کا مکمل ذخیرہ"
+          quote="شاعری دل کی زبان ہے"
+        />
+        <div className="mx-auto max-w-7xl px-4 py-8">
 
           <div className="mb-6 flex flex-wrap gap-2">
             {["تمام", ...POEM_CATEGORIES].map((c) => (

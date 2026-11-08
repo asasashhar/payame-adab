@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Users2, BookA, Newspaper, Inbox, Trophy, CalendarDays,
   Sparkles, Quote, Activity, ExternalLink, Eye, Heart, MessagesSquare,
-  Megaphone, Clock, Archive, FileEdit, ShieldCheck,
+  Megaphone, Clock, Archive, FileEdit, ShieldCheck, Zap, Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,37 @@ const ACTION_URDU: Record<string, string> = {
 function fmt(n: number) {
   return n >= 1000 ? n.toLocaleString("en-US") : String(n);
 }
+
+/** live Urdu date chip (client-only — avoids SSR hydration mismatch) */
+function UrduTodayChip() {
+  const [today, setToday] = useState<string | null>(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        setToday(new Intl.DateTimeFormat("ur-PK", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()));
+      } catch {
+        try { setToday(new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })); } catch { setToday(null); }
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+  if (!today) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-gold/40 bg-card px-3 py-1.5 text-[13px] font-naskh text-foreground">
+      <CalendarDays className="h-3.5 w-3.5 text-gold" /> {today}
+    </span>
+  );
+}
+
+/** mockup-style colorful stat cards (green, blue, purple, orange, teal, maroon) */
+const CARD_STYLES = [
+  "bg-gradient-to-br from-[#0e7a4f] to-[#0a5237]",
+  "bg-gradient-to-br from-[#24558e] to-[#173b70]",
+  "bg-gradient-to-br from-[#6d5bb8] to-[#4a3d8c]",
+  "bg-gradient-to-br from-[#d9832e] to-[#b05e12]",
+  "bg-gradient-to-br from-[#0e8f8f] to-[#0a6b6b]",
+  "bg-gradient-to-br from-[#b04a5a] to-[#87353f]",
+];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -92,6 +123,7 @@ export default function AdminDashboard() {
         subtitle="پیامِ ادب کا ہر شعبہ اسی پینل سے منظم ہوتا ہے — تمام اعداد اصل ریکارڈ سے"
         action={
           <div className="flex items-center gap-2">
+            <UrduTodayChip />
             {stats.publishedNow > 0 && (
               <span className="rounded-full bg-[#e3f0e6] px-3 py-1 text-xs font-naskh text-[#2f6d46]">
                 {stats.publishedNow} شیڈول شدہ تحریریں ابھی شائع ہوئیں
@@ -104,33 +136,75 @@ export default function AdminDashboard() {
         }
       />
 
-      {/* traffic summary */}
+      {/* traffic summary — colorful mockup-style cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {mainCards.map((c) => (
-          <Link key={c.label} href={c.href} className="manuscript-frame group rounded-xl bg-card p-4 transition-shadow hover:shadow-md">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-naskh text-sm text-muted-foreground">{c.label}</p>
-                <p className="mt-1 font-latin text-3xl font-bold tabular-nums text-foreground">{c.value}</p>
-                {c.sub && <p className="mt-0.5 text-xs font-naskh text-muted-foreground">{c.sub}</p>}
+        {mainCards.map((c, i) => (
+          <Link
+            key={c.label}
+            href={c.href}
+            className={cn(
+              "group relative overflow-hidden rounded-xl p-4 text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg",
+              CARD_STYLES[i % CARD_STYLES.length]
+            )}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-naskh text-sm text-white/85">{c.label}</p>
+                <p className="mt-1 font-latin text-3xl font-bold tabular-nums">{c.value}</p>
+                {c.sub && <p className="mt-0.5 truncate text-xs font-naskh text-white/75">{c.sub}</p>}
               </div>
-              <c.icon className={cn("h-6 w-6", c.accent, c.pulse && "animate-pulse")} />
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
+                <c.icon className={cn("h-6 w-6 text-white", c.pulse && "animate-pulse")} />
+              </span>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* content summary */}
+      {/* content summary — colorful mockup-style mini cards */}
       <h2 className="mb-3 mt-8 font-nastaliq-tight text-xl text-primary">مواد کا جائزہ</h2>
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {contentCards.map((c) => (
-          <Link key={c.label} href={c.href} className="manuscript-frame group rounded-xl bg-card p-3.5 transition-shadow hover:shadow-md">
-            <c.icon className={cn("h-5 w-5", c.accent, c.pulse && "animate-pulse")} />
+        {contentCards.map((c, i) => (
+          <Link
+            key={c.label}
+            href={c.href}
+            className={cn(
+              "group rounded-xl p-3.5 text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+              CARD_STYLES[(i + 2) % CARD_STYLES.length]
+            )}
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
+              <c.icon className={cn("h-5 w-5 text-white", c.pulse && "animate-pulse")} />
+            </span>
             <p className="mt-2 font-latin text-2xl font-bold tabular-nums">{c.value}</p>
-            <p className="font-naskh text-xs text-muted-foreground">{c.label}</p>
-            {c.sub && <p className="text-[10px] font-naskh text-muted-foreground/80">{c.sub}</p>}
+            <p className="font-naskh text-xs text-white/85">{c.label}</p>
+            {c.sub && <p className="text-[10px] font-naskh text-white/70">{c.sub}</p>}
           </Link>
         ))}
+      </div>
+
+      {/* quick actions — mockup فوری ایکشن (all real links) */}
+      <div className="manuscript-frame mt-8 rounded-xl bg-card p-5">
+        <h3 className="mb-3 flex items-center gap-2 font-nastaliq-tight text-lg text-primary">
+          <Zap className="h-5 w-5 text-gold" /> فوری ایکشن
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {([
+            { label: "نئی کتاب شامل کریں", href: "/admin/books", icon: BookA },
+            { label: "تحریر جائزہ لیں", href: "/admin/submissions", icon: Inbox, pulse: stats.poemsPending + stats.articlesPending + stats.newsPending > 0 },
+            { label: "اخبار اپ لوڈ کریں", href: "/admin/newspaper", icon: Newspaper },
+            { label: "تبصرے منظم کریں", href: "/admin/comments", icon: MessagesSquare, pulse: stats.commentsPending > 0 },
+            { label: "سیٹنگز کھولیں", href: "/admin/settings", icon: Settings },
+            { label: "رپورٹ دیکھیں", href: "/admin/analytics", icon: Activity },
+          ] as { label: string; href: string; icon: React.ElementType; pulse?: boolean }[]).map((a) => (
+            <Link key={a.href} href={a.href} className="group flex flex-col items-center gap-2 rounded-xl bg-accent/60 p-4 text-center transition-colors hover:bg-accent">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-deep/10 text-primary transition-colors group-hover:bg-emerald-deep group-hover:text-white">
+                <a.icon className={cn("h-5 w-5", a.pulse && "animate-pulse")} />
+              </span>
+              <span className="font-naskh text-[13px] leading-6 text-foreground">{a.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* system + activity */}

@@ -45,40 +45,42 @@
 
 :root {
   --radius: 0.75rem;
+  --paper-dot: #e7ddc3;
 
-  /* Payam-e-Adab palette: deep emerald, muted gold, warm ivory, charcoal */
-  --emerald-deep: #0e5b43;
-  --emerald-ink: #0a3f2f;
-  --gold: #b8922e;
-  --gold-soft: #d9bc6a;
-  --ivory: #faf6ec;
+  /* Payam-e-Adab palette (mockup-sampled): deep forest green, amber gold,
+     warm ivory, warm charcoal — literary traditional look */
+  --emerald-deep: #06422a;
+  --emerald-ink: #03301c;
+  --gold: #b5891e;
+  --gold-soft: #e2c57c;
+  --ivory: #f8f1e7;
 
-  --background: #faf6ec;
+  --background: #f8f1e7;
   --foreground: #26221b;
-  --card: #fffdf7;
+  --card: #fffdf8;
   --card-foreground: #26221b;
-  --popover: #fffdf7;
+  --popover: #fffdf8;
   --popover-foreground: #26221b;
-  --primary: #0e5b43;
+  --primary: #0a4c2b;
   --primary-foreground: #f7f3e8;
-  --secondary: #f1ebdb;
-  --secondary-foreground: #0a3f2f;
-  --muted: #f1ebdb;
+  --secondary: #f1e9d7;
+  --secondary-foreground: #03301c;
+  --muted: #f1e9d7;
   --muted-foreground: #6f6a5c;
   --accent: #f3ead2;
-  --accent-foreground: #0a3f2f;
+  --accent-foreground: #03301c;
   --destructive: #a03333;
   --border: #e4dcc6;
   --input: #e4dcc6;
-  --ring: #b8922e;
-  --sidebar: #0e5b43;
+  --ring: #b5891e;
+  --sidebar: #06422a;
   --sidebar-foreground: #eee9d8;
-  --sidebar-primary: #b8922e;
-  --sidebar-primary-foreground: #fffdf7;
-  --sidebar-accent: #0a3f2f;
+  --sidebar-primary: #17603a;
+  --sidebar-primary-foreground: #f3ead2;
+  --sidebar-accent: #03301c;
   --sidebar-accent-foreground: #eee9d8;
-  --sidebar-border: #0a3f2f;
-  --sidebar-ring: #b8922e;
+  --sidebar-border: #03301c;
+  --sidebar-ring: #b5891e;
 }
 
 .dark {
@@ -99,7 +101,7 @@
   --destructive: #c05656;
   --border: #32362a;
   --input: #32362a;
-  --ring: #b8922e;
+  --ring: #b5891e;
 }
 
 @layer base {
@@ -171,18 +173,18 @@
 /* ---------- paper texture & patterns ---------- */
 .paper-bg {
   background-color: var(--ivory);
-  background-image: radial-gradient(#e9e1cb 0.65px, transparent 0.65px);
+  background-image: radial-gradient(var(--paper-dot, #e9e1cb) 0.65px, transparent 0.65px);
   background-size: 14px 14px;
 }
 .manuscript-frame {
   border: 1px solid var(--border);
-  box-shadow: 0 1px 2px rgb(38 34 27 / 0.04), 0 8px 24px -12px rgb(14 91 67 / 0.14);
+  box-shadow: 0 1px 2px rgb(38 34 27 / 0.04), 0 8px 24px -12px rgb(6 66 42 / 0.16);
 }
 .pattern-emerald {
   background-color: var(--emerald-deep);
   background-image:
-    radial-gradient(circle at 20% 30%, rgb(184 146 46 / 0.14) 0, transparent 42%),
-    radial-gradient(circle at 80% 70%, rgb(217 188 106 / 0.1) 0, transparent 45%),
+    radial-gradient(circle at 20% 30%, rgb(181 137 30 / 0.16) 0, transparent 42%),
+    radial-gradient(circle at 80% 70%, rgb(226 197 124 / 0.12) 0, transparent 45%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4 L33 14 L44 12 L40 22 L50 28 L40 34 L44 44 L33 42 L28 52 L23 42 L12 44 L16 34 L6 28 L16 22 L12 12 L23 14 Z' fill='none' stroke='%23d9bc6a' stroke-opacity='0.12'/%3E%3C/svg%3E");
 }
 

@@ -1,12 +1,32 @@
 import Link from "next/link";
+import type { ElementType } from "react";
 import { db } from "@/lib/db";
 import { BOOK_CATEGORIES } from "@/lib/site";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
-import { SectionHeading } from "@/components/site/section-heading";
+import { PageBanner } from "@/components/site/page-banner";
 import { BookCard } from "@/components/site/cards";
 import { cn } from "@/lib/utils";
-import { Library } from "lucide-react";
+import {
+  Library, LayoutGrid, Feather, BookOpen, BookMarked, FlaskConical,
+  MessagesSquare, Landmark, UserRound, MoonStar, Baby, Languages, Shapes,
+} from "lucide-react";
+
+/** mockup-style icons for library category chips */
+const CHIP_ICONS: Record<string, ElementType> = {
+  "تمام": LayoutGrid,
+  "شاعری": Feather,
+  "افسانہ": BookOpen,
+  "ناول": BookMarked,
+  "تحقیق": FlaskConical,
+  "تنقید": MessagesSquare,
+  "تاریخ": Landmark,
+  "سوانح": UserRound,
+  "اسلامی ادب": MoonStar,
+  "بچوں کا ادب": Baby,
+  "زبان و قواعد": Languages,
+  "دیگر": Shapes,
+};
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "کتب خانہ — ڈیجیٹل کتب کا ذخیرہ" };
@@ -26,23 +46,32 @@ export default async function BooksPage({
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1 paper-bg">
-        <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="کتب خانہ" subtitle="ڈیجیٹل کتب — آن لائن مطالعہ کے لیے" />
+        <PageBanner
+          title="کتب خانہ"
+          subtitle="علم و ادب کا خزانہ — اب آپ کے قدموں میں"
+          quote="کتابیں ذہن کی روشنی ہیں"
+          image="/brand/hero-banner.jpg"
+        />
+        <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="mb-6 flex flex-wrap gap-2">
-            {["تمام", ...BOOK_CATEGORIES].map((c) => (
-              <Link
-                key={c}
-                href={c === "تمام" ? "/books" : `/books?category=${encodeURIComponent(c)}`}
-                className={cn(
-                  "rounded-full border px-4 py-1.5 text-sm font-naskh transition-colors",
-                  (category ?? "تمام") === c
-                    ? "border-emerald-deep bg-emerald-deep text-[#f3ead2]"
-                    : "border-gold/40 bg-card text-foreground/80 hover:border-gold hover:text-primary"
-                )}
-              >
-                {c}
-              </Link>
-            ))}
+            {["تمام", ...BOOK_CATEGORIES].map((c) => {
+              const Icon = CHIP_ICONS[c] ?? Shapes;
+              return (
+                <Link
+                  key={c}
+                  href={c === "تمام" ? "/books" : `/books?category=${encodeURIComponent(c)}`}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-naskh transition-colors",
+                    (category ?? "تمام") === c
+                      ? "border-emerald-deep bg-emerald-deep text-[#f3ead2] shadow-sm"
+                      : "border-gold/40 bg-card text-foreground/80 hover:border-gold hover:text-primary"
+                  )}
+                >
+                  <Icon className={cn("h-3.5 w-3.5", (category ?? "تمام") === c ? "text-[#e9c979]" : "text-gold")} />
+                  {c === "تمام" ? "تمام کتابیں" : c}
+                </Link>
+              );
+            })}
           </div>
           {books.length === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">

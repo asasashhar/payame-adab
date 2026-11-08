@@ -47,7 +47,7 @@ export function SectionHeading({
         </div>
       </div>
       {subtitle && (
-        <p className={cn("mt-1 text-sm", light ? "text-[#d9bc6a]" : "text-muted-foreground", center && "text-center")}>
+        <p className={cn("mt-1 text-sm", light ? "text-[#e2c57c]" : "text-muted-foreground", center && "text-center")}>
           {subtitle}
         </p>
       )}

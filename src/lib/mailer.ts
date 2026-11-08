@@ -8,8 +8,8 @@ export type MailKind =
 
 const SITE_FALLBACK = "پیامِ ادب";
 
-const GREEN = "#0e5b43";
-const GOLD = "#b8922e";
+const GREEN = "#06422a";
+const GOLD = "#b5891e";
 const CREAM = "#f7f1e1";
 
 function shell(title: string, bodyHtml: string, siteUrl: string): string {
@@ -19,7 +19,7 @@ function shell(title: string, bodyHtml: string, siteUrl: string): string {
   <div style="max-width:640px;margin:24px auto;background:#ffffff;border:1px solid ${GOLD}55;border-radius:14px;overflow:hidden;">
     <div style="background:${GREEN};padding:18px 24px;text-align:center;">
       <span style="color:#f3ead2;font-size:22px;">پیامِ ادب</span>
-      <span style="color:#d9bc6a;font-size:13px;"> — Payam-e-Adab</span>
+      <span style="color:#e2c57c;font-size:13px;"> — Payam-e-Adab</span>
     </div>
     <div style="padding:28px 30px;color:#242424;line-height:2.1;font-size:16px;">
       <h2 style="color:${GREEN};font-size:20px;margin:0 0 14px;">${title}</h2>

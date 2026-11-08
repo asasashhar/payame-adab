@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Eye, Feather, Newspaper, CalendarDays } from "lucide-react";
+import { BookOpen, Eye, Feather, Newspaper, CalendarDays, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_URDU } from "@/lib/site";
 
@@ -86,6 +86,12 @@ export function PoemCard({ poem, badge, showViews = true }: { poem: PoemItem; ba
             </span>
           )}
         </div>
+        <Link
+          href={`/poetry/${poem.id}`}
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-naskh font-semibold text-primary-foreground transition-colors hover:bg-emerald-deep"
+        >
+          مزید پڑھیں <ArrowLeft className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </article>
   );
@@ -110,13 +116,19 @@ export function ArticleCard({ article, badge, showViews = true }: { article: Art
           {excerptPreview(article.excerpt || article.content)}
         </p>
         <div className="mt-3 flex items-center justify-between border-t border-gold/20 pt-2.5 text-xs text-muted-foreground">
-          <span className="font-naskh font-semibold text-primary/90">{authorLabel(article)}</span>
+          <span className="font-naskh font-semibold text-primary/90">از قلم: {authorLabel(article)}</span>
           {showViews && (
             <span className="inline-flex items-center gap-1 font-latin">
               <Eye className="h-3.5 w-3.5" /> {article.views ?? 0}
             </span>
           )}
         </div>
+        <Link
+          href={`/articles/${article.id}`}
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-naskh font-semibold text-primary-foreground transition-colors hover:bg-emerald-deep"
+        >
+          مزید پڑھیں <ArrowLeft className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </article>
   );
@@ -141,10 +153,15 @@ export function BookCard({ book, showViews = true }: { book: BookItem; showViews
         <p className="mt-1.5 flex-1 text-[15px] leading-8 text-foreground/70 font-naskh line-clamp-3">
           {excerptPreview(book.description ?? "", 30)}
         </p>
-        <div className="mt-3 flex items-center justify-between border-t border-gold/20 pt-2.5 text-xs text-muted-foreground">
-          <span className="font-latin">{book.year || ""}</span>
+        {book.year && (
+          <p className="mt-1 text-[11px] font-latin text-muted-foreground" dir="ltr">{book.year}</p>
+        )}
+        <div className="mt-3 flex items-center justify-between border-t border-gold/20 pt-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-deep px-3.5 py-1.5 text-[13px] font-naskh font-semibold text-[#f3ead2] transition-colors group-hover:bg-emerald-ink">
+            کتاب پڑھیں <ArrowLeft className="h-3.5 w-3.5" />
+          </span>
           {showViews && (
-            <span className="inline-flex items-center gap-1 font-latin">
+            <span className="inline-flex items-center gap-1 font-latin text-xs text-muted-foreground">
               <Eye className="h-3.5 w-3.5" /> {book.views ?? 0}
             </span>
           )}
@@ -168,7 +185,7 @@ export function PosterCard({
           <img src={posterUrl} alt={title} className="h-64 w-full object-cover" loading="lazy" />
         ) : (
           <div className="flex h-64 w-full flex-col items-center justify-center gap-2 pattern-emerald text-center">
-            <Feather className="h-8 w-8 text-[#d9bc6a]" />
+            <Feather className="h-8 w-8 text-[#e2c57c]" />
             <p className="px-6 font-nastaliq-tight text-xl leading-8 text-[#f3ead2]">{title}</p>
           </div>
         )}

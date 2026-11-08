@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
         </div>
 
         <div className="mt-5 text-center">
-          <Link href="/" className="text-sm font-naskh text-[#e5dfc9]/85 hover:text-[#d9bc6a]">
+          <Link href="/" className="text-sm font-naskh text-[#e5dfc9]/85 hover:text-[#e2c57c]">
             ← مین سائٹ پر واپس جائیں
           </Link>
         </div>

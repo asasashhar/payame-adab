@@ -47,7 +47,7 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   // branding
   logoUrl: "/brand/logo-badge.png",
   logoHorizontalUrl: "/brand/logo-horizontal.png",
-  heroImage: "/brand/hero-emblem.jpg",
+  heroImage: "/brand/hero-banner.jpg",
   heroBadge: "پیامِ ادب · Payam-e-Adab",
   // appearance
   themePreset: "emerald",
@@ -93,15 +93,18 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   // homepage
   homeSections: JSON.stringify([
     { key: "hero", label: "ہیرو سیکشن", visible: true },
-    { key: "poets", label: "نمایاں شعرا و ادبا", visible: true },
     { key: "sherWord", label: "آج کا شعر و آج کا لفظ", visible: true },
     { key: "latestPoems", label: "تازہ شاعری", visible: true },
     { key: "latestArticles", label: "تازہ مضامین", visible: true },
     { key: "news", label: "ادبی خبریں", visible: true },
-    { key: "booksPopular", label: "نئی کتب و مقبول تحریریں", visible: true },
+    { key: "booksPopular", label: "نئی کتب، شعرا و مقبول تحریریں", visible: true },
     { key: "newspaper", label: "ڈیجیٹل اخبار", visible: true },
     { key: "competitions", label: "ادبی مقابلے", visible: true },
   ]),
+  // four-design monthly rotation (blueprint Part 3)
+  designRotation: "1",          // 1 = automatic calendar schedule on
+  designOverride: "",           // A | B | C | D — manual/preview selection wins
+  designTimezone: "Asia/Kolkata",
   // site url (used in email links) + owner
   siteUrl: "",
   ownerEmail: "mdnematullah1343@gmail.com",
@@ -188,14 +191,14 @@ export const THEME_PRESETS: Record<ThemePreset, { label: string; vars: Record<st
   emerald: {
     label: "زمرد و سنہری (موجود)",
     vars: {
-      "--primary": "#0e5b43",
-      "--emerald-deep": "#0e5b43",
-      "--emerald-ink": "#0a3f2f",
-      "--sidebar": "#0e5b43",
-      "--sidebar-accent": "#0a3f2f",
-      "--sidebar-border": "#0a3f2f",
-      "--gold": "#b8922e",
-      "--gold-soft": "#d9bc6a",
+      "--primary": "#06422a",
+      "--emerald-deep": "#06422a",
+      "--emerald-ink": "#03301c",
+      "--sidebar": "#06422a",
+      "--sidebar-accent": "#03301c",
+      "--sidebar-border": "#03301c",
+      "--gold": "#b5891e",
+      "--gold-soft": "#e2c57c",
     },
   },
   navy: {
@@ -207,8 +210,8 @@ export const THEME_PRESETS: Record<ThemePreset, { label: string; vars: Record<st
       "--sidebar": "#122a5c",
       "--sidebar-accent": "#0c1d42",
       "--sidebar-border": "#0c1d42",
-      "--gold": "#b8922e",
-      "--gold-soft": "#d9bc6a",
+      "--gold": "#b5891e",
+      "--gold-soft": "#e2c57c",
     },
   },
   maroon: {
@@ -220,8 +223,8 @@ export const THEME_PRESETS: Record<ThemePreset, { label: string; vars: Record<st
       "--sidebar": "#6d1f2c",
       "--sidebar-accent": "#4d1420",
       "--sidebar-border": "#4d1420",
-      "--gold": "#b8922e",
-      "--gold-soft": "#d9bc6a",
+      "--gold": "#b5891e",
+      "--gold-soft": "#e2c57c",
     },
   },
 };

@@ -61,3 +61,6 @@ db/backups/
 
 # sandbox artifacts
 tool-results/
+
+# local upload staging (raw user uploads, not site content)
+upload/

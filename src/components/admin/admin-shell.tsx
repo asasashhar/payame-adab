@@ -18,6 +18,7 @@ import {
   Inbox, Settings, ExternalLink, Loader2, ShieldCheck, Menu,
   Megaphone, BarChart3, MessagesSquare, Heart, LayoutTemplate, Palette,
   ScrollText, Trash2, Clock, KeyRound, LogOut, Mail, DollarSign,
+  Bell, Eye,
 } from "lucide-react";
 
 type Me = { id: string; name: string; email: string; penName: string | null; mustChangePassword?: boolean } | null;
@@ -103,6 +104,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [pwBusy, setPwBusy] = useState(false);
+  const [pending, setPending] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -119,6 +121,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => setSidebarOpen(false), [pathname]);
+
+  // real pending-work badge for the alert bell (submissions + comments)
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && typeof d === "object") {
+          const p =
+            Number(d.poemsPending ?? 0) +
+            Number(d.articlesPending ?? 0) +
+            Number(d.newsPending ?? 0) +
+            Number(d.commentsPending ?? 0);
+          setPending(Number.isFinite(p) ? p : 0);
+        }
+      })
+      .catch(() => {});
+  }, [pathname]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -188,7 +207,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <LogoMark size={52} />
           <div>
             <p className="font-nastaliq-tight text-xl leading-8 text-[#f3ead2]">پیامِ ادب</p>
-            <p className="flex items-center gap-1 text-xs font-naskh text-[#d9bc6a]">
+            <p className="flex items-center gap-1 text-xs font-naskh text-[#e2c57c]">
               <ShieldCheck className="h-3.5 w-3.5" /> ایڈمن پینل
             </p>
           </div>
@@ -197,7 +216,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <nav className="p-3 pb-8">
           {GROUPS.map((g) => (
             <div key={g.title} className="mb-3">
-              <p className="mb-1.5 px-3 text-[11px] font-naskh tracking-wide text-[#d9bc6a]/70">{g.title}</p>
+              <p className="mb-1.5 px-3 text-[11px] font-naskh tracking-wide text-[#e2c57c]/70">{g.title}</p>
               <div className="space-y-0.5">
                 {g.items.map((item) => {
                   const active = pathname === item.href;
@@ -237,6 +256,46 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       {/* main */}
       <div className="flex min-w-0 flex-1 flex-col pt-14 lg:pt-0">
+        {/* desktop top bar — logo + tagline + view site + alerts + admin (mockup style) */}
+        <div className="sticky top-0 z-20 hidden items-center gap-3 border-b border-gold/25 bg-background/95 px-6 py-2.5 backdrop-blur lg:flex">
+          <span className="flex items-center gap-2.5">
+            <LogoMark size={36} />
+            <span className="font-nastaliq-tight text-xl leading-8 text-primary">پیامِ ادب</span>
+          </span>
+          <p className="hidden min-w-0 flex-1 text-center font-nastaliq-tight text-[15px] text-emerald-deep xl:block">
+            اردو ادب، روایت سے نئی نسل تک
+          </p>
+          <div className="ms-auto flex items-center gap-2.5">
+            <Link
+              href="/"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-ink px-3.5 py-2 text-[13px] font-naskh font-semibold text-[#f3ead2] transition-colors hover:bg-emerald-deep"
+            >
+              <Eye className="h-4 w-4" /> سائٹ دیکھیں
+            </Link>
+            <Link
+              href="/admin/submissions"
+              aria-label="زیرِ جائزہ تحریریں و تبصرے"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-gold/40 text-primary transition-colors hover:bg-accent"
+            >
+              <Bell className="h-4.5 w-4.5" />
+              {pending > 0 && (
+                <span className="absolute -end-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 font-latin text-[10px] font-bold text-white">
+                  {pending > 99 ? "99+" : pending}
+                </span>
+              )}
+            </Link>
+            <span className="flex items-center gap-2 rounded-lg border border-gold/30 bg-card px-3 py-1.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-deep font-latin text-xs font-bold text-white">
+                {(me.name ?? "?").trim().charAt(0).toUpperCase()}
+              </span>
+              <span className="flex flex-col leading-tight">
+                <span className="text-[13px] font-naskh text-foreground">{me.penName || me.name}</span>
+                <span className="font-latin text-[10px] text-muted-foreground">Administrator</span>
+              </span>
+            </span>
+          </div>
+        </div>
         {me.mustChangePassword && (
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#8a6d1a]/40 bg-[#fdf3d7] px-4 py-2.5 lg:px-8">
             <p className="text-sm font-naskh text-[#6d5311]">

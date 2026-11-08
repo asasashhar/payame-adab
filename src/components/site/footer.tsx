@@ -39,10 +39,11 @@ export function SiteFooter({
           <p className="mt-4 text-sm leading-7 text-[#e5dfc9]/85 font-naskh">
             اردو زبان و ادب کے فروغ، تحفظ اور ڈیجیٹل اشاعت کا ادبی ادارہ۔
           </p>
+          <p className="mt-1 font-nastaliq-tight text-[15px] text-[#e2c57c]">اردو ادب، روایت سے نئی نسل تک</p>
         </div>
 
         <nav aria-label="اعداد و شمار">
-          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#d9bc6a]">ادبی سرحدیں</h3>
+          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#e2c57c]">ادبی سرحدیں</h3>
           <ul className="space-y-2 text-sm font-naskh">
             {[
               ["شاعری", "/poetry"],
@@ -53,7 +54,7 @@ export function SiteFooter({
               ["ڈیجیٹل اخبار", "/newspaper"],
             ].map(([label, href]) => (
               <li key={href}>
-                <Link href={href} className="text-[#e5dfc9]/85 hover:text-[#d9bc6a] transition-colors">
+                <Link href={href} className="text-[#e5dfc9]/85 hover:text-[#e2c57c] transition-colors">
                   {label}
                 </Link>
               </li>
@@ -62,7 +63,7 @@ export function SiteFooter({
         </nav>
 
         <nav aria-label="اوزار و خدمات">
-          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#d9bc6a]">اوزار و خدمات</h3>
+          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#e2c57c]">اوزار و خدمات</h3>
           <ul className="space-y-2 text-sm font-naskh">
             {[
               ["قافیہ تلاش", "/qafiya"],
@@ -72,7 +73,7 @@ export function SiteFooter({
               ["ہمارا تعارف", "/about"],
             ].map(([label, href]) => (
               <li key={href}>
-                <Link href={href} className="text-[#e5dfc9]/85 hover:text-[#d9bc6a] transition-colors">
+                <Link href={href} className="text-[#e5dfc9]/85 hover:text-[#e2c57c] transition-colors">
                   {label}
                 </Link>
               </li>
@@ -81,17 +82,17 @@ export function SiteFooter({
         </nav>
 
         <div>
-          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#d9bc6a]">رابطہ</h3>
+          <h3 className="mb-4 font-nastaliq-tight text-lg text-[#e2c57c]">رابطہ</h3>
           <ul className="space-y-3 text-sm font-latin" dir="ltr">
             <li className="flex items-center gap-2.5">
-              <Mail className="h-4 w-4 shrink-0 text-[#d9bc6a]" />
-              <a href={`mailto:${settings?.contactEmail ?? "payameadab@gmail.com"}`} className="text-[#e5dfc9]/85 hover:text-[#d9bc6a] break-all">
+              <Mail className="h-4 w-4 shrink-0 text-[#e2c57c]" />
+              <a href={`mailto:${settings?.contactEmail ?? "payameadab@gmail.com"}`} className="text-[#e5dfc9]/85 hover:text-[#e2c57c] break-all">
                 {settings?.contactEmail ?? "payameadab@gmail.com"}
               </a>
             </li>
             <li className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-[#d9bc6a]" />
-              <a href={`tel:+91${settings?.contactPhone ?? "9199258187"}`} className="text-[#e5dfc9]/85 hover:text-[#d9bc6a]">
+              <Phone className="h-4 w-4 shrink-0 text-[#e2c57c]" />
+              <a href={`tel:+91${settings?.contactPhone ?? "9199258187"}`} className="text-[#e5dfc9]/85 hover:text-[#e2c57c]">
                 +91 {settings?.contactPhone ?? "9199258187"}
               </a>
             </li>
@@ -105,7 +106,7 @@ export function SiteFooter({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.platform}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9bc6a]/40 text-[#e5dfc9]/85 transition-colors hover:bg-[#d9bc6a]/20 hover:text-[#f3ead2]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e2c57c]/40 text-[#e5dfc9]/85 transition-colors hover:bg-[#e2c57c]/20 hover:text-[#f3ead2]"
                 >
                   {socialIcon(s.platform)}
                 </a>
@@ -115,10 +116,11 @@ export function SiteFooter({
         </div>
       </div>
 
-      <div className="border-t border-[#d9bc6a]/20">
+      <div className="border-t border-[#e2c57c]/20">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-[#e5dfc9]/70 sm:flex-row">
           <p className="font-naskh">{settings?.footerNote ?? "© پیامِ ادب — تمام حقوق محفوظ ہیں"}</p>
-          <p className="font-latin tracking-widest">URDU LITERATURE · DIGITALLY PRESERVED</p>
+          <p className="font-naskh text-[#e2c57c]">اردو ادب، روایت سے نئی نسل تک</p>
+          <p className="font-latin">© Payam-e-Adab. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
