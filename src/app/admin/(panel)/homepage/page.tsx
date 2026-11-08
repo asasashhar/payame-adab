@@ -11,12 +11,28 @@ import { Loader2, Save, ArrowUp, ArrowDown, Eye, EyeOff, ImageIcon } from "lucid
 import { cn } from "@/lib/utils";
 
 type Section = { key: string; label: string; visible: boolean };
+type NavItem = { label: string; href: string; visible: boolean };
+
+const DEFAULT_NAV: NavItem[] = [
+  { label: "ہوم", href: "/", visible: true },
+  { label: "شاعری", href: "/poetry", visible: true },
+  { label: "مضامین", href: "/articles", visible: true },
+  { label: "کتب خانہ", href: "/books", visible: true },
+  { label: "شعرا و ادبا", href: "/poets", visible: true },
+  { label: "اخبار", href: "/newspaper", visible: true },
+  { label: "ادبی خبریں", href: "/news", visible: true },
+  { label: "ادبی مقابلے", href: "/competitions", visible: true },
+  { label: "ادبی تقریبات", href: "/events", visible: true },
+  { label: "لغت اور آج کا لفظ", href: "/dictionary", visible: true },
+  { label: "ہمارا تعارف", href: "/about", visible: true },
+];
 
 export default function HomepageManager() {
   const [settings, setSettings] = useState<Record<string, string> | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [heroFields, setHeroFields] = useState({ heroTitle: "", heroSubtitle: "", heroBadge: "", heroImage: "" });
   const [featured, setFeatured] = useState({ featuredPoemId: "", featuredArticleId: "", featuredBookId: "" });
+  const [navItems, setNavItems] = useState<NavItem[]>(DEFAULT_NAV);
   const [poems, setPoems] = useState<{ id: string; title: string }[]>([]);
   const [articles, setArticles] = useState<{ id: string; title: string }[]>([]);
   const [books, setBooks] = useState<{ id: string; title: string }[]>([]);
@@ -33,6 +49,10 @@ export default function HomepageManager() {
       heroImage: s.heroImage ?? "",
     });
     try { setSections(JSON.parse(s.homeSections ?? "[]")); } catch { setSections([]); }
+    try {
+      const parsed = JSON.parse(s.navLinks ?? "");
+      if (Array.isArray(parsed) && parsed.length) setNavItems(parsed);
+    } catch { /* defaults already set */ }
     // featured options: read current featured ids from content lists
     const [p, a, b] = await Promise.all([
       fetch("/api/poems?all=1&limit=100&sort=views").then((r) => r.json()),
@@ -61,6 +81,7 @@ export default function HomepageManager() {
           ...heroFields,
           ...featured,
           homeSections: JSON.stringify(sections),
+          navLinks: JSON.stringify(navItems),
         }),
       });
       if (res.ok) toast({ title: "ہوم پیج ترتیبات محفوظ ہو گئیں", description: "تبدیلیاں فوراً عوامی سائٹ پر نظر آئیں گی۔" });
@@ -102,6 +123,22 @@ export default function HomepageManager() {
     next[idx] = { ...next[idx], visible: !next[idx].visible };
     setSections(next);
   };
+
+  // nav editor helpers
+  const moveNav = (idx: number, dir: -1 | 1) => {
+    const next = [...navItems];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    setNavItems(next);
+  };
+  const patchNav = (idx: number, patch: Partial<NavItem>) => {
+    const next = [...navItems];
+    next[idx] = { ...next[idx], ...patch };
+    setNavItems(next);
+  };
+  const removeNav = (idx: number) => setNavItems(navItems.filter((_, i) => i !== idx));
+  const addNav = () => setNavItems([...navItems, { label: "نیا لنک", href: "/", visible: true }]);
 
   if (settings === null) {
     return <div><AdminPageHeader title="ہوم پیج مینجمنٹ" /><Skeleton className="h-96 rounded-xl" /></div>;
@@ -235,6 +272,40 @@ export default function HomepageManager() {
         <p className="mt-3 text-xs font-naskh text-muted-foreground">
           چھوٹا نمبر اوپر دکھایا جاتا ہے۔ آنکھ کے نشان سے سیکشن چھپائیں یا دکھائیں — ہوم پیج فوراً اپ ڈیٹ ہو جاتا ہے۔
         </p>
+      </div>
+
+      {/* navigation menu editor (spec Part 2.4) */}
+      <div className="manuscript-frame mt-6 rounded-xl bg-card p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-nastaliq-tight text-xl text-primary">نیویگیشن مینو — ترتیب، لیبل، نمائش</h2>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="border-gold/40 font-naskh" onClick={addNav}>+ نیا لنک شامل کریں</Button>
+            <Button variant="outline" size="sm" className="border-gold/40 font-naskh" onClick={() => setNavItems(DEFAULT_NAV)}>ڈیفالٹ پر واپس</Button>
+          </div>
+        </div>
+        <p className="mb-3 text-xs font-naskh leading-6 text-muted-foreground">
+          پہلے 6 نظر آنے والے لنک اوپر والی پٹی میں دکھائے جاتے ہیں، باقی ’’مزید‘‘ مینو میں۔ لیبل یا لنک بدل کر «سب محفوظ کریں» دبائیں۔
+        </p>
+        <ul className="space-y-2">
+          {navItems.map((n, idx) => (
+            <li key={idx} className={cn(
+              "flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2",
+              n.visible ? "border-gold/30 bg-accent/30" : "border-dashed border-gold/30 bg-muted/40 opacity-60"
+            )}>
+              <span className="w-6 shrink-0 text-center font-latin text-xs text-muted-foreground" dir="ltr">{idx + 1}</span>
+              <Input value={n.label} onChange={(e) => patchNav(idx, { label: e.target.value })} className="h-9 w-36 flex-1 font-naskh text-sm" aria-label="لیبل" />
+              <Input value={n.href} onChange={(e) => patchNav(idx, { href: e.target.value })} dir="ltr" className="h-9 w-40 flex-1 font-latin text-sm" aria-label="لنک" />
+              <span className="flex shrink-0 items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveNav(idx, -1)} aria-label="اوپر"><ArrowUp className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveNav(idx, 1)} aria-label="نیچے"><ArrowDown className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => patchNav(idx, { visible: !n.visible })} aria-label="نمائش">
+                  {n.visible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeNav(idx)} aria-label="حذف کریں">✕</Button>
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

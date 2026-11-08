@@ -23,8 +23,11 @@ model User {
   permissions        String    @default("*") // admin module keys CSV or "*" (all)
   lastLoginAt        DateTime?
   mustChangePassword Boolean   @default(false)
-  resetToken         String?
+  resetToken         String?   // password reset: sha256(OTP) before verify, one-time ticket after verify
   resetTokenExpiry   DateTime?
+  resetAttempts      Int       @default(0)     // wrong OTP attempts for the current code (max 5)
+  resetRequestedAt   DateTime? // last reset-code request (rate limiting)
+  socials            String?   // user social links (one URL per line)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   poems              Poem[]

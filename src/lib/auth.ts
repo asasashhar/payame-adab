@@ -57,6 +57,8 @@ export type SessionUser = {
   status: string;
   emailVerified?: boolean;
   permissions?: string;
+  mustChangePassword?: boolean;
+  socials?: string | null;
 };
 
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -75,13 +77,14 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   }
 }
 
-export async function setSessionCookie(userId: string) {
+export async function setSessionCookie(userId: string, remember = false) {
   const store = await cookies();
   store.set(COOKIE, createToken(userId), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: MAX_AGE,
+    // "remember me" → persistent 30-day cookie, otherwise a browser-session cookie
+    ...(remember ? { maxAge: MAX_AGE } : {}),
   });
 }
 

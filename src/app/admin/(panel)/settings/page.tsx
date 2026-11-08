@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Save, Globe, Share2, Link2, ToggleLeft, Tags, Search, DatabaseBackup, Download, Trash2 } from "lucide-react";
+import { Loader2, Save, Globe, Share2, Link2, ToggleLeft, Tags, Search, DatabaseBackup, Download, Trash2, FilePlus2 } from "lucide-react";
 
 const FIELDS: { key: string; label: string; type?: "text" | "textarea"; full?: boolean }[] = [
   { key: "siteName", label: "سائٹ کا نام (اردو)" },
@@ -49,6 +49,7 @@ export default function AdminSettingsPage() {
   const [values, setValues] = useState<Record<string, string> | null>(null);
   const [saving, setSaving] = useState(false);
   const [social, setSocial] = useState<{ platform: string; url: string }[]>([]);
+  const [pages, setPages] = useState<{ slug: string; title: string; content: string; visible: boolean }[]>([]);
   const [backups, setBackups] = useState<{ name: string; size: number; createdAt: string }[]>([]);
   const [bkBusy, setBkBusy] = useState(false);
 
@@ -64,6 +65,10 @@ export default function AdminSettingsPage() {
     fetch("/api/settings").then((r) => r.json()).then((d) => {
       setValues(d);
       try { setSocial(JSON.parse(d.socialLinks ?? "[]")); } catch { setSocial([]); }
+      try {
+        const p = JSON.parse(d.customPages ?? "[]");
+        if (Array.isArray(p)) setPages(p);
+      } catch { setPages([]); }
     });
     loadBackups();
   }, []);
@@ -95,7 +100,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, socialLinks: JSON.stringify(social) }),
+        body: JSON.stringify({ ...values, socialLinks: JSON.stringify(social), customPages: JSON.stringify(pages) }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -225,6 +230,67 @@ export default function AdminSettingsPage() {
               ))}
               <Button variant="outline" size="sm" className="gap-1.5 border-gold/40 font-naskh" onClick={() => setSocial([...social, { platform: "", url: "" }])}>
                 <Link2 className="h-4 w-4" /> نیا لنک شامل کریں
+              </Button>
+            </div>
+          </section>
+
+          {/* custom pages (spec Part 2.4) */}
+          <section className="rounded-xl border border-gold/25 bg-card p-6">
+            <h2 className="mb-1 flex items-center gap-2 font-nastaliq-tight text-xl text-primary"><FilePlus2 className="h-5 w-5 text-gold" /> صفحات کا انتظام — نئے صفحے بنائیں</h2>
+            <p className="mb-4 font-naskh text-xs leading-6 text-muted-foreground">
+              یہاں بنائے گئے صفحے /p/<span dir="ltr">slug</span> پر عام قارئین کے لیے کھل جاتے ہیں۔ لنک نیویگیشن مینو میں «نیا لنک شامل کریں» سے لگائیں۔
+            </p>
+            <div className="space-y-3">
+              {pages.length === 0 && (
+                <p className="font-naskh text-sm text-muted-foreground">ابھی کوئی اضافی صفحہ نہیں بنا۔</p>
+              )}
+              {pages.map((p, i) => (
+                <div key={i} className="rounded-lg border border-gold/30 bg-accent/20 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input
+                      value={p.title}
+                      onChange={(e) => setPages(pages.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))}
+                      placeholder="صفحے کا عنوان"
+                      className="w-56 font-naskh"
+                    />
+                    <div className="flex items-center gap-1 rounded-md border border-gold/40 bg-card px-2" dir="ltr">
+                      <span className="font-latin text-xs text-muted-foreground">/p/</span>
+                      <Input
+                        value={p.slug}
+                        onChange={(e) => setPages(pages.map((x, j) => (j === i ? { ...x, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") } : x)))}
+                        placeholder="my-page"
+                        className="h-9 w-36 border-0 font-latin text-sm shadow-none focus-visible:ring-0"
+                      />
+                    </div>
+                    <label className="flex cursor-pointer items-center gap-1.5 font-naskh text-sm text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={p.visible}
+                        onChange={(e) => setPages(pages.map((x, j) => (j === i ? { ...x, visible: e.target.checked } : x)))}
+                        className="h-4 w-4 accent-[#06422a]"
+                      />
+                      نظر آئے
+                    </label>
+                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-[#fbe4e4]" onClick={() => setPages(pages.filter((_, j) => j !== i))}>
+                      حذف
+                    </Button>
+                  </div>
+                  <textarea
+                    value={p.content}
+                    onChange={(e) => setPages(pages.map((x, j) => (j === i ? { ...x, content: e.target.value } : x)))}
+                    rows={4}
+                    className="mt-2 w-full rounded-md border border-input bg-card px-3 py-2 font-naskh leading-7 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    placeholder="صفحے کا مواد یہاں لکھیں (خالی سطر = نیا پیراگراف)…"
+                  />
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 border-gold/40 font-naskh"
+                onClick={() => setPages([...pages, { slug: `page-${pages.length + 1}`, title: "نیا صفحہ", content: "", visible: true }])}
+              >
+                <FilePlus2 className="h-4 w-4" /> نیا صفحہ شامل کریں
               </Button>
             </div>
           </section>

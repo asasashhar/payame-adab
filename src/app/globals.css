@@ -203,11 +203,19 @@
   user-select: none;
 }
 
-/* ---------- content typography for poems/articles ---------- */
+/* ---------- content typography for poems/articles (per-area admin font) ---------- */
 .literary-content {
-  font-family: var(--font-urdu-body, "Noto Nastaliq Urdu", serif);
+  font-family: var(--font-urdu-poetry, var(--font-urdu-body, "Noto Nastaliq Urdu", serif));
   font-size: calc(var(--font-urdu-body-size, 17px) * 1.06);
   line-height: calc(var(--font-urdu-line-height, 2.6) * 1.13);
+}
+/* navigation + buttons (per-area admin font) */
+.font-nav {
+  font-family: var(--font-urdu-nav, var(--font-urdu-body, "Noto Nastaliq Urdu", serif));
+}
+/* digital book reading view (per-area admin font) */
+.font-reader {
+  font-family: var(--font-urdu-reader, var(--font-urdu-body, "Noto Nastaliq Urdu", serif));
 }
 .literary-content .couplet {
   margin-bottom: 1.1rem;

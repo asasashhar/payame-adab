@@ -1,28 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { SectionHeading } from "@/components/site/section-heading";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/site/cards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { PenLine, Loader2, Eye, MessageSquareWarning, MailWarning, Send } from "lucide-react";
+import {
+  PenLine, Loader2, Eye, EyeOff, MessageSquareWarning, MailWarning, Send,
+  UserRound, ShieldCheck, Heart, BookOpenText,
+} from "lucide-react";
 
 type Work = {
   id: string; title: string; status: string; feedback: string | null;
   category: string; views: number; createdAt: string;
 };
-type Me = { id: string; name: string; penName: string | null; emailVerified?: boolean } | null;
+type Me = {
+  id: string; name: string; penName: string | null; emailVerified?: boolean;
+  bio?: string | null; photoUrl?: string | null; socials?: string | null;
+} | null;
+
+type Tab = "works" | "profile" | "security" | "liked";
 
 export default function DashboardPage() {
   const [me, setMe] = useState<Me>(null);
   const [poems, setPoems] = useState<Work[] | null>(null);
   const [articles, setArticles] = useState<Work[] | null>(null);
   const [resending, setResending] = useState(false);
+  const [tab, setTab] = useState<Tab>("works");
   const router = useRouter();
 
   useEffect(() => {
@@ -71,12 +82,12 @@ export default function DashboardPage() {
           </Link>
           <StatusBadge status={w.status} />
         </div>
-        <p className="mt-0.5 text-xs font-naskh text-muted-foreground">
+        <p className="mt-0.5 text-[13px] font-naskh text-muted-foreground">
           {w.category} · <span className="font-latin">{new Date(w.createdAt).toLocaleDateString("en-GB")}</span>
           {w.status === "PUBLISHED" && ` · ${w.views} مطالعے`}
         </p>
         {w.feedback && (
-          <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[#fbf5e2] px-3 py-2 text-xs leading-6 font-naskh text-[#7a5c14]">
+          <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-[#fbf5e2] px-3 py-2 text-[13px] leading-6 font-naskh text-[#7a5c14]">
             <MessageSquareWarning className="mt-0.5 h-4 w-4 shrink-0" /> ادارتی پیغام: {w.feedback}
           </p>
         )}
@@ -93,6 +104,13 @@ export default function DashboardPage() {
       )}
     </div>
   );
+
+  const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: "works", label: "میری تحریریں", icon: <BookOpenText className="h-4 w-4" /> },
+    { key: "profile", label: "پروفائل", icon: <UserRound className="h-4 w-4" /> },
+    { key: "security", label: "سیکیورٹی", icon: <ShieldCheck className="h-4 w-4" /> },
+    { key: "liked", label: "پسندیدہ", icon: <Heart className="h-4 w-4" /> },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -133,32 +151,281 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mb-6 text-center">
-            <Button asChild className="gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
-              <Link href="/submit"><PenLine className="h-4.5 w-4.5" /> نئی تحریر بھیجیں</Link>
-            </Button>
+          {/* ---- tabs ---- */}
+          <div className="mb-6 flex flex-wrap gap-2">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 font-naskh text-[14px] transition-colors ${
+                  tab === t.key
+                    ? "border-emerald-deep bg-emerald-deep text-[#f3ead2]"
+                    : "border-gold/40 bg-card text-primary hover:bg-accent"
+                }`}
+              >
+                {t.icon} {t.label}
+              </button>
+            ))}
           </div>
 
-          <section className="mb-8">
-            <h2 className="mb-4 font-nastaliq-tight text-2xl text-primary">شاعری</h2>
-            {poems.length === 0 ? (
-              <SkeletonRow label="ابھی کوئی شاعری بھیجی نہیں گئی" />
-            ) : (
-              <div className="space-y-3">{poems.map((p) => <WorkRow key={p.id} w={p} type="poem" />)}</div>
-            )}
-          </section>
+          {tab === "works" && (
+            <>
+              <div className="mb-6 text-center">
+                <Button asChild className="gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
+                  <Link href="/submit"><PenLine className="h-4.5 w-4.5" /> نئی تحریر بھیجیں</Link>
+                </Button>
+              </div>
+              <section className="mb-8">
+                <h2 className="mb-4 font-nastaliq-tight text-2xl text-primary">شاعری</h2>
+                {poems.length === 0 ? (
+                  <SkeletonRow label="ابھی کوئی شاعری بھیجی نہیں گئی" />
+                ) : (
+                  <div className="space-y-3">{poems.map((p) => <WorkRow key={p.id} w={p} type="poem" />)}</div>
+                )}
+              </section>
+              <section>
+                <h2 className="mb-4 font-nastaliq-tight text-2xl text-primary">مضامین</h2>
+                {articles.length === 0 ? (
+                  <SkeletonRow label="ابھی کوئی مضمون بھیجا نہیں گیا" />
+                ) : (
+                  <div className="space-y-3">{articles.map((a) => <WorkRow key={a.id} w={a} type="article" />)}</div>
+                )}
+              </section>
+            </>
+          )}
 
-          <section>
-            <h2 className="mb-4 font-nastaliq-tight text-2xl text-primary">مضامین</h2>
-            {articles.length === 0 ? (
-              <SkeletonRow label="ابھی کوئی مضمون بھیجا نہیں گیا" />
-            ) : (
-              <div className="space-y-3">{articles.map((a) => <WorkRow key={a.id} w={a} type="article" />)}</div>
-            )}
-          </section>
+          {tab === "profile" && <ProfileTab me={me} onSaved={(m) => setMe(m)} />}
+          {tab === "security" && <SecurityTab />}
+          {tab === "liked" && <LikedTab />}
         </div>
       </main>
       <SiteFooter />
+    </div>
+  );
+}
+
+/* ---------------- profile tab ---------------- */
+function ProfileTab({ me, onSaved }: { me: NonNullable<Me>; onSaved: (m: Me) => void }) {
+  const [form, setForm] = useState({ name: me.name, penName: me.penName ?? "", bio: me.bio ?? "", socials: me.socials ?? "" });
+  const [photoUrl, setPhotoUrl] = useState(me.photoUrl ?? "");
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const uploadPhoto = async (file: File) => {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) setPhotoUrl(data.url);
+      else toast({ title: "تصویر اپلوڈ نہیں ہو سکی", description: data.error, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, photoUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: "محفوظ نہیں ہو سکا", description: data.error, variant: "destructive" });
+        return;
+      }
+      onSaved(data);
+      toast({ title: "پروفائل محفوظ ہو گئی" });
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={save} className="manuscript-frame space-y-5 rounded-xl bg-card p-6 md:p-8">
+      <h2 className="font-nastaliq-tight text-xl text-primary">پروفائل کی ترتیبات</h2>
+      <div className="flex flex-wrap items-center gap-4">
+        {photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photoUrl} alt="پروفائل" className="h-20 w-20 rounded-full border-2 border-gold/50 object-cover" />
+        ) : (
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-gold/40 bg-accent/50 font-nastaliq-tight text-2xl text-primary">
+            {form.name?.[0] ?? "؟"}
+          </div>
+        )}
+        <div>
+          <Label className="mb-1.5 block font-naskh text-[14px]">پروفائل تصویر</Label>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); }}
+            className="block cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm font-naskh text-muted-foreground file:me-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:font-naskh file:text-foreground"
+          />
+          {uploading && <p className="mt-1 flex items-center gap-1.5 text-xs font-naskh text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> اپلوڈ ہو رہی ہے…</p>}
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label className="font-naskh text-[15px]">اصل نام</Label>
+          <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 font-naskh" />
+        </div>
+        <div className="space-y-2">
+          <Label className="font-naskh text-[15px]">قلمی نام (تخلص)</Label>
+          <Input value={form.penName} onChange={(e) => setForm({ ...form, penName: e.target.value })} className="h-11 font-nastaliq-tight text-lg" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">تعارف (سوانح)</Label>
+        <textarea
+          value={form.bio}
+          onChange={(e) => setForm({ ...form, bio: e.target.value })}
+          rows={4}
+          className="w-full rounded-md border border-input bg-card px-3 py-2 font-naskh leading-7 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          placeholder="اپنے ادبی تعارف کے چند جملے…"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">سوشل میڈیا روابط</Label>
+        <textarea
+          value={form.socials}
+          onChange={(e) => setForm({ ...form, socials: e.target.value })}
+          rows={3}
+          dir="ltr"
+          className="w-full rounded-md border border-input bg-card px-3 py-2 text-left font-latin text-sm leading-7 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          placeholder={"https://facebook.com/…\nhttps://instagram.com/…\nhttps://youtube.com/…"}
+        />
+        <p className="text-xs font-naskh text-muted-foreground">ہر لنک ایک سطر میں لکھیں — یہ روابط آپ کی عوامی پروفائل پر دکھائے جائیں گے۔</p>
+      </div>
+      <Button type="submit" disabled={busy} className="h-11 w-full bg-primary font-naskh text-[15px] hover:bg-emerald-deep md:w-auto">
+        {busy && <Loader2 className="h-4 w-4 animate-spin" />} پروفائل محفوظ کریں
+      </Button>
+    </form>
+  );
+}
+
+/* ---------------- security tab ---------------- */
+function SecurityTab() {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (next.length < 8 || !/[A-Za-z]/.test(next) || !/[0-9]/.test(next)) {
+      toast({ title: "پاس ورڈ کمزور ہے", description: "کم از کم 8 حروف، ایک حرف اور ایک عدد ضروری ہے", variant: "destructive" });
+      return;
+    }
+    if (next !== confirm) {
+      toast({ title: "پاس ورڈ مطابقت نہیں رکھتے", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: current, newPassword: next }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: "پاس ورڈ تبدیل نہیں ہو سکا", description: data.error, variant: "destructive" });
+        return;
+      }
+      toast({ title: "پاس ورڈ تبدیل ہو گیا", description: "تصدیقی ای میل بھی بھیج دی گئی ہے" });
+      setCurrent(""); setNext(""); setConfirm("");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={save} className="manuscript-frame space-y-5 rounded-xl bg-card p-6 md:p-8">
+      <h2 className="font-nastaliq-tight text-xl text-primary">پاس ورڈ تبدیل کریں</h2>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">موجودہ پاس ورڈ</Label>
+        <Input required type={show ? "text" : "password"} dir="ltr" value={current} onChange={(e) => setCurrent(e.target.value)} className="h-11 text-left font-latin" />
+      </div>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">نیا پاس ورڈ</Label>
+        <div className="relative">
+          <Input required type={show ? "text" : "password"} dir="ltr" value={next} onChange={(e) => setNext(e.target.value)} className="h-11 pe-11 text-left font-latin" />
+          <button type="button" onClick={() => setShow((v) => !v)} aria-label="پاس ورڈ دکھائیں/چھپائیں" className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
+            {show ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+          </button>
+        </div>
+        <p className="text-xs font-naskh text-muted-foreground">کم از کم 8 حروف، ایک حرف اور ایک عدد۔</p>
+      </div>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">نئے پاس ورڈ کی تصدیق</Label>
+        <Input required type={show ? "text" : "password"} dir="ltr" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={`h-11 text-left font-latin ${confirm && confirm !== next ? "border-destructive" : ""}`} />
+      </div>
+      <Button type="submit" disabled={busy} className="h-11 w-full bg-primary font-naskh text-[15px] hover:bg-emerald-deep md:w-auto">
+        {busy && <Loader2 className="h-4 w-4 animate-spin" />} پاس ورڈ تبدیل کریں
+      </Button>
+    </form>
+  );
+}
+
+/* ---------------- liked tab ---------------- */
+function LikedTab() {
+  const [data, setData] = useState<{ poems: Work[]; articles: Work[] } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/likes?mine=1")
+      .then((r) => r.json())
+      .then((d) => (d?.error ? setData({ poems: [], articles: [] }) : setData(d)))
+      .catch(() => setData({ poems: [], articles: [] }));
+  }, []);
+
+  if (!data) return <Skeleton className="h-40 w-full" />;
+  const total = data.poems.length + data.articles.length;
+
+  return (
+    <div className="manuscript-frame rounded-xl bg-card p-6 md:p-8">
+      <h2 className="mb-4 font-nastaliq-tight text-xl text-primary">میری پسندیدہ تحریریں</h2>
+      {total === 0 ? (
+        <SkeletonRow label="ابھی کسی تحریر کو پسند نہیں کیا گیا — شاعری یا مضمون پڑھ کر ❤️ پر کلک کریں" />
+      ) : (
+        <div className="space-y-6">
+          {data.poems.length > 0 && (
+            <section>
+              <h3 className="mb-3 font-nastaliq-tight text-lg text-[#8a6d1a]">شاعری</h3>
+              <div className="space-y-2">
+                {data.poems.map((p) => (
+                  <Link key={p.id} href={`/poetry/${p.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gold/25 bg-accent/30 px-4 py-2.5 font-nastaliq-tight text-lg leading-8 hover:border-gold/50">
+                    <span>{p.title}</span>
+                    <span className="shrink-0 font-naskh text-xs text-muted-foreground">{p.category} · <Heart className="inline h-3.5 w-3.5" /> {p.views}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          {data.articles.length > 0 && (
+            <section>
+              <h3 className="mb-3 font-nastaliq-tight text-lg text-[#8a6d1a]">مضامین</h3>
+              <div className="space-y-2">
+                {data.articles.map((a) => (
+                  <Link key={a.id} href={`/articles/${a.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-gold/25 bg-accent/30 px-4 py-2.5 font-nastaliq-tight text-lg leading-8 hover:border-gold/50">
+                    <span>{a.title}</span>
+                    <span className="shrink-0 font-naskh text-xs text-muted-foreground">{a.category} · <Eye className="inline h-3.5 w-3.5" /> {a.views}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   );
 }

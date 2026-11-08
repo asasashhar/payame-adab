@@ -472,6 +472,27 @@ export default function AppearancePage() {
               </select>
             </div>
 
+            {/* per-area fonts (spec Part 2.3) */}
+            {([
+              ["fontPoetry", "شاعری و تحریر کا فونٹ (ادبی صفحات)"],
+              ["fontNav", "نیویگیشن و بٹن کا فونٹ"],
+              ["fontReader", "کتاب مطالعہ کا فونٹ (ڈیجیٹل ریڈر)"],
+            ] as const).map(([key, label]) => (
+              <div key={key} className="space-y-1.5">
+                <Label className="font-naskh">{label}</Label>
+                <select
+                  value={s[key] ?? ""}
+                  onChange={(e) => set(key, e.target.value)}
+                  className="h-11 w-full rounded-md border border-gold/40 bg-card px-3 font-naskh text-sm"
+                >
+                  <option value="">(متن کے فونٹ کے مطابق — default)</option>
+                  {URDU_FONTS.filter((f) => f.available).map((f) => (
+                    <option key={f.id} value={f.id}>{f.name} — {f.urdu}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="space-y-1.5">
                 <Label className="font-naskh">متن سائز (px)</Label>
@@ -491,7 +512,7 @@ export default function AppearancePage() {
               </div>
             </div>
 
-            <Button onClick={() => save(["fontBody", "fontHeading", "fontBodySize", "fontHeadingSize", "fontLineHeight", "fontScale"], "fonts")} disabled={saving === "fonts"} className="gap-2 bg-primary font-naskh hover:bg-emerald-deep">
+            <Button onClick={() => save(["fontBody", "fontHeading", "fontPoetry", "fontNav", "fontReader", "fontBodySize", "fontHeadingSize", "fontLineHeight", "fontScale"], "fonts")} disabled={saving === "fonts"} className="gap-2 bg-primary font-naskh hover:bg-emerald-deep">
               {saving === "fonts" && <Loader2 className="h-4 w-4 animate-spin" />} فونٹ ترتیبات محفوظ کریں
             </Button>
             <p className="text-xs font-naskh leading-6 text-muted-foreground">

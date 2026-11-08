@@ -14,6 +14,20 @@ export async function POST(
 ) {
   const { action } = await ctx.params;
 
+  /** Shared password-strength rule (self-service passwords only):
+   *  at least 8 characters with at least one letter and one digit.
+   *  Admin-initial passwords (e.g. darulhuda) are set through the admins API
+   *  but force a change on first login, which enforces this rule. */
+  const passwordProblem = (pw: string): string | null => {
+    if (pw.length < 8) return "پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے";
+    if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw))
+      return "پاس ورڈ میں کم از کم ایک حرف اور ایک عدد ضروری ہے";
+    return null;
+  };
+
+  const sha256 = (v: string) => crypto.createHash("sha256").update(v).digest("hex");
+  const sixDigitCode = () => String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
+
   if (action === "register") {
     try {
       const body = (await req.json()) as Record<string, string>;
@@ -23,8 +37,8 @@ export async function POST(
       if (!email || !password || !name) {
         return NextResponse.json({ error: "نام، ای میل اور پاس ورڈ ضروری ہیں" }, { status: 400 });
       }
-      if (password.length < 6) {
-        return NextResponse.json({ error: "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے" }, { status: 400 });
+      if (passwordProblem(password)) {
+        return NextResponse.json({ error: passwordProblem(password) }, { status: 400 });
       }
       const exists = await db.user.findUnique({ where: { email } });
       if (exists) {
@@ -39,13 +53,22 @@ export async function POST(
           name,
           passwordHash: hashPassword(password),
           penName: body.penName?.trim() || null,
+          bio: body.bio?.trim() || null,
           emailVerified: !requireVerification,
           verifyToken,
           verifyTokenExpiry: verifyToken ? new Date(Date.now() + 48 * 60 * 60 * 1000) : null,
         },
       });
+      // account-registration confirmation (always) + verification link when required
+      const base = siteUrlFrom(req, settings);
+      await queueMail({
+        kind: "WELCOME",
+        to: email,
+        data: { authorName: name, title: "", url: `${base}/dashboard` },
+        relatedType: "user",
+        relatedId: user.id,
+      });
       if (verifyToken) {
-        const base = siteUrlFrom(req, settings);
         await queueMail({
           kind: "VERIFY",
           to: email,
@@ -78,7 +101,7 @@ export async function POST(
         where: { id: user.id },
         data: { lastLoginAt: new Date() },
       });
-      await setSessionCookie(user.id);
+      await setSessionCookie(user.id, body.remember === "1" || body.remember === "true");
       const { passwordHash: _p, ...safe } = user;
       return NextResponse.json(safe);
     } catch (e) {
@@ -128,13 +151,14 @@ export async function POST(
       if (!row || !verifyPassword(current, row.passwordHash)) {
         return NextResponse.json({ error: "موجودہ پاس ورڈ غلط ہے" }, { status: 400 });
       }
-      if (next.length < 6) {
-        return NextResponse.json({ error: "نیا پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے" }, { status: 400 });
+      if (passwordProblem(next)) {
+        return NextResponse.json({ error: passwordProblem(next) }, { status: 400 });
       }
       await db.user.update({
         where: { id: user.id },
-        data: { passwordHash: hashPassword(next), mustChangePassword: false, resetToken: null, resetTokenExpiry: null },
+        data: { passwordHash: hashPassword(next), mustChangePassword: false, resetToken: null, resetTokenExpiry: null, resetAttempts: 0 },
       });
+      await queueMail({ kind: "PASSWORD_CHANGED", to: user.email, data: { authorName: user.name, title: "" }, relatedType: "user", relatedId: user.id });
       await logActivity("password-change", user.email, user.email);
       return NextResponse.json({ ok: true });
     } catch (e) {
@@ -192,27 +216,45 @@ export async function POST(
     }
   }
 
-  // public password-recovery request: queues a token valid 30 minutes and
-  // emails the reset link through the configured mail service.
+  // ---- password recovery (OTP flow, spec Part 5) ----
+  // Step 1-2: request a 6-digit code. The code is stored only as a SHA-256
+  // hash, expires in 15 minutes, invalidates any previous code, and requests
+  // are rate-limited (1/min and max 3/hour per email). The response is always
+  // generic so it never reveals whether the email is registered.
   if (action === "request-reset") {
     try {
       const body = (await req.json()) as Record<string, string>;
       const email = (body.email ?? "").trim().toLowerCase();
-      const generic = { ok: true, message: "اگر یہ ای میل درج ہے تو بازیابی کی درخواست موصول ہو گئی ہے۔ براہ کرم ایڈمنسٹریٹر سے رابطہ کریں۔" };
+      const generic = { ok: true, message: "اگر یہ ای میل رجسٹرڈ ہے تو تصدیقی کوڈ آپ کے ای میل پر بھیج دیا گیا ہے۔ براہ کرم اپنا ان باکس (اور اسپام فولڈر) چیک کریں۔" };
       if (!email) return NextResponse.json(generic);
       const user = await db.user.findUnique({ where: { email } });
       if (user) {
-        const token = crypto.randomBytes(24).toString("hex");
+        // rate limiting: max 1 request per minute, max 3 per rolling hour
+        const last = user.resetRequestedAt?.getTime() ?? 0;
+        if (Date.now() - last < 60_000) {
+          return NextResponse.json({ error: "بار بار درخواست نہ کریں — براہ کرم ایک منٹ بعد دوبارہ کوشش کریں۔" }, { status: 429 });
+        }
+        const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const recent = await db.activityLog.count({
+          where: { action: "reset-request", actorEmail: email, createdAt: { gt: hourAgo } },
+        });
+        if (recent >= 3) {
+          return NextResponse.json({ error: "ایک گھنٹے میں زیادہ سے زیادہ تین درخواستیں ممکن ہیں — تھوڑی دیر بعد کوشش کریں۔" }, { status: 429 });
+        }
+        const code = sixDigitCode();
         await db.user.update({
           where: { id: user.id },
-          data: { resetToken: token, resetTokenExpiry: new Date(Date.now() + 30 * 60 * 1000) },
+          data: {
+            resetToken: sha256(code),          // store only the hash of the code
+            resetTokenExpiry: new Date(Date.now() + 15 * 60 * 1000),
+            resetAttempts: 0,                   // new code → fresh attempt budget
+            resetRequestedAt: new Date(),       // invalidates older codes by overwrite
+          },
         });
-        const settings = await getSettings();
-        const base = siteUrlFrom(req, settings);
         await queueMail({
           kind: "RESET",
           to: email,
-          data: { authorName: user.name, title: "", url: `${base}/reset-password?token=${token}` },
+          data: { authorName: user.name, title: "", code },
           relatedType: "user",
           relatedId: user.id,
         });
@@ -224,25 +266,73 @@ export async function POST(
     }
   }
 
-  // consume a reset token and set a new password
+  // Step 3-4: verify the OTP code. On success mints a one-time ticket
+  // (valid 10 minutes) that authorizes exactly one password change.
+  if (action === "verify-reset") {
+    try {
+      const body = (await req.json()) as Record<string, string>;
+      const email = (body.email ?? "").trim().toLowerCase();
+      const code = String(body.code ?? "").trim();
+      const fail = (msg = "کوڈ غلط ہے — دوبارہ کوشش کریں۔", extra: Record<string, unknown> = {}) =>
+        NextResponse.json({ error: msg, ...extra }, { status: 400 });
+      if (!/^\d{6}$/.test(code) || !email) return fail();
+      const user = await db.user.findUnique({ where: { email } });
+      if (!user || !user.resetToken || !user.resetTokenExpiry || user.resetTokenExpiry.getTime() < Date.now()) {
+        return fail("کوڈ میعاد ختم ہو چکی ہے — نیا کوڈ طلب کریں۔");
+      }
+      if (user.resetAttempts >= 5) {
+        return fail("بہت زیادہ غلط کوششیں — براہ کرم نیا کوڈ طلب کریں۔");
+      }
+      if (user.resetToken !== sha256(code)) {
+        const attempts = user.resetAttempts + 1;
+        await db.user.update({ where: { id: user.id }, data: { resetAttempts: attempts } });
+        const left = Math.max(0, 5 - attempts);
+        return fail(
+          left > 0 ? `کوڈ غلط ہے — ${left} کوششیں باقی ہیں۔` : "کوڈ غلط ہے — مزید کوشش ممکن نہیں، نیا کوڈ طلب کریں۔",
+          { attemptsLeft: left }
+        );
+      }
+      // code correct → one-time ticket for the actual reset
+      const ticket = crypto.randomBytes(24).toString("hex");
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          resetToken: ticket,
+          resetTokenExpiry: new Date(Date.now() + 10 * 60 * 1000),
+          resetAttempts: 0,
+        },
+      });
+      await logActivity("reset-verified", email, email);
+      return NextResponse.json({ ok: true, ticket });
+    } catch {
+      return NextResponse.json({ error: "تصدیق میں خرابی" }, { status: 400 });
+    }
+  }
+
+  // Step 5-6: consume the one-time ticket and set the new password.
   if (action === "reset-password") {
     try {
       const body = (await req.json()) as Record<string, string>;
-      const token = String(body.token ?? "");
+      const ticket = String(body.ticket ?? body.token ?? "");
       const password = String(body.password ?? "");
-      if (!token || password.length < 6) {
-        return NextResponse.json({ error: "ٹوکن اور نئی پاس ورڈ (کم از کم 6 حروف) ضروری ہیں" }, { status: 400 });
+      if (!ticket) {
+        return NextResponse.json({ error: "پہلے تصدیقی کوڈ درست کریں" }, { status: 400 });
+      }
+      if (passwordProblem(password)) {
+        return NextResponse.json({ error: passwordProblem(password) }, { status: 400 });
       }
       const user = await db.user.findFirst({
-        where: { resetToken: token, resetTokenExpiry: { gt: new Date() } },
+        where: { resetToken: ticket, resetTokenExpiry: { gt: new Date() } },
       });
       if (!user) {
-        return NextResponse.json({ error: "ٹوکن غلط یا میعاد ختم ہے" }, { status: 400 });
+        return NextResponse.json({ error: "تصدیق کی میعاد ختم ہے — دوبارہ کوڈ طلب کریں" }, { status: 400 });
       }
       await db.user.update({
         where: { id: user.id },
-        data: { passwordHash: hashPassword(password), resetToken: null, resetTokenExpiry: null, mustChangePassword: false },
+        data: { passwordHash: hashPassword(password), resetToken: null, resetTokenExpiry: null, resetAttempts: 0, mustChangePassword: false },
       });
+      // Step 7: confirmation email
+      await queueMail({ kind: "PASSWORD_CHANGED", to: user.email, data: { authorName: user.name, title: "" }, relatedType: "user", relatedId: user.id });
       await logActivity("reset-consumed", user.email, user.email);
       return NextResponse.json({ ok: true });
     } catch (e) {
@@ -278,7 +368,7 @@ export async function PUT(
   try {
     const body = (await req.json()) as Record<string, string>;
     const data: Record<string, string | null> = {};
-    for (const k of ["name", "penName", "bio", "photoUrl"]) {
+    for (const k of ["name", "penName", "bio", "photoUrl", "socials"]) {
       if (k in body) data[k] = body[k]?.trim() || null;
       if (k === "name" && body.name?.trim()) data[k] = body.name.trim();
     }

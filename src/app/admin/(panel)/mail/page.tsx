@@ -33,10 +33,12 @@ type MailData = {
 const KIND_URDU: Record<string, string> = {
   PUBLISHED: "اشاعت کی خوشخبری", APPROVED: "منظوری", REJECTED: "مستردی",
   REVISION: "اصلاح مطلوب", PENDING: "زیرِ جائزہ اطلاع",
-  VERIFY: "ای میل تصدیق", RESET: "پاس ورڈ بازیابی", TEST: "آزمائشی",
+  VERIFY: "ای میل تصدیق", WELCOME: "خوش آمدید (رجسٹریشن)",
+  RESET: "پاس ورڈ بازیابی کا کوڈ", PASSWORD_CHANGED: "پاس ورڈ تبدیلی کی تصدیق",
+  TEST: "آزمائشی",
 };
 
-const TEMPLATE_KINDS = ["PUBLISHED", "APPROVED", "REJECTED", "REVISION", "PENDING", "VERIFY", "RESET"] as const;
+const TEMPLATE_KINDS = ["PUBLISHED", "APPROVED", "REJECTED", "REVISION", "PENDING", "VERIFY", "WELCOME", "RESET", "PASSWORD_CHANGED"] as const;
 
 type TplKind = (typeof TEMPLATE_KINDS)[number];
 

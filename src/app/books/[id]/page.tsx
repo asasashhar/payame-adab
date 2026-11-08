@@ -70,7 +70,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
                 {book.description && (
                   <div className="mt-5 border-t border-gold/25 pt-4">
                     {book.description.split(/\n{2,}/).filter(Boolean).map((para, i) => (
-                      <p key={i} className="literary-content text-justify text-[16px]">{para.trim()}</p>
+                      <p key={i} className="font-reader literary-content text-justify text-[17px]">{para.trim()}</p>
                     ))}
                   </div>
                 )}

@@ -4,7 +4,7 @@ import { getSettings } from "@/lib/site";
 
 export type MailKind =
   | "PUBLISHED" | "APPROVED" | "REJECTED" | "REVISION" | "PENDING"
-  | "VERIFY" | "RESET" | "TEST";
+  | "VERIFY" | "WELCOME" | "RESET" | "PASSWORD_CHANGED" | "TEST";
 
 const SITE_FALLBACK = "پیامِ ادب";
 
@@ -53,6 +53,7 @@ export type MailTemplateData = {
   suggestions?: string; // improvement suggestions
   resubmitAllowed?: boolean;
   url?: string;         // link of the published work / action link
+  code?: string;        // one-time verification code (OTP) — password reset
   siteName?: string;
 };
 
@@ -74,7 +75,7 @@ function inlineBold(t: string): string {
   return t.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
 }
 
-function paragraphsFromTemplate(body: string, data: MailTemplateData, site: string, readLink: string): string {
+function paragraphsFromTemplate(body: string, data: MailTemplateData, site: string, readLink: string, siteUrl: string): string {
   const linkLabel = data.url ? "اپنی تحریر پڑھیں" : "ویب سائٹ کھولیں";
   const name = data.authorName || "عزیز مصنف";
   const title = data.title || "";
@@ -126,7 +127,7 @@ export function renderMail(
   const customSubject = custom?.subject?.trim() || "";
   const customBody = custom?.body?.trim() || "";
   if (customBody) {
-    const filled = paragraphsFromTemplate(customBody, data, site, readLink);
+    const filled = paragraphsFromTemplate(customBody, data, site, readLink, siteUrl);
     const heading = customSubject || "ادارتی اطلاع";
     return {
       subject: customSubject || "پیامِ ادب — ادارتی اطلاع",
@@ -221,14 +222,46 @@ export function renderMail(
       };
     case "RESET":
       return {
-        subject: "پاس ورڈ بازیابی — پیامِ ادب",
+        subject: "پاس ورڈ بازیابی کا کوڈ — پیامِ ادب",
         html: shell(
-          "پاس ورڈ بازیابی",
+          "پاس ورڈ بازیابی کا کوڈ",
           `${p(`محترم <b>${name}</b> صاحب، السلام علیکم!`)}${p(
-            "آپ کی درخواست پر پاس ورڈ بازیابی کا لنک نیچے ہے۔ یہ لنک 30 منٹ کے لیے معتبر ہے۔"
-          )}${data.url ? linkBtn(data.url, "نیا پاس ورڈ مقرر کریں") : ""}${p(
-            "اگر آپ نے یہ درخواست نہیں دی تو اپنا اکاؤنٹ محفوظ سمجھیں اور اس پیغام کو نظر انداز کریں۔"
+            "آپ نے پاس ورڈ بازیابی کی درخواست دی ہے۔ نیچے دیا گیا تصدیقی کوڈ ویب سائٹ پر درج کریں۔ یہ کوڈ 15 منٹ کے لیے معتبر ہے اور صرف ایک بار استعمال ہو سکتا ہے۔"
+          )}${
+            data.code
+              ? `<div style="text-align:center;margin:22px 0;"><div style="display:inline-block;background:${CREAM};border:2px solid ${GOLD};border-radius:14px;padding:14px 34px;"><div style="font-size:13px;color:#6f6a5c;margin-bottom:6px;">تصدیقی کوڈ (OTP)</div><div style="font-size:34px;font-weight:bold;letter-spacing:8px;color:${GREEN};direction:ltr;font-family:monospace;">${data.code}</div></div></div>`
+              : ""
+          }${data.url ? p("متبادل: نیچے دیے گئے بٹن سے بھی آپ سیدھا نیا پاس ورڈ مقرر کر سکتے ہیں۔") : ""}${
+            data.url ? linkBtn(data.url, "نیا پاس ورڈ مقرر کریں") : ""
+          }${p(
+            "اگر آپ نے یہ درخواست نہیں دی تو اپنا اکاؤنٹ محفوظ سمجھیں اور اس پیغام کو نظر انداز کریں۔ سیکیورٹی کے پیشِ نظر یہ کوڈ کسی سے شیئر نہ کریں۔"
           )}`,
+          siteUrl
+        ),
+      };
+    case "WELCOME":
+      return {
+        subject: `${site} میں خوش آمدید!`,
+        html: shell(
+          "خوش آمدید",
+          `${p(`محترم <b>${name}</b> صاحب، السلام علیکم ورحمۃ اللہ وبرکاتہ!`)}${p(
+            `آپ کا اکاؤنٹ <b>${site}</b> پر کامیابی سے بنا دیا گیا ہے۔ اب آپ اپنی شاعری، مضامین اور تحقیقی تحریریں ادارتی جائزے کے لیے بھیج سکتے ہیں اور اپنی ادبی پروفائل بنا سکتے ہیں۔`
+          )}${data.url ? linkBtn(data.url, "اپنا ڈیش بورڈ کھولیں") : ""}${p(
+            "اردو ادب کی خدمت میں آپ کا خوش آمدید — امید ہے آپ کا قلم اس ادبی سفر کا قیمتی اضافہ ہوگا۔"
+          )}${p(`<b>ادارتی ٹیم</b><br/>${site}`)}`,
+          siteUrl
+        ),
+      };
+    case "PASSWORD_CHANGED":
+      return {
+        subject: "آپ کا پاس ورڈ تبدیل کر دیا گیا — پیامِ ادب",
+        html: shell(
+          "پاس ورڈ تبدیل",
+          `${p(`محترم <b>${name}</b> صاحب، السلام علیکم!`)}${p(
+            "آپ کی درخواست پر آپ کا پاس ورڈ کامیابی سے تبدیل کر دیا گیا ہے۔ اب آپ اپنے نئے پاس ورڈ سے لاگ اِن کر سکتے ہیں۔"
+          )}${p(
+            "اگر یہ تبدیلی آپ نے نہیں کی تو فوری طور پر ایڈمنسٹریٹر سے رابطہ کریں اور اپنا اکاؤنٹ محفوظ بنائیں۔"
+          )}${p(`<b>ادارتی ٹیم</b><br/>${site}`)}`,
           siteUrl
         ),
       };

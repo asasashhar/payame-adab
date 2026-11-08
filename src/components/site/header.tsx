@@ -22,6 +22,20 @@ import {
 
 type Me = { id: string; name: string; penName: string | null; role: string; photoUrl: string | null } | null;
 type Social = { platform: string; url: string };
+type NavItem = { label: string; href: string; visible?: boolean };
+
+/** admin-managed menu (navLinks setting); empty → built-in defaults */
+function parseNav(raw: string | undefined): NavItem[] | null {
+  if (!raw) return null;
+  try {
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list) || !list.length) return null;
+    const items = list
+      .filter((x) => x && typeof x.label === "string" && typeof x.href === "string" && x.visible !== false)
+      .map((x) => ({ label: x.label as string, href: x.href as string }));
+    return items.length ? items : null;
+  } catch { return null; }
+}
 
 const NAV = [
   { label: "ہوم", href: "/" },
@@ -55,16 +69,19 @@ const socialIcon = (p: string, cls = "h-3.5 w-3.5") => {
   return <Globe className={cls} />;
 };
 
-function NavLinks({ inSheet = false }: { inSheet?: boolean }) {
+function NavLinks({ inSheet = false, items }: { inSheet?: boolean; items?: NavItem[] | null }) {
   const pathname = usePathname();
+  const source = items ?? [...NAV, ...MORE];
+  const primary = source.slice(0, 6);
+  const rest = source.slice(6);
   return (
     <>
-      {NAV.map((item) => (
+      {primary.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           className={cn(
-            "whitespace-nowrap rounded-md px-3.5 py-1.5 text-[15px] font-naskh transition-colors",
+            "whitespace-nowrap rounded-md px-3.5 py-1.5 text-[15.5px] font-nav transition-colors",
             pathname === item.href
               ? "bg-white/12 text-[#e9c979] font-semibold"
               : "text-[#eee9d8]/85 hover:bg-white/8 hover:text-[#e9c979]",
@@ -75,16 +92,16 @@ function NavLinks({ inSheet = false }: { inSheet?: boolean }) {
         </Link>
       ))}
       <DropdownMenu>
-        <DropdownMenuTrigger className="whitespace-nowrap rounded-md px-3.5 py-1.5 text-[15px] font-naskh text-[#eee9d8]/85 hover:bg-white/8 hover:text-[#e9c979] outline-none data-[state=open]:bg-white/10 data-[state=open]:text-[#e9c979]">
+        <DropdownMenuTrigger className="whitespace-nowrap rounded-md px-3.5 py-1.5 text-[15.5px] font-nav text-[#eee9d8]/85 hover:bg-white/8 hover:text-[#e9c979] outline-none data-[state=open]:bg-white/10 data-[state=open]:text-[#e9c979]">
           <span className="inline-flex items-center gap-1">مزید <ChevronDown className="h-3.5 w-3.5" /></span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          {MORE.map((m) => (
+          {rest.map((m) => (
             <DropdownMenuItem key={m.href} asChild>
-              <Link href={m.href} className="font-naskh text-[15px]">{m.label}</Link>
+              <Link href={m.href} className="font-nav text-[15.5px]">{m.label}</Link>
             </DropdownMenuItem>
           ))}
-          <DropdownMenuSeparator />
+          {rest.length > 0 && <DropdownMenuSeparator />}
           {TOOLS.map((t) => (
             <DropdownMenuItem key={t.href} asChild>
               <Link href={t.href} className="font-naskh text-[15px]">{t.label}</Link>
@@ -123,6 +140,7 @@ export function SiteHeader() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [social, setSocial] = useState<Social[]>([]);
+  const [navItems, setNavItems] = useState<NavItem[] | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -139,6 +157,7 @@ export function SiteHeader() {
           const list: Social[] = JSON.parse(d?.socialLinks ?? "[]");
           setSocial(Array.isArray(list) ? list.slice(0, 5) : []);
         } catch { setSocial([]); }
+        setNavItems(parseNav(d?.navLinks));
       })
       .catch(() => setSocial([]));
   }, [pathname]);
@@ -293,7 +312,7 @@ export function SiteHeader() {
                   <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="تلاش کریں…" className="bg-card pe-8" />
                 </form>
                 <nav className="flex flex-col gap-0.5">
-                  <NavLinks inSheet />
+                  <NavLinks inSheet items={navItems} />
                 </nav>
                 <div className="my-3 border-t border-gold/25" />
                 <div className="flex flex-col gap-0.5">
@@ -331,16 +350,16 @@ export function SiteHeader() {
       {/* ── strip 3 · dark emerald nav bar (mockup style) ── */}
       <div className="border-t border-emerald-ink/60 bg-emerald-ink shadow-sm">
         <div className="mx-auto hidden max-w-7xl items-center gap-1 px-4 py-1.5 lg:flex">
-          <NavLinks />
+          <NavLinks items={navItems} />
         </div>
         {/* mobile: compact quick nav row */}
         <div className="flex items-center gap-1 overflow-x-auto px-3 py-1.5 nice-scroll lg:hidden">
-          {NAV.map((item) => (
+          {(navItems ?? NAV).slice(0, 8).map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "shrink-0 rounded-md px-3 py-1 text-[13px] font-naskh transition-colors",
+                "shrink-0 rounded-md px-3 py-1 text-[13px] font-nav transition-colors",
                 pathname === item.href ? "bg-white/12 text-[#e9c979] font-semibold" : "text-[#eee9d8]/85"
               )}
             >

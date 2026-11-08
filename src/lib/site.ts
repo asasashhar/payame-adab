@@ -53,8 +53,13 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   themePreset: "emerald",
   fontBody: "jameel-noori-nastaleeq",
   fontHeading: "jameel-noori-nastaleeq",
-  fontBodySize: "17",
-  fontHeadingSize: "30",
+  // per-area fonts (empty/default = follow the approved 10-font list)
+  fontPoetry: "",   // literary reading areas (poems/articles content)
+  fontNav: "",      // navigation menu + buttons
+  fontReader: "",   // digital book reading view
+  // readability defaults (spec Part 3.1) — larger base sizes
+  fontBodySize: "18",
+  fontHeadingSize: "32",
   fontLineHeight: "230",
   // custom colors (empty = use the selected theme preset values)
   colorPrimary: "",
@@ -134,6 +139,8 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   socialLinks: "[]",
   navLinks: "",
   footerLinks: "",
+  // admin-created custom pages (spec Part 2.4) — JSON: [{slug,title,content,visible}]
+  customPages: "[]",
 };
 
 /** Every admin-writable setting key (brand + extended). */

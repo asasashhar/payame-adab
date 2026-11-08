@@ -66,17 +66,18 @@ export default async function RootLayout({
     .join("\n");
 
   // selected fonts must be approved AND installed, else fall back cleanly
-  const bodyFont = getFontById(s.fontBody ?? "");
-  const headingFont = getFontById(s.fontHeading ?? "");
-  const bodyStack = bodyFont && installed.has(bodyFont.id)
-    ? `"PFA-${bodyFont.id}", ${FONT_FALLBACK_CHAIN}`
-    : FONT_FALLBACK_CHAIN;
-  const headingStack = headingFont && installed.has(headingFont.id)
-    ? `"PFA-${headingFont.id}", ${FONT_FALLBACK_CHAIN}`
-    : FONT_FALLBACK_CHAIN;
+  const stackFor = (key: string, fallbackKey?: string): string => {
+    const f = getFontById(s[key] ?? s[fallbackKey ?? ""] ?? "");
+    return f && installed.has(f.id) ? `"PFA-${f.id}", ${FONT_FALLBACK_CHAIN}` : FONT_FALLBACK_CHAIN;
+  };
+  const bodyStack = stackFor("fontBody");
+  const headingStack = stackFor("fontHeading");
+  const poetryStack = stackFor("fontPoetry", "fontBody");
+  const navStack = stackFor("fontNav", "fontBody");
+  const readerStack = stackFor("fontReader", "fontBody");
 
-  const bodySize = Math.min(30, Math.max(14, Number(s.fontBodySize ?? 17) || 17));
-  const headingSize = Math.min(64, Math.max(18, Number(s.fontHeadingSize ?? 30) || 30));
+  const bodySize = Math.min(30, Math.max(14, Number(s.fontBodySize ?? 18) || 18));
+  const headingSize = Math.min(64, Math.max(18, Number(s.fontHeadingSize ?? 32) || 32));
   const lineHeight = Math.min(340, Math.max(160, Number(s.fontLineHeight ?? 230) || 230)) / 100;
   // admin-controlled global typography scale (percent, default 112 → noticeably larger)
   const fontScale = Math.min(150, Math.max(85, Number(s.fontScale ?? 112) || 112)) / 100;
@@ -101,7 +102,7 @@ export default async function RootLayout({
   if (cFg) themeVars["--foreground"] = cFg;
   const themeCss = Object.entries(themeVars).map(([k, v]) => `${k}:${v};`).join("");
 
-  const cssVars = `:root:root{--font-urdu-body:${bodyStack};--font-urdu-heading:${headingStack};--font-urdu-body-size:${(bodySize * fontScale).toFixed(1)}px;--font-urdu-heading-size:${(headingSize * fontScale).toFixed(1)}px;--font-urdu-line-height:${lineHeight};--font-scale:${fontScale};${themeCss}}`;
+  const cssVars = `:root:root{--font-urdu-body:${bodyStack};--font-urdu-heading:${headingStack};--font-urdu-poetry:${poetryStack};--font-urdu-nav:${navStack};--font-urdu-reader:${readerStack};--font-urdu-body-size:${(bodySize * fontScale).toFixed(1)}px;--font-urdu-heading-size:${(headingSize * fontScale).toFixed(1)}px;--font-urdu-line-height:${lineHeight};--font-scale:${fontScale};${themeCss}}`;
 
   return (
     <html lang="ur" dir="rtl" suppressHydrationWarning>

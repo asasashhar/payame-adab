@@ -231,3 +231,19 @@ Stage Summary:
 - Git: discovered remote main already at b3ae613 (earlier push succeeded); local was ahead 7 (incl. 4 sandbox UUID auto-sync commits that had accidentally tracked upload/ ~12MB raw uploads)
 - Cleaned: untracked upload/ + gitignore rule; squashed b3ae613..HEAD into single commit 850ea3d (mockup redesign record above); final tree 255 files, no .env/db/upload
 - PUSH BLOCKED AGAIN: fine-grained PAT write test 403 "Resource not accessible by personal access token" (Contents still Read-only); push command ready — needs classic token (repo/public_repo scope) at https://github.com/settings/tokens/new
+
+## Task ID: 10-spec-compliance-audit (2026-11-08 15:30)
+- User supplied the full 15-part English dev spec (admin control, user accounts, Gmail OTP, publishing, analytics, rotation)
+- CRITICAL RECOVERY: latest sandbox recycle wiped db/custom.db AND .next build; entire DB restored from git dangling commit a2f331c (Nov 1 snapshot: 5 users, 17 poems, 7 articles, 16 books, settings); design settings re-applied (themePreset=emerald, designOverride=A, hero text); contactEmail typo fixed
+- Also recovered: src/app/api/upload/route.ts (had vanished from disk; restored from reflog commit 8f8d6f6)
+- OTP password recovery implemented (spec Part 5): 6-digit code, sha256-hashed storage, 15-min expiry, single-use, 5 wrong-attempt limit, 1/min + 3/hour request limits, generic responses, one-time ticket → /reset-password; PASSWORD_CHANGED + WELCOME mail kinds; RESET template shows code box; mail center gained WELCOME/PASSWORD_CHANGED template editors
+- Register page: confirm password, strength rule (8+, letter+digit), bio, optional photo (upload after signup), terms checkbox; backend enforces strength
+- Login: show/hide password + remember-me (30-day vs session cookie, remembered email only)
+- Admin first-login gate: ForceChangePassword blocks panel until initial darulhuda password replaced (sadaemaqbul/payameadab trigger it; verified live)
+- User dashboard rebuilt with 4 tabs: works (existing), profile (name/penName/bio/photo/socials → public profile), security (change password), پسندیدہ (likes mine=1 API)
+- Admin control added: navigation menu editor (navLinks setting: labels/hrefs/order/visibility, 6 primary + rest in مزید, custom links allowed) and custom pages (settings JSON + /p/[slug] public renderer + admin editor in settings page) — Part 2.4
+- Typography (Part 2.3): per-area font settings fontPoetry/fontNav/fontReader (admin selects from 10 approved fonts; empty = follow body), wired via CSS vars into .literary-content, .font-nav (header nav), .font-reader (book reader); readability defaults raised (18/32; DB already 22/40)
+- Fixed latent mailer bug (siteUrl undefined in custom-template path — would crash rendered emails with [لنک])
+- New suite scripts/test-auth-otp.js: 32/32 PASS (strength, welcome mail, remember login, rate limits, wrong attempts, verify, single-use ticket, reset, confirmation mail, change-password, profile+socials, liked list, admin force-change); regression test-upgrade 38/38, test-gaps 30/30 → 100/100 total
+- DB cleaned of all test residue: final 5 users (3 admins, mustChange: sadaeqbal+payameadab true), 17 poems, 7 articles, 16 books, 1 legit mail log
+- Verified visually: register, login, forgot-OTP (wrong-code toast + attempts counted), admin gate, dashboard tabs, homepage (0 JS errors)

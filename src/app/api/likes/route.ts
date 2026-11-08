@@ -22,6 +22,29 @@ async function validResource(type: string, id: string) {
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
+
+  // "mine" — the logged-in user's saved/liked items (personal dashboard)
+  if (sp.get("mine") === "1") {
+    const me = await getSessionUser();
+    if (!me) return NextResponse.json({ error: "لاگ اِن کریں" }, { status: 401 });
+    const likes = await db.like.findMany({
+      where: { userId: me.id },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
+    const poemIds = likes.filter((l) => l.resourceType === "poem").map((l) => l.resourceId);
+    const articleIds = likes.filter((l) => l.resourceType === "article").map((l) => l.resourceId);
+    const [poems, articles] = await Promise.all([
+      poemIds.length
+        ? db.poem.findMany({ where: { id: { in: poemIds }, status: "PUBLISHED" }, select: { id: true, title: true, category: true, views: true } })
+        : Promise.resolve([]),
+      articleIds.length
+        ? db.article.findMany({ where: { id: { in: articleIds }, status: "PUBLISHED" }, select: { id: true, title: true, category: true, views: true } })
+        : Promise.resolve([]),
+    ]);
+    return NextResponse.json({ poems, articles });
+  }
+
   const type = sp.get("resourceType") ?? "";
   const id = sp.get("resourceId") ?? "";
   if (!RESOURCE_PUBLISHED[type] || !id) {
