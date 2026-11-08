@@ -282,3 +282,4 @@ Stage Summary:
 - tsc clean (src), production build OK, standalone server on :3000 (static+public copied in)
 - E2E: test-upgrade 38/38, test-auth-otp 32/32, test-gaps 30/30 → **100/100 PASS** (run twice: dev + standalone)
 - Visual: homepage 4 scroll positions, poetry cards, articles, trio, newspaper, competitions, books grid, footer, admin dashboard (navy sidebar/royal active item), admin login, mobile 390px = 0 overflow, 0 JS/hydration errors
+- Push still blocked: sandbox recycle lost the stored credential (no classic token present); local main = 8c05070 (2 commits ahead of eff568f, fast-forward over remote b3ae613) — needs classic token (repo/public_repo) at https://github.com/settings/tokens/new
