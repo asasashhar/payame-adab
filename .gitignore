@@ -63,4 +63,4 @@ db/backups/
 tool-results/
 
 # local upload staging (raw user uploads, not site content)
-upload/
+/upload/

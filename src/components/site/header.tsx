@@ -183,7 +183,8 @@ export function SiteHeader() {
       {/* ── strip 1 · dark emerald utility bar: date + socials + submit ── */}
       <div className="hidden pattern-emerald text-[#eee9d8] sm:block">
         <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4">
-          <div className="hidden items-center gap-2 sm:flex">
+          <UrduDate />
+          <div className="flex items-center gap-2">
             {shownSocial.map((s) => (
               <a
                 key={s.url}
@@ -196,14 +197,13 @@ export function SiteHeader() {
                 {socialIcon(s.platform)}
               </a>
             ))}
+            <Link
+              href="/submit"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2 py-1 font-naskh transition-colors hover:bg-emerald-ink/60 hover:text-[#e2c57c]"
+            >
+              <PenLine className="h-3.5 w-3.5 text-[#e2c57c]" /> اپنی تحریر بھیجیں
+            </Link>
           </div>
-          <UrduDate />
-          <Link
-            href="/submit"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2 py-1 font-naskh transition-colors hover:bg-emerald-ink/60 hover:text-[#e2c57c]"
-          >
-            <PenLine className="h-3.5 w-3.5 text-[#e2c57c]" /> اپنی تحریر بھیجیں
-          </Link>
         </div>
       </div>
 

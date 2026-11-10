@@ -70,19 +70,29 @@ export function HeroCarousel({
             fetchPriority={i === 0 ? "high" : undefined}
           />
         ))}
-        {/* readability overlay (keeps the emblem visible, darkens for text) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-emerald-ink/95 via-emerald-ink/70 to-emerald-ink/55" />
+        {/* readability overlay (green-reference): soft ivory center wash so the
+            photographic banner stays visible at the edges while the headline
+            sits on a bright middle band, emerald tint top/bottom */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 62% 78% at 50% 46%, rgba(248,241,231,0.94) 0%, rgba(248,241,231,0.82) 38%, rgba(248,241,231,0.30) 68%, rgba(6,66,42,0.30) 100%)",
+          }}
+          aria-hidden
+        />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-emerald-ink/45 to-transparent" aria-hidden />
       </div>
 
       {/* content */}
       <div className="relative mx-auto flex min-h-[380px] max-w-3xl flex-col items-center justify-center px-4 py-14 text-center md:min-h-[470px] md:py-20">
-        <p className="mb-3 inline-block rounded-full border border-gold/50 bg-emerald-ink/50 px-5 py-1 font-naskh text-[13px] text-[#e9c979] backdrop-blur-sm md:text-[15px]">
+        <p className="mb-3 inline-block rounded-full border border-gold/60 bg-[#f8f1e7]/85 px-5 py-1 font-naskh text-[13px] text-emerald-ink shadow-sm backdrop-blur-sm md:text-[15px]">
           {badge}
         </p>
-        <h1 className="font-nastaliq-tight text-[26px] leading-[1.85] text-[#f6f0e0] drop-shadow-sm sm:text-3xl md:text-[42px] md:leading-[1.8]">
+        <h1 className="font-nastaliq-tight text-[26px] leading-[1.85] text-emerald-ink drop-shadow-sm sm:text-3xl md:text-[42px] md:leading-[1.8]">
           {title}
         </h1>
-        <p className="mt-3 max-w-2xl font-naskh text-[14px] leading-8 text-[#e5dfc9]/90 sm:text-[15px] md:text-lg md:leading-9">
+        <p className="mt-3 max-w-2xl font-naskh text-[14px] leading-8 text-[#26221b]/85 sm:text-[15px] md:text-lg md:leading-9">
           {subtitle}
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
@@ -112,7 +122,7 @@ export function HeroCarousel({
                 aria-current={i === active}
                 className={cn(
                   "h-2 rounded-full transition-all duration-300",
-                  i === active ? "w-6 bg-gold" : "w-2 bg-[#e5dfc9]/45 hover:bg-[#e5dfc9]/70"
+                  i === active ? "w-6 bg-gold" : "w-2 bg-emerald-ink/35 hover:bg-emerald-ink/60"
                 )}
               />
             ))}

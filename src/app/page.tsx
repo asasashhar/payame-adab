@@ -144,7 +144,7 @@ export default async function HomePage() {
                 )}
               </div>
 
-              <div className="manuscript-frame relative overflow-hidden rounded-2xl bg-card p-7">
+              <div className="manuscript-frame relative overflow-hidden rounded-2xl border border-gold/30 bg-[#faf3df] p-7">
                 <Feather className="mb-2 h-6 w-6 text-gold" />
                 <div className="absolute end-6 top-6 flex items-center gap-3">
                   <Link href="/dictionary" className="text-sm font-naskh text-gold hover:text-primary">لغت ←</Link>
@@ -152,14 +152,19 @@ export default async function HomePage() {
                 </div>
                 {wordOfDay ? (
                   <div className="mt-10 text-center">
-                    <p className="font-nastaliq-tight text-5xl text-emerald-deep leading-[1.9]">{wordOfDay.word}</p>
+                    <p className="font-nastaliq-tight text-5xl text-[#a8821b] leading-[1.9]">{wordOfDay.word}</p>
                     <p className="mt-2 font-naskh text-lg text-foreground/85">{wordOfDay.meaning}</p>
                     {wordOfDay.englishMeaning && (
                       <p className="mt-1 font-latin text-base text-muted-foreground" dir="ltr">{wordOfDay.englishMeaning}</p>
                     )}
                     {wordOfDay.example && (
-                      <p className="mx-auto mt-4 max-w-md rounded-lg bg-accent px-5 py-3 font-nastaliq text-base leading-8 text-foreground/80">
+                      <p className="mx-auto mt-4 max-w-md rounded-lg bg-[#f3ead2] px-5 py-3 font-nastaliq text-base leading-8 text-foreground/80">
                         مثال: {wordOfDay.example}
+                      </p>
+                    )}
+                    {wordOfDay.date && (
+                      <p className="mt-4 inline-block rounded-tl-lg rounded-tr-lg bg-gold/20 px-4 py-1 text-xs font-naskh text-[#7a5d12]">
+                        {urduDate(wordOfDay.date)}
                       </p>
                     )}
                   </div>

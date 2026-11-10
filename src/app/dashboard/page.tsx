@@ -137,17 +137,17 @@ export default function DashboardPage() {
           )}
 
           <div className="mb-8 grid grid-cols-3 gap-4 text-center">
-            <div className="manuscript-frame rounded-xl bg-card p-5">
-              <p className="font-latin text-3xl font-bold text-emerald-deep">{published}</p>
-              <p className="mt-1 font-naskh text-sm text-muted-foreground">شائع شدہ</p>
+            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#0e5c38] to-[#06422a] p-5 text-[#f3ead2] shadow-sm">
+              <p className="font-latin text-3xl font-bold">{published}</p>
+              <p className="mt-1 font-naskh text-sm text-[#e5dfc9]/85">شائع شدہ</p>
             </div>
-            <div className="manuscript-frame rounded-xl bg-card p-5">
-              <p className="font-latin text-3xl font-bold text-[#8a6d1a]">{pending}</p>
-              <p className="mt-1 font-naskh text-sm text-muted-foreground">زیرِ جائزہ</p>
+            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#8a6d1a] to-[#6d5311] p-5 text-[#f8f1e7] shadow-sm">
+              <p className="font-latin text-3xl font-bold">{pending}</p>
+              <p className="mt-1 font-naskh text-sm text-[#f3ead2]/85">زیرِ جائزہ</p>
             </div>
-            <div className="manuscript-frame rounded-xl bg-card p-5">
-              <p className="font-latin text-3xl font-bold text-primary">{poems.length + articles.length}</p>
-              <p className="mt-1 font-naskh text-sm text-muted-foreground">کل تحریریں</p>
+            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#2a4d8f] to-[#173b70] p-5 text-[#e8eef8] shadow-sm">
+              <p className="font-latin text-3xl font-bold">{poems.length + articles.length}</p>
+              <p className="mt-1 font-naskh text-sm text-[#dce6f5]/85">کل تحریریں</p>
             </div>
           </div>
 

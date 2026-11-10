@@ -119,7 +119,7 @@ export function PoemCard({ poem, badge, showViews = true }: { poem: PoemItem; ba
         </div>
         <Link
           href={`/poetry/${poem.id}`}
-          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 py-1.5 text-[12.5px] font-naskh font-semibold text-[color:var(--accent-text)] transition-colors hover:bg-gold/15"
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary py-1.5 text-[12.5px] font-naskh font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-emerald-deep"
         >
           مزید پڑھیں <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
@@ -168,7 +168,7 @@ export function ArticleCard({ article, badge, showViews = true }: { article: Art
         </div>
         <Link
           href={`/articles/${article.id}`}
-          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gold/40 py-1.5 text-[12.5px] font-naskh font-semibold text-[color:var(--accent-text)] transition-colors hover:bg-gold/15"
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary py-1.5 text-[12.5px] font-naskh font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-emerald-deep"
         >
           مزید پڑھیں <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
@@ -198,7 +198,7 @@ export function BookCard({ book, showViews = true }: { book: BookItem; showViews
             {book.title}
           </h3>
         </Link>
-        <p className="text-[13px] font-naskh text-gold">بہ قلم: {book.author}</p>
+        <p className="text-[13px] font-naskh text-foreground/70">از: {book.author}</p>
         <p className="mt-1.5 flex-1 text-[14px] leading-7 text-foreground/70 font-naskh line-clamp-2">
           {excerptPreview(book.description ?? "", 26)}
         </p>
@@ -258,7 +258,7 @@ export function StatusBadge({ status }: { status: string }) {
     PENDING: "bg-[#fdf3d7] text-[#8a6d1a]",
     REVISION: "bg-[#fde8cf] text-[#9a5b1f]",
     APPROVED: "bg-[#e3f0e6] text-[#2f6d46]",
-    PUBLISHED: "bg-[#24558e]/25 text-[#c9dcf5]",
+    PUBLISHED: "bg-[#0a4c2b]/15 text-[#0a4c2b] font-semibold",
     REJECTED: "bg-[#fbe4e4] text-[#a03333]",
     SCHEDULED: "bg-[#e4ecfb] text-[#2a4d8f]",
     ARCHIVED: "bg-muted text-muted-foreground",
