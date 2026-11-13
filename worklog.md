@@ -313,3 +313,32 @@ Stage Summary:
 - Post-E2E cleanup + fix-admins re-applied; final: 5 users (3 admins darulhuda/mustChange), 16 poems, 7 articles, 8 books, 4 news, 1 competition, 1 edition, 46 settings
 - Visual: homepage (hero/cards/word/trio/footer), books, user dashboard, admin dashboard+sidebar, profile — all match the 4 green reference mockups
 - Push still blocked (fine-grained PAT Contents=Read-only → 403): local main ahead of remote b3ae613, needs classic token (repo/public_repo) at https://github.com/settings/tokens/new
+
+## Task ID: 14-logo-mockup-exact (2026-11-13)
+**User re-uploaded the 4 green reference mockups + the official two-variant logo file (a1658935…jpg: circular badge + horizontal lockup) with: "Make the website look exactly like it is in these photos… and also use the logo at the best location."**
+
+### CRITICAL RECOVERY (sandbox recycle wiped db/custom.db + backup was post-wipe-empty)
+- Recovered DB from dangling commit a2f331c → re-ALTERed User (+socials/+resetAttempts/+resetRequestedAt), apply-green-design re-applied (emerald/override A/hero/contactEmail), demo poem removed, restore-cleanup + fix-admins → documented state (5 users, 16 poems, 7 articles, 8 books, 4 news, 46 settings)
+- REWROTE src/app/api/upload/route.ts — it had NEVER actually been committed (gitignore "upload/" shadowed src/app/api/upload at add-time; 07275bf's stat shows no route). Now truly committed: session-gated, jpg/jpeg/png/webp/gif/svg/pdf allowlist, 10MB cap, public/uploads/<YYYY-MM>/<ts>-<rand>.<ext>, 201 {url}
+
+### Design changes (presentation only — exact mockup alignment)
+- Header: strip-1 gets اپنی تحریر بھیجیں | رابطہ کریں after socials (mockup top-bar), NO center tagline in strip-1; strip-2 logo plate removed (logo sits directly on ivory like the mockup); strip-4 categories rail removed (mockup has none)
+- Logo (official uploaded artwork, best locations): header = horizontal lockup on ivory; footer = horizontal on light plate; admin sidebar/top bar + user sidebar/top bar + login/force-password pages = circular badge; favicon icon.png/icon.svg regenerated from logo-badge.png; watermark + og-image already brand assets
+- Homepage: hero now FULL-BLEED band (margin-inline breakout, keeps admin section reordering) with wavy emerald base + gold line (mockup signature); section order per mockup: hero → تازہ مضامین (featured "آج کی منتخب تحریر" card + مقبول تحریریں sidebar + آج کا لفظ gold card moved into sidebar + category pills + cards) → trio نئی کتب | نمایاں شعرا و ادبا | ڈیجیٹل اخبار (third slot swapped from مقبول تحریریں to newspaper panel; مقبول تحریریں stays in the articles sidebar) → footer; poets/sherWord/latestPoems/news/newspaper/competitions sections visible:false (admin-reversible in homeSections); dividers render only between visible sections (no stray ornaments)
+- PageBanner (books): dark overlay → light-center radial ivory wash + emerald edges + dark title (mockup bright hero); pattern-emerald fallback kept when no image
+- Dashboard (user area): new UserShell (dark emerald sidebar: ڈیش بورڈ/میری تحریریں/پسندیدہ مواد/اکاؤنٹ سیٹنگز/پاس ورڈ و سیکیورٹی/عوامی پروفائل/لاگ آؤٹ + ivory top bar with logo, tagline, سائٹ دیکھیں, bell, user chip — mirrors mockup 73afa19c), میرا پروفائل dark banner + profile summary card, 4 colored stat cards (مجموعی تحریریں/شاعری/مضامین/زیرِ جائزہ), ?tab= deep links via useSearchParams (Suspense-wrapped)
+
+### Cover-art assets (mockup shows covered cards; admin replaceable)
+- make-book-covers.py: 8 emerald/gold typographic covers (Jameel Noori Nastaliq titles, star lattice, gold frames) → public/books-covers/, Book.coverUrl set (only NULL rows)
+- make-article-covers.py: 7 landscape quill-motif covers → public/articles-covers/
+- make-news-covers.py: newspaper front-page thumbnail (پیامِ ادب masthead, columns) → trio + edition coverUrl; 4 news card covers
+
+### Cleanup
+- Junk E2E-residue ads ("fdrtdtrdsxd","fgdff") + their test PNGs deleted (mockup shows no ad rails) — ads remain a feature, rails render only when admin adds ads
+- Post-E2E: 3 test articles, 2 test users (writer*/otp-test), 6 test mailLogs, 1 test upload PNG deleted → final: 5 users (3 admins darulhuda+mustChange), 16 poems, 7 articles, 8 books, 4 news, 1 competition, 1 edition, 46 settings, 1 mailLog
+
+### Verification
+- tsc clean (src); E2E: test-upgrade 38/38, test-auth-otp 32/32, test-gaps 30/30 → **100/100 PASS**
+- Visual: final-home (full-bleed wavy hero + mockup flow), final-books (bright hero + covered cards), final-articles, admin dashboard, user dashboard (sidebar shell + banner + 4 stat cards), header close-up — all match the 4 reference mockups
+- Mobile 390px: 0 px horizontal overflow on home + books; 0 JS/page errors
+- Local main committed (1 commit on top of 07275bf); push STILL blocked (fine-grained PAT Contents=Read-only → 403) — needs classic token (repo/public_repo) at https://github.com/settings/tokens/new
