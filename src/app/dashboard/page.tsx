@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { SiteHeader } from "@/components/site/header";
-import { SiteFooter } from "@/components/site/footer";
+import { useRouter, useSearchParams } from "next/navigation";
+import { UserShell } from "@/components/site/user-shell";
 import { SectionHeading } from "@/components/site/section-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,11 +28,25 @@ type Me = {
 type Tab = "works" | "profile" | "security" | "liked";
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-secondary/60">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <DashboardInner />
+    </Suspense>
+  );
+}
+
+function DashboardInner() {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab | null) ?? "works";
   const [me, setMe] = useState<Me>(null);
   const [poems, setPoems] = useState<Work[] | null>(null);
   const [articles, setArticles] = useState<Work[] | null>(null);
   const [resending, setResending] = useState(false);
-  const [tab, setTab] = useState<Tab>("works");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,15 +76,13 @@ export default function DashboardPage() {
 
   if (!me || !poems || !articles) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="flex flex-1 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-      </div>
+      <UserShell>
+        <div className="flex h-[70vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+      </UserShell>
     );
   }
 
   const pending = [...poems, ...articles].filter((w) => w.status === "PENDING").length;
-  const published = [...poems, ...articles].filter((w) => w.status === "PUBLISHED").length;
 
   const WorkRow = ({ w, type }: { w: Work; type: "poem" | "article" }) => (
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gold/25 bg-card p-4">
@@ -113,10 +124,45 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="flex-1 paper-bg">
-        <div className="mx-auto max-w-5xl px-4 py-10">
+    <UserShell>
+      {/* banner — mockup "میرا پروفائل" dark literary band */}
+      <div className="relative overflow-hidden bg-emerald-ink">
+        <img src="/brand/hero-banner.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-ink/85 via-emerald-ink/55 to-emerald-ink/85" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-4 py-10 text-center">
+          <p className="mb-1 font-naskh text-[13px] text-[#e5dfc9]/85">صفحہ اول &lsaquo; میری پروفائل</p>
+          <h1 className="font-nastaliq-tight text-4xl leading-[1.7] text-[#e9c979] drop-shadow-sm md:text-5xl">میرا پروفائل</h1>
+          <p className="mt-1 font-nastaliq-tight text-lg text-[#f3ead2]/90">آپ کا ادبی سفر، ہماری نظر میں</p>
+          <div className="decor-rule mx-auto mt-3 max-w-[260px] opacity-80">
+            <span className="rule-dot" />
+            <span className="rule-track"><span className="rule-line" /></span>
+            <span className="rule-dot" />
+          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-l from-transparent via-gold/70 to-transparent" />
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 py-8">
+          {/* profile summary card — mockup avatar card */}
+          <div className="manuscript-frame mb-6 flex flex-wrap items-center gap-5 rounded-xl bg-card p-5">
+            {me.photoUrl ? (
+              <img src={me.photoUrl} alt={me.name} className="h-20 w-20 rounded-full border-2 border-gold/60 object-cover shadow-md" />
+            ) : (
+              <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold/60 bg-secondary font-nastaliq-tight text-3xl text-primary shadow-md">
+                {(me.penName || me.name).trim().charAt(0)}
+              </span>
+            )}
+            <div className="min-w-0 flex-1">
+              <h2 className="font-nastaliq-tight text-2xl leading-9 text-foreground">{me.penName || me.name}</h2>
+              <p className="text-sm font-naskh text-muted-foreground">{me.name}{me.penName ? ` — قلمی نام: ${me.penName}` : ""}</p>
+              {me.bio && <p className="mt-1 line-clamp-2 text-[13px] font-naskh leading-6 text-foreground/70">{me.bio}</p>}
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <span className="rounded-full bg-emerald-deep/10 px-3 py-1 text-xs font-naskh font-semibold text-emerald-deep">ادبی رکن</span>
+              <Link href={`/profile/${me.id}`} className="text-xs font-naskh text-gold hover:text-primary">عوامی پروفائل دیکھیں ←</Link>
+            </div>
+          </div>
+
           <SectionHeading
             title="میرا ڈیش بورڈ"
             subtitle={`${me.penName || me.name} کی تحریریں اور ان کی حالت`}
@@ -136,18 +182,22 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="mb-8 grid grid-cols-3 gap-4 text-center">
+          <div className="mb-8 grid grid-cols-2 gap-4 text-center md:grid-cols-4">
             <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#0e5c38] to-[#06422a] p-5 text-[#f3ead2] shadow-sm">
-              <p className="font-latin text-3xl font-bold">{published}</p>
-              <p className="mt-1 font-naskh text-sm text-[#e5dfc9]/85">شائع شدہ</p>
+              <p className="font-latin text-3xl font-bold">{poems.length + articles.length}</p>
+              <p className="mt-1 font-naskh text-sm text-[#e5dfc9]/85">مجموعی تحریریں</p>
+            </div>
+            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#2a4d8f] to-[#173b70] p-5 text-[#e8eef8] shadow-sm">
+              <p className="font-latin text-3xl font-bold">{poems.length}</p>
+              <p className="mt-1 font-naskh text-sm text-[#dce6f5]/85">شاعری</p>
+            </div>
+            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#6d3fa0] to-[#4c2b74] p-5 text-[#efe8fa] shadow-sm">
+              <p className="font-latin text-3xl font-bold">{articles.length}</p>
+              <p className="mt-1 font-naskh text-sm text-[#e5dcf5]/85">مضامین</p>
             </div>
             <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#8a6d1a] to-[#6d5311] p-5 text-[#f8f1e7] shadow-sm">
               <p className="font-latin text-3xl font-bold">{pending}</p>
               <p className="mt-1 font-naskh text-sm text-[#f3ead2]/85">زیرِ جائزہ</p>
-            </div>
-            <div className="manuscript-frame rounded-xl bg-gradient-to-bl from-[#2a4d8f] to-[#173b70] p-5 text-[#e8eef8] shadow-sm">
-              <p className="font-latin text-3xl font-bold">{poems.length + articles.length}</p>
-              <p className="mt-1 font-naskh text-sm text-[#dce6f5]/85">کل تحریریں</p>
             </div>
           </div>
 
@@ -183,7 +233,7 @@ export default function DashboardPage() {
                   <div className="space-y-3">{poems.map((p) => <WorkRow key={p.id} w={p} type="poem" />)}</div>
                 )}
               </section>
-              <section>
+              <section className="mb-8">
                 <h2 className="mb-4 font-nastaliq-tight text-2xl text-primary">مضامین</h2>
                 {articles.length === 0 ? (
                   <SkeletonRow label="ابھی کوئی مضمون بھیجا نہیں گیا" />
@@ -197,10 +247,8 @@ export default function DashboardPage() {
           {tab === "profile" && <ProfileTab me={me} onSaved={(m) => setMe(m)} />}
           {tab === "security" && <SecurityTab />}
           {tab === "liked" && <LikedTab />}
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+      </div>
+    </UserShell>
   );
 }
 

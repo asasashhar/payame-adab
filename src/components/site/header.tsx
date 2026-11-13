@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   Search, Menu, UserCircle2, LayoutDashboard, LogOut, PenLine,
-  ShieldCheck, ChevronDown, BookOpenText, CalendarCheck2,
+  ShieldCheck, ChevronDown, CalendarCheck2,
   Instagram, Facebook, Youtube, Twitter, Globe, Sparkles,
 } from "lucide-react";
 
@@ -180,7 +180,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* ── strip 1 · dark emerald utility bar: date + socials + submit ── */}
+      {/* ── strip 1 · dark emerald utility bar: date + socials + submit + contact ── */}
       <div className="hidden pattern-emerald text-[#eee9d8] sm:block">
         <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4">
           <UrduDate />
@@ -197,11 +197,16 @@ export function SiteHeader() {
                 {socialIcon(s.platform)}
               </a>
             ))}
+            <span className="mx-1 h-4 w-px bg-[#e5dfc9]/30" aria-hidden />
             <Link
               href="/submit"
               className="inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2 py-1 font-naskh transition-colors hover:bg-emerald-ink/60 hover:text-[#e2c57c]"
             >
               <PenLine className="h-3.5 w-3.5 text-[#e2c57c]" /> اپنی تحریر بھیجیں
+            </Link>
+            <span className="h-4 w-px bg-[#e5dfc9]/30" aria-hidden />
+            <Link href="/about" className="rounded-sm px-2 py-1 font-naskh transition-colors hover:bg-emerald-ink/60 hover:text-[#e2c57c]">
+              رابطہ کریں
             </Link>
           </div>
         </div>
@@ -210,9 +215,7 @@ export function SiteHeader() {
       {/* ── strip 2 · ivory brand bar: logo + centered tagline + actions ── */}
       <div className="border-b border-gold/25 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
-          <span className="rounded-xl bg-[#f6f1e4] px-3 py-1.5 shadow-sm">
-            <BrandLock />
-          </span>
+          <BrandLock />
 
           {/* decorative center tagline */}
           <div className="hidden min-w-0 flex-1 flex-col items-center lg:flex" aria-hidden>
@@ -371,26 +374,7 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* ── strip 4 · literary categories rail ── */}
-      <div className="border-t border-gold/15 bg-secondary/60">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-1 nice-scroll">
-          <BookOpenText className="h-3.5 w-3.5 shrink-0 text-gold" />
-          <span className="shrink-0 text-xs text-muted-foreground font-naskh">اجلاسِ ادب:</span>
-          {["غزل", "نظم", "رباعی", "مرثیہ", "حمد", "نعت", "صوفی شاعری", "افسانہ", "تنقید", "تحقیق"].map((c) => (
-            <Link
-              key={c}
-              href={c === "افسانہ" || c === "تنقید" || c === "تحقیق" ? `/articles?category=${encodeURIComponent(c)}` : `/poetry?category=${encodeURIComponent(c)}`}
-              className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-naskh text-foreground/75 hover:bg-accent hover:text-primary transition-colors"
-            >
-              {c}
-            </Link>
-          ))}
-          <CalendarCheck2 className="ms-2 h-3.5 w-3.5 shrink-0 text-gold" />
-          <Link href="/newspaper" className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-naskh text-primary font-semibold hover:bg-accent">
-            ہفتہ وار شمارہ
-          </Link>
-        </div>
-      </div>
+      {/* ── strip 4 · literary categories rail (removed — reference mockup header has no categories rail) ── */}
     </header>
   );
 }

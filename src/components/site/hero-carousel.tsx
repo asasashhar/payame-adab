@@ -51,7 +51,7 @@ export function HeroCarousel({
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl manuscript-frame pattern-emerald"
+      className="relative overflow-hidden bg-emerald-ink"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -81,7 +81,16 @@ export function HeroCarousel({
           }}
           aria-hidden
         />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-emerald-ink/45 to-transparent" aria-hidden />
+        {/* wavy emerald base with gold line — mockup hero signature */}
+        <svg
+          className="absolute inset-x-0 bottom-0 h-12 w-full"
+          viewBox="0 0 1440 48"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path d="M0,26 C180,44 360,8 540,22 C720,36 900,6 1080,20 C1260,34 1380,14 1440,24 L1440,48 L0,48 Z" fill="#03301c" opacity="0.92" />
+          <path d="M0,26 C180,44 360,8 540,22 C720,36 900,6 1080,20 C1260,34 1380,14 1440,24" fill="none" stroke="#c99a2e" strokeWidth="2" />
+        </svg>
       </div>
 
       {/* content */}

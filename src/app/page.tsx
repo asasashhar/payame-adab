@@ -66,6 +66,12 @@ export default async function HomePage() {
   const order = (key: string) => sections.findIndex((s) => s.key === key);
   const isVisible = (key: string) => sections.find((s) => s.key === key)?.visible === true;
   const sectionProps = (key: string) => ({ className: "mx-auto w-full max-w-7xl px-4", style: { order: order(key) < 0 ? 990 : order(key) * 10 } });
+  // dividers only render when visible sections exist both above and below the gap
+  const showDivider = (gapOrder: number) =>
+    sections.some((s) => s.visible && order(s.key) >= 0 && order(s.key) * 10 < gapOrder) &&
+    sections.some((s) => s.visible && order(s.key) >= 0 && order(s.key) * 10 > gapOrder);
+  const DividerMaybe = ({ gap }: { gap: number }) =>
+    showDivider(gap) ? <Divider style={{ order: gap }} /> : null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -79,9 +85,15 @@ export default async function HomePage() {
           <AdRail slot="RIGHT" maxWidth={adsMax} side="start" />
 
           <main className="flex min-w-0 flex-1 flex-col" style={{ display: "flex", flexDirection: "column" }}>
-        {/* ============ HERO ============ */}
+        {/* ============ HERO (full-bleed band per reference mockup) ============ */}
         {isVisible("hero") && (
-          <section {...sectionProps("hero")} className="mx-auto w-full max-w-7xl px-4 pt-6">
+          <section
+            className="w-full"
+            style={{
+              order: order("hero") < 0 ? 990 : order("hero") * 10,
+              marginInline: "calc(50% - 50vw)",
+            }}
+          >
             <HeroCarousel
               slides={heroBanners.map((b) => ({ id: b.id, imageUrl: b.imageUrl, title: b.title, linkUrl: b.linkUrl }))}
               badge={heroBadge}
@@ -178,7 +190,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 25 } } />
+        <DividerMaybe gap={25} />
 
         {/* ============ تازہ شاعری ============ */}
         {isVisible("latestPoems") && (
@@ -207,7 +219,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 35 } } />
+        <DividerMaybe gap={35} />
 
         {/* ============ تازہ مضامین ============ */}
         {isVisible("latestArticles") && (
@@ -331,12 +343,45 @@ export default async function HomePage() {
                     </ul>
                   )}
                 </div>
+
+                {/* آج کا لفظ — mockup sidebar anatomy: popular list + gold word-of-day card */}
+                <div className="manuscript-frame mt-5 overflow-hidden rounded-xl border border-gold/30 bg-[#faf3df]">
+                  <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
+                    <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e9c979]">
+                      <Feather className="h-4.5 w-4.5" /> آج کا لفظ
+                    </h3>
+                    <Link href="/dictionary" className="text-xs font-naskh text-[#e5dfc9]/80 hover:text-[#e2c57c]">
+                      لغت ←
+                    </Link>
+                  </div>
+                  {wordOfDay ? (
+                    <div className="px-5 py-6 text-center">
+                      <p className="font-nastaliq-tight text-4xl leading-[1.8] text-[#a8821b]">{wordOfDay.word}</p>
+                      <p className="mt-1 font-naskh text-[15px] text-foreground/85">{wordOfDay.meaning}</p>
+                      {wordOfDay.englishMeaning && (
+                        <p className="mt-0.5 font-latin text-sm text-muted-foreground" dir="ltr">{wordOfDay.englishMeaning}</p>
+                      )}
+                      {wordOfDay.example && (
+                        <p className="mx-auto mt-3 rounded-lg bg-[#f3ead2] px-4 py-2.5 font-nastaliq text-[13.5px] leading-8 text-foreground/80">
+                          مثال: {wordOfDay.example}
+                        </p>
+                      )}
+                      {wordOfDay.date && (
+                        <p className="mt-3 inline-block rounded-tl-lg rounded-tr-lg bg-gold/20 px-4 py-1 text-xs font-naskh text-[#7a5d12]">
+                          {urduDate(wordOfDay.date)}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="p-6 text-center font-naskh text-sm text-muted-foreground">آج کا لفظ جلد منتشر ہوگا۔</p>
+                  )}
+                </div>
               </aside>
             </div>
           </section>
         )}
 
-        <Divider style={{ order: 45 } } />
+        <DividerMaybe gap={45} />
 
         {/* ============ ادبی خبریں ============ */}
         {isVisible("news") && (
@@ -373,7 +418,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 55 } } />
+        <DividerMaybe gap={55} />
 
         {/* ============ نئی کتب / نمایاں شعرا و ادبا / مقبول تحریریں (mockup trio) ============ */}
         {isVisible("booksPopular") && (
@@ -453,38 +498,40 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* مقبول تحریریں */}
+              {/* ڈیجیٹل اخبار — mockup trio: books | poets | newspaper */}
               <div className="manuscript-frame overflow-hidden rounded-xl bg-card">
                 <div className="flex items-center justify-between bg-emerald-ink px-4 py-2.5">
                   <h3 className="flex items-center gap-2 font-nastaliq-tight text-lg text-[#e9c979]">
-                    <Flame className="h-4.5 w-4.5" /> مقبول تحریریں
+                    <Newspaper className="h-4.5 w-4.5" /> ڈیجیٹل اخبار
                   </h3>
+                  <Link href="/newspaper" className="text-xs font-naskh text-[#e5dfc9]/80 hover:text-[#e9c979]">
+                    تمام شمارے ←
+                  </Link>
                 </div>
                 <div className="p-3">
-                  {popularPoems.length === 0 && popularArticles.length === 0 ? (
-                    <p className="py-8 text-center font-naskh text-sm text-muted-foreground">مقبول تحریریں کا ریکارڈ جلد مرتب ہوگا۔</p>
-                  ) : (
-                    <ul className="space-y-1">
-                      {[
-                        ...popularPoems.slice(0, 2).map((p) => ({ href: `/poetry/${p.id}`, title: p.title, views: p.views, author: p.poetName ?? p.user?.penName ?? p.user?.name ?? "" })),
-                        ...popularArticles.slice(0, 1).map((a) => ({ href: `/articles/${a.id}`, title: a.title, views: a.views, author: a.authorName ?? "" })),
-                      ].map((item) => (
-                        <li key={item.href}>
-                          <Link href={item.href} className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-accent/60">
-                            <span className="min-w-0 flex-1">
-                              <span className="line-clamp-1 block font-nastaliq-tight text-[14px] leading-7 text-foreground group-hover:text-primary">{item.title}</span>
-                              <span className="line-clamp-1 block text-[11px] font-naskh text-muted-foreground">{item.author}</span>
-                            </span>
-                            {showViews && (
-                              <span className="inline-flex shrink-0 items-center gap-1 font-latin text-[11px] text-muted-foreground" dir="ltr">
-                                <Eye className="h-3 w-3" /> {item.views}
-                              </span>
-                            )}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <Link
+                    href={latestEdition ? `/newspaper/${latestEdition.id}` : "/newspaper"}
+                    className="group block overflow-hidden rounded-lg border border-gold/25"
+                  >
+                    <span className="block overflow-hidden bg-secondary">
+                      {latestEdition?.coverUrl ? (
+                        <img src={latestEdition.coverUrl} alt={latestEdition.title} className="h-56 w-full object-cover object-top transition-transform group-hover:scale-[1.03]" loading="lazy" />
+                      ) : (
+                        <span className="flex h-56 w-full flex-col items-center justify-center gap-2 bg-secondary">
+                          <Newspaper className="h-8 w-8 text-gold" />
+                          <span className="font-nastaliq-tight text-sm text-foreground/70">ہفتہ وار شمارہ</span>
+                        </span>
+                      )}
+                    </span>
+                    <span className="block bg-emerald-deep/5 px-3 py-2 text-center">
+                      <span className="line-clamp-1 block font-nastaliq-tight text-[14px] leading-7 text-foreground group-hover:text-primary">
+                        {latestEdition ? latestEdition.title : "تازہ شمارہ"}
+                      </span>
+                      <span className="mt-0.5 inline-block rounded-full bg-emerald-deep/10 px-3 py-0.5 text-[11px] font-naskh font-semibold text-emerald-deep">
+                        شمارہ پڑھیں
+                      </span>
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -502,7 +549,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 65 } } />
+        <DividerMaybe gap={65} />
 
         {/* ============ ڈیجیٹل اخبار ============ */}
         {isVisible("newspaper") && (
@@ -537,7 +584,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <Divider style={{ order: 75 } } />
+        <DividerMaybe gap={75} />
 
         {/* ============ ادبی مقابلے ============ */}
         {isVisible("competitions") && (
