@@ -64,3 +64,6 @@ tool-results/
 
 # local upload staging (raw user uploads, not site content)
 /upload/
+
+# runtime uploads (user/profile/admin media) — served by GET /uploads/*
+public/uploads/

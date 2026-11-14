@@ -340,6 +340,84 @@ export async function POST(
     }
   }
 
+  // ---- "Continue with Google" -------------------------------------------------
+  // With real OAuth credentials configured (Admin Panel → Settings) the client
+  // is redirected to Google itself (see /api/auth/google). Without credentials
+  // the button runs in demo mode: registered accounts — and always the three
+  // authorized administrators — sign in directly with their Gmail address.
+  if (action === "google-start") {
+    try {
+      const body = (await req.json()) as Record<string, string>;
+      const email = (body.email ?? "").trim().toLowerCase();
+      const adminIntent = body.admin === "1";
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json({ error: "درست ای میل لکھیں" }, { status: 400 });
+      }
+      const settings = await getSettings();
+      const oauthReady =
+        settings.googleEnabled === "1" &&
+        (settings.googleClientId ?? "").length > 0 &&
+        (settings.googleClientSecret ?? "").length > 0;
+      if (oauthReady && !adminIntent) {
+        // real Google verification for the public site
+        const base = siteUrlFrom(req, settings);
+        return NextResponse.json({
+          mode: "oauth",
+          redirectUrl: `${base}/api/auth/google?intent=user`,
+        });
+      }
+      // ---- demo direct mode ----
+      const user = await db.user.findUnique({ where: { email } });
+      if (adminIntent) {
+        if (!user || user.role !== "ADMIN") {
+          return NextResponse.json({ error: "یہ ای میل کسی مجاز ایڈمنسٹریٹر سے متعلق نہیں ہے" }, { status: 403 });
+        }
+        if (user.status === "SUSPENDED") {
+          return NextResponse.json({ error: "یہ اکاؤنٹ معطل کر دیا گیا ہے" }, { status: 403 });
+        }
+      } else if (!user) {
+        if (settings.googleSignup === "1") {
+          const local = email.split("@")[0].replace(/[._-]+/g, " ").trim() || "قارئ";
+          const created = await db.user.create({
+            data: {
+              email,
+              name: local.charAt(0).toUpperCase() + local.slice(1),
+              passwordHash: hashPassword(crypto.randomBytes(24).toString("hex")),
+              emailVerified: true,
+            },
+          });
+          await queueMail({
+            kind: "WELCOME",
+            to: email,
+            data: { authorName: created.name, title: "", url: siteUrlFrom(req, settings) + "/dashboard" },
+            relatedType: "user",
+            relatedId: created.id,
+          });
+          await setSessionCookie(created.id, true);
+          await logActivity("google-login", `${email} (new)`, email);
+          return NextResponse.json({ ok: true, role: "USER", redirect: "/dashboard" }, { status: 201 });
+        }
+        return NextResponse.json(
+          { error: "اس ای میل سے متعلق کوئی رجسٹرڈ اکاؤنٹ نہیں ملا — پہلے اکاؤنٹ بنائیں" },
+          { status: 404 }
+        );
+      }
+      if (!user || user.status === "SUSPENDED") {
+        return NextResponse.json({ error: "آپ کا اکاؤنٹ معطل ہے" }, { status: 403 });
+      }
+      await db.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+      await setSessionCookie(user.id, true);
+      await logActivity("google-login", email, email);
+      return NextResponse.json({
+        ok: true,
+        role: user.role,
+        redirect: user.role === "ADMIN" && adminIntent ? "/admin" : "/dashboard",
+      });
+    } catch (e) {
+      return NextResponse.json({ error: "گوگل سائن اِن میں خرابی", detail: String(e) }, { status: 400 });
+    }
+  }
+
   return NextResponse.json({ error: "نامعلوم کارروائی" }, { status: 404 });
 }
 

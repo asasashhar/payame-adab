@@ -122,6 +122,14 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   smtpPass: "",
   smtpFrom: "پیامِ ادب <payameadab@gmail.com>",
   requireEmailVerification: "1",
+  // "Continue with Google" sign-in. With real OAuth credentials (Admin Panel →
+  // Settings) users authenticate through Google itself; without credentials the
+  // button runs in demo mode — registered accounts (and always the three
+  // authorized admins) sign in directly with their Gmail address.
+  googleClientId: "",
+  googleClientSecret: "",
+  googleEnabled: "0",
+  googleSignup: "1", // demo mode: auto-create an account for unknown Gmails
   // global typography scale in percent (100 = base size, 112 = slightly larger)
   fontScale: "112",
   // side advertisements

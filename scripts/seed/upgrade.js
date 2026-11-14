@@ -43,6 +43,9 @@ const SETTINGS = {
   contactEmail: "payameadab@gmail.com",
   // appearance
   themePreset: "emerald",
+  // the green reference design stays on top; admin can re-enable rotation
+  designOverride: "A",
+  designRotation: "1",
   fontBody: "jameel-noori-nastaleeq",
   fontHeading: "jameel-noori-nastaleeq",
   fontBodySize: "17",

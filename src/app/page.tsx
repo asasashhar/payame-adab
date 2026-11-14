@@ -70,7 +70,7 @@ export default async function HomePage() {
   const showDivider = (gapOrder: number) =>
     sections.some((s) => s.visible && order(s.key) >= 0 && order(s.key) * 10 < gapOrder) &&
     sections.some((s) => s.visible && order(s.key) >= 0 && order(s.key) * 10 > gapOrder);
-  const DividerMaybe = ({ gap }: { gap: number }) =>
+  const maybeDivider = (gap: number) =>
     showDivider(gap) ? <Divider style={{ order: gap }} /> : null;
 
   return (
@@ -190,7 +190,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={25} />
+        {maybeDivider(25)}
 
         {/* ============ تازہ شاعری ============ */}
         {isVisible("latestPoems") && (
@@ -210,7 +210,7 @@ export default async function HomePage() {
                   </div>
                 )}
               </div>
-              <aside className="lg:col-span-1">
+              <aside className="lg:col-span-1 self-start">
                 {(featuredPoem || latestPoems[0]) && (
                   <FeaturedPoemPanel poem={featuredPoem ?? latestPoems[0]} />
                 )}
@@ -219,7 +219,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={35} />
+        {maybeDivider(35)}
 
         {/* ============ تازہ مضامین ============ */}
         {isVisible("latestArticles") && (
@@ -381,7 +381,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={45} />
+        {maybeDivider(45)}
 
         {/* ============ ادبی خبریں ============ */}
         {isVisible("news") && (
@@ -418,7 +418,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={55} />
+        {maybeDivider(55)}
 
         {/* ============ نئی کتب / نمایاں شعرا و ادبا / مقبول تحریریں (mockup trio) ============ */}
         {isVisible("booksPopular") && (
@@ -549,7 +549,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={65} />
+        {maybeDivider(65)}
 
         {/* ============ ڈیجیٹل اخبار ============ */}
         {isVisible("newspaper") && (
@@ -584,7 +584,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <DividerMaybe gap={75} />
+        {maybeDivider(75)}
 
         {/* ============ ادبی مقابلے ============ */}
         {isVisible("competitions") && (
@@ -655,7 +655,7 @@ function FeaturedPoemPanel({ poem }: { poem: { id: string; title: string; conten
           نمایاں نظم
         </span>
       </div>
-      {/* text half — title, poet, call to action */}
+      {/* text half — title, poet, verse preview, call to action */}
       <div className="flex flex-1 flex-col p-5 text-center">
         <h3 className="font-nastaliq-tight text-xl leading-9 text-[color:var(--accent-text)]">
           <Link href={`/poetry/${poem.id}`} className="hover:text-[color:var(--accent-text-hover)]">{poem.title}</Link>
@@ -663,9 +663,14 @@ function FeaturedPoemPanel({ poem }: { poem: { id: string; title: string; conten
         <p className="mt-0.5 text-[13px] font-naskh text-gold">
           {poem.poetName ?? poem.user?.penName ?? poem.user?.name ?? ""}
         </p>
+        {cover && (
+          <p className="mx-auto mt-4 max-w-sm flex-1 whitespace-pre-line border-t border-gold/25 pt-4 font-nastaliq text-[15px] leading-8 text-foreground/80">
+            {half}
+          </p>
+        )}
         <Link
           href={`/poetry/${poem.id}`}
-          className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-naskh text-sm font-semibold text-primary-foreground transition-colors hover:bg-emerald-deep"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-naskh text-sm font-semibold text-primary-foreground transition-colors hover:bg-emerald-deep"
         >
           مزید پڑھیے <ArrowLeft className="h-4 w-4" />
         </Link>

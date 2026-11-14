@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Save, Globe, Share2, Link2, ToggleLeft, Tags, Search, DatabaseBackup, Download, Trash2, FilePlus2 } from "lucide-react";
+import { Loader2, Save, Globe, Share2, Link2, ToggleLeft, Tags, Search, DatabaseBackup, Download, Trash2, FilePlus2, KeyRound } from "lucide-react";
+import { GoogleG } from "@/components/site/google-button";
 
 const FIELDS: { key: string; label: string; type?: "text" | "textarea"; full?: boolean }[] = [
   { key: "siteName", label: "سائٹ کا نام (اردو)" },
@@ -232,6 +233,38 @@ export default function AdminSettingsPage() {
                 <Link2 className="h-4 w-4" /> نیا لنک شامل کریں
               </Button>
             </div>
+          </section>
+
+          {/* Continue with Google (OAuth + demo mode) */}
+          <section className="rounded-xl border border-gold/25 bg-card p-6">
+            <h2 className="mb-1 flex items-center gap-2 font-nastaliq-tight text-xl text-primary">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gold/30"><GoogleG className="h-4.5 w-4.5" /></span>
+              گوگل سائن اِن — «Continue with Google»
+            </h2>
+            <p className="mb-4 font-naskh text-xs leading-6 text-muted-foreground">
+              Client ID اور Client Secret محفوظ ہوتے ہی قارئین حقیقی گوگل تصدیق سے داخل ہوں گے۔ ترتیبات خالی ہوں تو بٹن ڈیمو موڈ میں رجسٹرڈ اکاؤنٹس اور مجاز ایڈمنسٹریٹرز کو براہِ راست داخل کرتا ہے۔
+            </p>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="font-naskh">Google Client ID</Label>
+                <Input dir="ltr" value={values["googleClientId"] ?? ""} onChange={(e) => set("googleClientId", e.target.value)} placeholder="xxxxxxxx.apps.googleusercontent.com" className="font-latin text-sm" />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-naskh">Google Client Secret (مخفی)</Label>
+                <Input dir="ltr" type="password" value={values["googleClientSecret"] ?? ""} onChange={(e) => set("googleClientSecret", e.target.value)} placeholder="خالی چھوڑیں تو پرانا محفوظ رہے گا" className="font-latin text-sm" />
+              </div>
+              <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-accent/60 px-3 py-3">
+                <input type="checkbox" checked={values["googleEnabled"] === "1"} onChange={() => toggle("googleEnabled")} className="mt-1 h-4 w-4 shrink-0 accent-brand" />
+                <span className="font-naskh text-[13px] leading-6">حقیقی گوگل OAuth فعال کریں <span className="block text-muted-foreground">بند ہو تو ڈیمو موڈ براہِ راست لاگ اِن دیتا ہے</span></span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2.5 rounded-lg bg-accent/60 px-3 py-3">
+                <input type="checkbox" checked={values["googleSignup"] === "1"} onChange={() => toggle("googleSignup")} className="mt-1 h-4 w-4 shrink-0 accent-brand" />
+                <span className="font-naskh text-[13px] leading-6">نئے Gmail خودکار رکن بنا دیے جائیں <span className="block text-muted-foreground">بند ہو تو صرف رجسٹرڈ اکاؤنٹس کھلیں گے</span></span>
+              </label>
+            </div>
+            <p className="mt-3 flex items-start gap-1.5 rounded-lg bg-[#fdf3d7] px-3 py-2 text-[12px] leading-6 font-naskh text-[#6d5311]">
+              <KeyRound className="mt-0.5 h-4 w-4 shrink-0" /> Google Cloud Console میں Authorized redirect URI یہ لکھیں: <span dir="ltr" className="font-latin">{(values.siteUrl || "https://aap-ki-site").replace(/\/+$/, "")}/api/auth/google</span>
+            </p>
           </section>
 
           {/* custom pages (spec Part 2.4) */}

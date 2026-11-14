@@ -302,7 +302,6 @@ function ProfileTab({ me, onSaved }: { me: NonNullable<Me>; onSaved: (m: Me) => 
       <h2 className="font-nastaliq-tight text-xl text-primary">پروفائل کی ترتیبات</h2>
       <div className="flex flex-wrap items-center gap-4">
         {photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={photoUrl} alt="پروفائل" className="h-20 w-20 rounded-full border-2 border-gold/50 object-cover" />
         ) : (
           <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-gold/40 bg-accent/50 font-nastaliq-tight text-2xl text-primary">

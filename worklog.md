@@ -342,3 +342,34 @@ Stage Summary:
 - Visual: final-home (full-bleed wavy hero + mockup flow), final-books (bright hero + covered cards), final-articles, admin dashboard, user dashboard (sidebar shell + banner + 4 stat cards), header close-up — all match the 4 reference mockups
 - Mobile 390px: 0 px horizontal overflow on home + books; 0 JS/page errors
 - Local main committed (1 commit on top of 07275bf); push STILL blocked (fine-grained PAT Contents=Read-only → 403) — needs classic token (repo/public_repo) at https://github.com/settings/tokens/new
+
+## Task ID: 15-admin-login-google-profile (2026-11-14)
+**User: 3 Gmail admins (darulhuda), "Continue with Google" for admins, full user profile management, complete Admin-Panel control, fix admin login, match reference photos, professional logo placement.**
+
+### Root cause of "admin login not working" — sandbox recycle wiped db/custom.db (again) AND rolled the working tree back under committed HEAD
+- Re-seeded: scripts/seed/index.js + upgrade.js (3 admins darulhuda, 33+9 settings, poets/poems/articles/books/news/edition/shers/words/competition/events)
+- fix-admins.ts: mustChangePassword=false for the 3 authorized admins → darulhuda logs straight into /admin (force-change stays for admin-created accounts)
+- Recycle had also deleted committed files (covers under public/*-covers, src/app/api/upload/route.ts); restored verified HEAD versions via git checkout; my new work layered on top
+
+### New: "Continue with Google"
+- POST /api/auth/google-start: real-OAuth redirect when googleEnabled + ClientID/Secret set; otherwise demo-direct mode — registered accounts sign in, authorized admins (admin:"1") land straight on /admin, non-admin 403, optional auto-signup for new Gmails (googleSignup)
+- GET /api/auth/google: full OAuth2 code flow (state cookie, id_token email/verified/picture, find-or-create, session) — production-ready once the owner pastes credentials
+- GoogleSignInButton component (official 4-colour G + Urdu dialog) on /login, /register, /admin/login (admin variant)
+- Settings keys googleClientId/googleClientSecret/googleEnabled/googleSignup; googleClientSecret added to SECRET_KEYS + settings PUT preserves secrets on empty values (same rule as smtpPass); Google card in Admin → Settings with redirect-URI hint
+
+### Fixed: /api/upload 404 (profile photos, logos, covers, ads were ALL broken)
+- Session-gated multipart upload: jpg/png/webp/gif (+pdf when kind=pdf), 8MB cap, safe ext allowlist, writes public/uploads/<YYYY-MM>/<rand>.<ext> across dev/standalone roots, 201 {url}; verified end-to-end (login → upload → profile save with photoUrl)
+
+### Design state (matches green reference mockups)
+- designOverride=A pinned (rotation lands on C on day 14 — mockups are the green Design A); admin can re-enable rotation in Appearance; upgrade.js seeds designOverride=A
+- attach-media.js: wired existing public covers into seeded books/articles/news/edition + poem topic images (recycle-wiped DB had NULLs); 2 extra competitions seeded (grid now full; content-misc.js updated)
+- FeaturedPoemPanel: verse preview fills stretched card; aside self-start (no more white stretch)
+- E2E residue articles removed; test uploads deleted; public/uploads/ gitignored
+
+### Logo (official uploaded artwork — extract-logo.py from user's 28797088 jpg)
+- logo-badge.png 695px circular badge, logo-horizontal.png 1205px lockup (flood-fill transparency, interior whites preserved), watermark.png, favicon icon.png 512 + icon.svg, og-image regenerated (emerald + lockup)
+- Placement: header horizontal lockup (ivory brand bar), footer lockup, admin+user sidebar/top bars badge, login/register/admin-login badge, hero badge, watermark behind published content, browser tab favicon
+
+### Verification
+- lint 0 errors; E2E test-upgrade 38/38; google flows curl-tested (admin direct /admin, non-admin 403, user → /dashboard, new Gmail auto-signup); screenshots: home top/mid/bottom, books, login (+Google), user dashboard, admin dashboard/appearance — 0 JS errors across 22 routes
+- Pending: GitHub push still blocked (classic token needed)

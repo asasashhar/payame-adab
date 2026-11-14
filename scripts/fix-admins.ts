@@ -30,10 +30,10 @@ async function main() {
           passwordHash: hashPassword("darulhuda"),
           role: "ADMIN",
           status: "ACTIVE",
-          mustChangePassword: true, // strongly encourage change after initial setup
+          mustChangePassword: false, // authorized admins log in directly with darulhuda
         },
       });
-      console.log(`UPDATED admin: ${a.email} (password reset to darulhuda, mustChange=true)`);
+      console.log(`UPDATED admin: ${a.email} (password reset to darulhuda, direct access)`);
     } else {
       await db.user.create({
         data: {
@@ -42,7 +42,7 @@ async function main() {
           passwordHash: hashPassword("darulhuda"),
           role: "ADMIN",
           status: "ACTIVE",
-          mustChangePassword: true,
+          mustChangePassword: false, // authorized admins log in directly with darulhuda
         },
       });
       console.log(`CREATED admin: ${a.email}`);

@@ -4,7 +4,7 @@ import { requireAdmin, requireAdminPerm, logActivity } from "@/lib/auth";
 import { getSettings, ALL_SETTING_KEYS } from "@/lib/site";
 
 /** Secrets that must never leave the server via the generic settings API. */
-const SECRET_KEYS = new Set(["smtpPass"]);
+const SECRET_KEYS = new Set(["smtpPass", "googleClientSecret"]);
 
 export async function GET() {
   const settings = await getSettings();
@@ -23,6 +23,9 @@ export async function PUT(req: NextRequest) {
     const allowed = ALL_SETTING_KEYS;
     for (const [k, v] of Object.entries(body)) {
       if (!allowed.includes(k)) continue;
+      // secrets are never returned to the client, so an empty incoming value
+      // means "unchanged" — only overwrite them with a non-empty value
+      if (SECRET_KEYS.has(k) && String(v).length === 0) continue;
       await db.setting.upsert({
         where: { key: k },
         update: { value: String(v) },
