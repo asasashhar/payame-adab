@@ -11,6 +11,9 @@ export type ResourceDef = {
   write: "admin";
   fields: Record<string, FieldType>;
   searchFields?: string[];
+  /** sort field used when the request has no explicit sort — models without
+   * createdAt (qafiyaEntry, behr) must declare one of their own columns */
+  defaultSort?: string;
 };
 
 export const REGISTRY: Record<string, ResourceDef> = {
@@ -116,6 +119,7 @@ export const REGISTRY: Record<string, ResourceDef> = {
     model: "qafiyaEntry",
     publicRead: true,
     write: "admin",
+    defaultSort: "word",
     fields: {
       word: "string", meaning: "string", pattern: "string",
       notes: "text", rhymes: "text",
@@ -126,6 +130,7 @@ export const REGISTRY: Record<string, ResourceDef> = {
     model: "behr",
     publicRead: true,
     write: "admin",
+    defaultSort: "name",
     fields: {
       name: "string", nameEn: "string", arkan: "string",
       pattern: "string", example: "text", notes: "text",

@@ -145,8 +145,8 @@ async function api(path, opts = {}, cookie) {
   console.log("== 10. cleanup ==");
   await api(`/api/books/${bookRes.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/books/${a4book.body.id}`, { method: "DELETE" }, adminCookie);
-  await api(`/api/articles/${art.body.id}`, { method: "DELETE" }, adminCookie);
-  await api(`/api/articles/${draft.body.id}`, { method: "DELETE" }, adminCookie);
+  await api(`/api/articles?id=${art.body.id}`, { method: "DELETE" }, adminCookie);
+  await api(`/api/articles?id=${draft.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/ads?id=${ad.body.id}`, { method: "DELETE" }, adminCookie);
   await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "revoke", id: a4.body.id }) }, adminCookie);
   console.log("  cleanup done");

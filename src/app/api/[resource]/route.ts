@@ -33,9 +33,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ resource: s
   const limit = Math.min(Number(sp.get("limit") ?? 100), 200);
   const skip = Number(sp.get("offset") ?? 0);
   const sortKey = sp.get("sort");
+  // models without createdAt (qafiyaEntry, behr) declare their own defaultSort
   const orderBy = sortKey
     ? { [sortKey]: "desc" as const }
-    : { createdAt: "desc" as const };
+    : { [def.defaultSort ?? "createdAt"]: "desc" as const };
 
   const delegate = getDelegate(db, def.model);
   const items = (await delegate.findMany({ where, orderBy, take: limit, skip })) as Record<string, unknown>[];
