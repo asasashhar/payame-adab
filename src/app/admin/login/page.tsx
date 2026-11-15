@@ -8,12 +8,13 @@ import { GoogleSignInButton } from "@/components/site/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -58,21 +59,24 @@ export default function AdminLoginPage() {
 
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="font-naskh">ای میل</Label>
+              <Label htmlFor="admin-id" className="font-naskh">Gmail / ایڈمن آئی ڈی</Label>
               <div className="relative">
                 <Mail className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
+                  id="admin-id"
+                  type="text"
                   dir="ltr"
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@payameadab.com"
+                  placeholder="@admin"
                   className="start-9 bg-background ps-9 font-latin"
                 />
               </div>
+              <p className="text-xs font-latin text-muted-foreground" dir="ltr">
+                Super Admin ID: <span className="font-semibold text-foreground">@admin</span>
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password" className="font-naskh">پاس ورڈ</Label>
@@ -80,15 +84,23 @@ export default function AdminLoginPage() {
                 <Lock className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPass ? "text" : "password"}
                   dir="ltr"
                   required
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="start-9 bg-background ps-9 font-latin"
+                  className="start-9 bg-background pe-11 ps-9 font-latin"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  aria-label={showPass ? "پاس ورڈ چھپائیں" : "پاس ورڈ دکھائیں"}
+                  className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  {showPass ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                </button>
               </div>
             </div>
 

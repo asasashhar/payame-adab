@@ -173,6 +173,7 @@ model Book {
   category    String   @default("شاعری")
   description String?
   coverUrl    String?
+  pdfUrl      String?  // uploaded digital edition served by the book reader
   year        String?
   pages       String?
   featured    Boolean  @default(false)

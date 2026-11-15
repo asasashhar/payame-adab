@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, ShieldCheck, ShieldOff, Trash2, KeyRound, Power, Link2, UserCog } from "lucide-react";
 import { ADMIN_MODULES } from "@/lib/admin-resources";
+import { ROLE_PRESETS, rolePermissions, permissionsLabel, type RoleId } from "@/lib/admin-roles";
 
 type Admin = {
   id: string; email: string; name: string; penName: string | null;
@@ -28,6 +29,7 @@ export default function AdminsPage() {
   const [me, setMe] = useState<{ id: string } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "darulhuda" });
+  const [createRole, setCreateRole] = useState<RoleId>("admin");
   const [busy, setBusy] = useState(false);
   const [confirmRevoke, setConfirmRevoke] = useState<Admin | null>(null);
   const [resetTarget, setResetTarget] = useState<Admin | null>(null);
@@ -160,7 +162,7 @@ export default function AdminsPage() {
                         <span className="mt-0.5 block text-[11px] text-[#8a6d1a]">ابتدائی پاس ورڈ استعمال میں</span>
                       )}
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        {(a.permissions ?? "*") === "*" ? "تمام اجازتیں" : `${(a.permissions ?? "").split(",").filter(Boolean).length} حصے`}
+                        {permissionsLabel(a.permissions)}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-latin text-xs" dir="ltr">{a.email}</td>
@@ -271,6 +273,32 @@ export default function AdminsPage() {
               <Input type="email" dir="ltr" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="font-latin" placeholder="admin@example.com" />
             </div>
             <div className="space-y-1.5">
+              <Label className="font-naskh">عہدہ (رول)</Label>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {ROLE_PRESETS.map((r) => (
+                  <label
+                    key={r.id}
+                    className={`flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 ${
+                      createRole === r.id ? "border-primary bg-accent" : "border-gold/25 bg-accent/30"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="new-admin-role"
+                      className="mt-1.5 h-3.5 w-3.5"
+                      checked={createRole === r.id}
+                      onChange={() => setCreateRole(r.id)}
+                    />
+                    <span>
+                      <span className="block font-naskh text-sm font-semibold">{r.labelUrdu}</span>
+                      <span className="block font-latin text-[10px] text-muted-foreground" dir="ltr">{r.labelEn}</span>
+                      <span className="mt-0.5 block font-naskh text-[11px] leading-5 text-muted-foreground">{r.descriptionUrdu}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1.5">
               <Label className="font-naskh">ابتدائی پاس ورڈ</Label>
               <Input dir="ltr" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="font-latin" />
               <p className="text-[11px] font-naskh text-muted-foreground">
@@ -284,8 +312,15 @@ export default function AdminsPage() {
               disabled={busy}
               className="gap-2 bg-primary font-naskh hover:bg-emerald-deep"
               onClick={async () => {
-                const ok = await op({ op: "create", ...form }, "ایڈمنسٹریٹر بنا دیا گیا");
-                if (ok) { setCreateOpen(false); setForm({ name: "", email: "", password: "darulhuda" }); }
+                const ok = await op(
+                  { op: "create", ...form, permissions: rolePermissions(createRole) },
+                  "ایڈمنسٹریٹر بنا دیا گیا"
+                );
+                if (ok) {
+                  setCreateOpen(false);
+                  setForm({ name: "", email: "", password: "darulhuda" });
+                  setCreateRole("admin");
+                }
               }}
             >
               {busy && <Loader2 className="h-4 w-4 animate-spin" />} بنائیں
@@ -342,13 +377,25 @@ export default function AdminsPage() {
             سب کچھ منتخب نہ ہو تو «تمام اجازتیں» کا بٹن استعمال کریں۔
           </p>
           <div className="space-y-1.5 py-1">
-            <button
-              type="button"
-              onClick={() => setPermKeys(ADMIN_MODULES.map((m) => m.key))}
-              className="rounded-lg border border-gold/40 px-3 py-1.5 text-xs font-naskh text-[#6d5311] hover:bg-accent"
-            >
-              تمام اجازتیں منتخب کریں
-            </button>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPermKeys(ADMIN_MODULES.map((m) => m.key))}
+                className="rounded-lg border border-gold/40 px-3 py-1.5 text-xs font-naskh text-[#6d5311] hover:bg-accent"
+              >
+                تمام اجازتیں
+              </button>
+              {ROLE_PRESETS.filter((r) => r.permissions !== "*").map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setPermKeys(r.permissions === "*" ? ADMIN_MODULES.map((m) => m.key) : [...r.permissions])}
+                  className="rounded-lg border border-gold/25 bg-accent/30 px-3 py-1.5 text-xs font-naskh text-foreground hover:bg-accent"
+                >
+                  {r.labelUrdu}
+                </button>
+              ))}
+            </div>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {ADMIN_MODULES.map((m) => (
                 <label key={m.key} className="flex cursor-pointer items-start gap-2 rounded-lg border border-gold/25 bg-accent/30 px-3 py-2">

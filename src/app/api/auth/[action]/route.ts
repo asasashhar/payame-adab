@@ -37,6 +37,10 @@ export async function POST(
       if (!email || !password || !name) {
         return NextResponse.json({ error: "نام، ای میل اور پاس ورڈ ضروری ہیں" }, { status: 400 });
       }
+      // reserved administrator IDs can never become ordinary user accounts
+      if (email.startsWith("@") || email === "admin") {
+        return NextResponse.json({ error: "یہ آئی ڈی ایڈمنسٹریٹرز کے لیے محفوظ ہے — براہ کرم اپنا ای میل استعمال کریں" }, { status: 400 });
+      }
       if (passwordProblem(password)) {
         return NextResponse.json({ error: passwordProblem(password) }, { status: 400 });
       }
@@ -90,6 +94,10 @@ export async function POST(
     try {
       const body = (await req.json()) as Record<string, string>;
       const email = (body.email ?? "").trim().toLowerCase();
+      // admin IDs have their own separate door — keep the two systems apart
+      if (email.startsWith("@") || email === "admin") {
+        return NextResponse.json({ error: "یہ ایڈمن آئی ڈی ہے — ایڈمن لاگ اِن صفحے (/admin/login) سے داخل ہوں" }, { status: 403 });
+      }
       const user = await db.user.findUnique({ where: { email } });
       if (!user || !verifyPassword(body.password ?? "", user.passwordHash)) {
         return NextResponse.json({ error: "ای میل یا پاس ورڈ غلط ہے" }, { status: 401 });
@@ -109,11 +117,15 @@ export async function POST(
     }
   }
 
-  // dedicated admin login: refuses non-admin accounts
+  // dedicated admin login: refuses non-admin accounts.
+  // The super admin signs in with the reserved ID "@admin" (+ darulhuda);
+  // "admin" is accepted as a lenient alias for the same account. Individual
+  // Gmail administrators (e.g. mdnematullah1343@gmail.com) may also sign in here.
   if (action === "admin-login") {
     try {
       const body = (await req.json()) as Record<string, string>;
-      const email = (body.email ?? "").trim().toLowerCase();
+      const raw = (body.email ?? "").trim().toLowerCase();
+      const email = raw === "admin" ? "@admin" : raw;
       const user = await db.user.findUnique({ where: { email } });
       if (!user || !verifyPassword(body.password ?? "", user.passwordHash)) {
         return NextResponse.json({ error: "ای میل یا پاس ورڈ غلط ہے" }, { status: 401 });
@@ -228,6 +240,7 @@ export async function POST(
       const generic = { ok: true, message: "اگر یہ ای میل رجسٹرڈ ہے تو تصدیقی کوڈ آپ کے ای میل پر بھیج دیا گیا ہے۔ براہ کرم اپنا ان باکس (اور اسپام فولڈر) چیک کریں۔" };
       if (!email) return NextResponse.json(generic);
       const user = await db.user.findUnique({ where: { email } });
+      const settings = await getSettings();
       if (user) {
         // rate limiting: max 1 request per minute, max 3 per rolling hour
         const last = user.resetRequestedAt?.getTime() ?? 0;
@@ -259,6 +272,17 @@ export async function POST(
           relatedId: user.id,
         });
         await logActivity("reset-request", email, email);
+        // Without SMTP the code can never reach the inbox — surface it as a
+        // clearly-marked demo fallback so the recovery flow stays usable
+        // (with SMTP configured, delivery is real and no code is ever returned).
+        const mailReady = settings?.mailEnabled === "1" && (settings?.smtpHost ?? "").trim().length > 0;
+        if (!mailReady) {
+          return NextResponse.json({
+            ...generic,
+            demoCode: code,
+            demoNote: "ای میل ترسیل (SMTP) ترتیب یافتہ نہیں — ڈیمو موڈ میں کوڈ یہاں دکھایا جا رہا ہے۔ ایڈمن پینل → سیٹنگز میں SMTP درج کریں تو کوڈ براہِ راست ای میل پر جائے گا۔",
+          });
+        }
       }
       return NextResponse.json(generic);
     } catch {

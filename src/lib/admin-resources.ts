@@ -50,6 +50,7 @@ export const ADMIN_RESOURCES: Record<string, ResourceConfig> = {
       { key: "year", label: "سالِ اشاعت", type: "text" },
       { key: "pages", label: "صفحات", type: "text" },
       { key: "coverUrl", label: "سرورق", type: "image", hint: "سفارش: 600×900 پکسل (تناسب 2:3)" },
+      { key: "pdfUrl", label: "ڈیجیٹل ایڈیشن (PDF)", type: "pdf", hint: "قاری صفحات اور پڑھنے والے صفحے اسی فائل سے چلتے ہیں" },
       { key: "description", label: "تعارف", type: "textarea", full: true },
       { key: "featured", label: "نمایاں کتاب (ہوم پیج پر ظاہر ہوگی)", type: "bool", full: true },
     ],

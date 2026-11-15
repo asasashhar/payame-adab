@@ -18,7 +18,7 @@ export function PageBanner({
   className?: string;
 }) {
   return (
-    <div className={cn("relative overflow-hidden", !image && "pattern-emerald", className)}>
+    <div className={cn("pea-banner relative overflow-hidden", !image && "pattern-emerald", className)}>
       {image && (
         <>
           {/* aria-hidden: purely decorative background artwork */}

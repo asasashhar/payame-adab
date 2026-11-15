@@ -9,7 +9,7 @@ import { ViewTracker } from "@/components/site/view-tracker";
 import { LikeButton } from "@/components/site/like-button";
 import { Comments } from "@/components/site/comments";
 import { BookCard } from "@/components/site/cards";
-import { BookOpen, CalendarDays, Eye, FileText } from "lucide-react";
+import { BookOpen, CalendarDays, Eye, FileText, Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "کتاب" };
@@ -74,7 +74,24 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
                     ))}
                   </div>
                 )}
-                <div className="mt-5">
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  {book.pdfUrl && (
+                    <>
+                      <Link
+                        href={`/books/${book.id}/read`}
+                        className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 font-naskh text-[15px] font-semibold text-[#f3ead2] shadow-md transition-colors hover:bg-emerald-deep"
+                      >
+                        <BookOpen className="h-4.5 w-4.5" /> آن لائن پڑھیں
+                      </Link>
+                      <a
+                        href={book.pdfUrl}
+                        download
+                        className="inline-flex h-11 items-center gap-2 rounded-full border-2 border-gold px-6 font-naskh text-[15px] font-semibold text-[#8a6d1a] transition-colors hover:bg-gold/10"
+                      >
+                        <Download className="h-4.5 w-4.5" /> PDF ڈاؤن لوڈ کریں
+                      </a>
+                    </>
+                  )}
                   <LikeButton resourceType="book" resourceId={book.id} enabled={settings.likesEnabled !== "0"} showCount={settings.showLikeCounts !== "0"} />
                 </div>
               </div>

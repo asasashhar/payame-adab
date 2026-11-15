@@ -1,0 +1,211 @@
+/* ==========================================================================
+   Payam-e-Adab — four-design structural system (spec §6–8)
+   Every page shares content, but each design changes layout structure,
+   typography arrangement, spacing, card anatomy and chrome — keyed on
+   body[data-design="A|B|C|D"] (set by app/layout from the monthly schedule
+   or the Super Admin's manual override).
+
+     A  Classic Literary      — baseline mockup identity (no overrides)
+     B  Modern Editorial      — flat navy, sharp corners, underline nav,
+                                sans-leaning headings, thick rules
+     C  Heritage Manuscript   — sepia ink on parchment, double-framed cards,
+                                pill radius, ornament-heavy
+     D  Contemporary Premium  — dark navy glass, gold accents, glow shadows
+   ========================================================================== */
+
+/* ---------- radius lever: one variable retunes every rounded-* utility,
+   giving each design a genuinely different card/button anatomy ---------- */
+body[data-design="B"] { --radius: 0.25rem; }
+body[data-design="C"] { --radius: 1.4rem; }
+body[data-design="D"] { --radius: 1.1rem; }
+
+/* ---------- typography arrangement ----------
+   B (editorial) sets headings in the flowing naskh UI face with tight
+   leading; C (manuscript) enlarges nastaliq with generous leading;
+   D keeps nastaliq but tightens for the premium look. */
+body[data-design="B"] .font-nastaliq-tight { font-family: var(--font-urdu-body, "Noto Nastaliq Urdu", serif); line-height: 1.7; }
+body[data-design="C"] .font-nastaliq-tight { line-height: calc(var(--font-urdu-line-height, 2) * 0.95); letter-spacing: 0.01em; }
+body[data-design="D"] .font-nastaliq-tight { line-height: calc(var(--font-urdu-line-height, 2) * 0.8); }
+
+/* ---------- header chrome (classes set in components/site/header.tsx) ---------- */
+
+/* B: flat editorial masthead — plain navy utility strip, no tagline panel,
+   brand bar closed by a thick primary rule, flat nav with active underline */
+body[data-design="B"] .pea-topbar { background: var(--primary); background-image: none; }
+body[data-design="B"] .pea-tagline { display: none; }
+body[data-design="B"] .pea-brandbar { border-bottom: 3px solid var(--primary); border-radius: 0; }
+body[data-design="B"] .pea-navstrip { background: var(--primary); border-top: none; box-shadow: none; }
+body[data-design="B"] .pea-navstrip a,
+body[data-design="B"] .pea-navstrip [data-slot="dropdown-menu-trigger"] {
+  border-radius: 0;
+  background: transparent;
+}
+body[data-design="B"] .pea-navstrip a.bg-white\/12,
+body[data-design="B"] .pea-navstrip [data-slot="dropdown-menu-trigger"][data-state="open"] {
+  background: transparent;
+  color: var(--gold-soft);
+  box-shadow: inset 0 -2px 0 0 var(--gold-soft);
+}
+
+/* C: heritage manuscript masthead — parchment strips closed by double gold
+   rules, ink-brown nav, ornament underline for the active link */
+body[data-design="C"] .pea-topbar {
+  background: color-mix(in srgb, var(--primary) 88%, black);
+  background-image: none;
+}
+body[data-design="C"] .pea-brandbar { border-bottom: 3px double var(--gold); }
+body[data-design="C"] .pea-navstrip {
+  background: var(--emerald-ink);
+  border-top: 3px double var(--gold);
+}
+body[data-design="C"] .pea-navstrip a.bg-white\/12,
+body[data-design="C"] .pea-navstrip [data-slot="dropdown-menu-trigger"][data-state="open"] {
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  box-shadow: inset 0 -2px 0 0 var(--gold-soft);
+}
+
+/* D: contemporary premium masthead — glass strips over the dark body,
+   gradient-gold active pill; the logo gets a light plate so its navy artwork
+   stays readable on the dark chrome */
+body[data-design="D"] .pea-topbar {
+  background: color-mix(in srgb, var(--emerald-ink) 82%, transparent);
+  background-image: none;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+}
+body[data-design="D"] .pea-brandbar {
+  background: color-mix(in srgb, var(--background) 72%, transparent);
+  backdrop-filter: blur(10px);
+}
+body[data-design="D"] .pea-navstrip {
+  background: color-mix(in srgb, var(--emerald-ink) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+body[data-design="D"] .pea-navstrip a.bg-white\/12,
+body[data-design="D"] .pea-navstrip [data-slot="dropdown-menu-trigger"][data-state="open"] {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 30%, transparent), color-mix(in srgb, var(--gold) 12%, transparent));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+body[data-design="D"] .pea-brandbar img {
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  border-radius: 12px;
+  padding: 3px 8px;
+}
+.pea-dark .pea-brandbar img {
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  border-radius: 12px;
+  padding: 3px 8px;
+}
+
+/* ---------- card anatomy (manuscript-frame is the sitewide card class) ---------- */
+/* B: flat editorial card — sharp, hairline border, no shadow, thick top keyline */
+body[data-design="B"] .manuscript-frame {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+  box-shadow: none;
+}
+body[data-design="B"] .manuscript-frame img { border-radius: 2px; }
+
+/* C: parchment double frame — outer hairline + inner gold keyline + soft stain */
+body[data-design="C"] .manuscript-frame {
+  border-radius: calc(var(--radius) + 2px);
+  border: 1px solid var(--border);
+  outline: 1px solid color-mix(in srgb, var(--gold) 38%, transparent);
+  outline-offset: -6px;
+  background-image: radial-gradient(color-mix(in srgb, var(--gold) 7%, transparent) 0.6px, transparent 0.6px);
+  background-size: 11px 11px;
+}
+
+/* D: dark glass card — gradient glass, gold hairline, lift glow */
+body[data-design="D"] .manuscript-frame {
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid color-mix(in srgb, var(--gold) 26%, transparent);
+  background-image: linear-gradient(165deg, color-mix(in srgb, var(--card) 92%, transparent) 0%, color-mix(in srgb, var(--card) 100%) 100%);
+  box-shadow: 0 18px 42px -20px rgba(0, 0, 0, 0.65), inset 0 1px 0 color-mix(in srgb, var(--gold) 16%, transparent);
+  backdrop-filter: blur(8px);
+}
+body[data-design="D"] .manuscript-frame:hover { box-shadow: 0 24px 52px -20px rgba(0, 0, 0, 0.75), 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent); }
+
+/* ---------- buttons: B sharp rectangular, C pill, D gradient ---------- */
+body[data-design="B"] .bg-primary { border-radius: 4px; }
+body[data-design="C"] .bg-primary { border-radius: 999px; }
+body[data-design="D"] .bg-primary {
+  border-radius: 999px;
+  background-image: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 70%, #7fb0e8) 100%);
+  box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--primary) 80%, black);
+}
+
+/* ---------- section rules: different ornament grammar per design ---------- */
+/* B: thick single primary rule */
+body[data-design="B"] .decor-rule .rule-line { height: 3px; background: var(--primary); opacity: 0.9; }
+body[data-design="B"] .decor-rule .rule-dot { display: none; }
+/* C: double ornamental gold rule with diamond caps */
+body[data-design="C"] .decor-rule .rule-line { background: var(--gold); opacity: 0.8; }
+body[data-design="C"] .decor-rule .rule-dot { width: 8px; height: 8px; transform: rotate(45deg); border-radius: 1px; }
+/* D: gold gradient hairline */
+body[data-design="D"] .decor-rule .rule-line { background: linear-gradient(to left, transparent, var(--gold-soft), transparent); opacity: 0.9; }
+
+/* ---------- page banners (components/site/page-banner.tsx) ---------- */
+/* B: flat navy editorial banner with baseline rule */
+body[data-design="B"] .pea-banner,
+body[data-design="B"] .pea-banner.pattern-emerald {
+  background: var(--primary);
+  background-image: none;
+  border-bottom: 4px solid var(--gold);
+}
+/* C: parchment banner with ornament frame */
+body[data-design="C"] .pea-banner,
+body[data-design="C"] .pea-banner.pattern-emerald {
+  background:
+    radial-gradient(color-mix(in srgb, var(--gold) 12%, transparent) 0.7px, transparent 0.7px) 0 0 / 16px 16px,
+    var(--secondary);
+}
+body[data-design="C"] .pea-banner > div:first-child { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent), inset 0 0 0 5px var(--secondary), inset 0 0 0 6px color-mix(in srgb, var(--gold) 30%, transparent); }
+/* D: deep navy banner with gold glow */
+body[data-design="D"] .pea-banner,
+body[data-design="D"] .pea-banner.pattern-emerald {
+  background:
+    radial-gradient(ellipse 70% 120% at 50% 0%, color-mix(in srgb, var(--primary) 55%, transparent) 0%, transparent 70%),
+    var(--emerald-ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+/* ---------- footer ---------- */
+body[data-design="B"] .pea-footer { background: var(--primary); background-image: none; border-top: 4px solid var(--gold); }
+body[data-design="C"] .pea-footer { background: var(--emerald-ink); background-image: none; border-top: 3px double var(--gold); }
+body[data-design="D"] .pea-footer { background: color-mix(in srgb, var(--emerald-ink) 92%, black); background-image: none; border-top: 1px solid color-mix(in srgb, var(--gold) 30%, transparent); }
+
+/* ---------- misc presentation differences ---------- */
+/* B: editorial pull-quote style for literary content */
+body[data-design="B"] .literary-content blockquote { border-inline-start: 4px solid var(--primary); padding-inline-start: 1rem; }
+/* C: literary text gets the parchment treatment and drop-cap-like first line */
+body[data-design="C"] .literary-content { text-shadow: 0 0 1px color-mix(in srgb, var(--gold) 25%, transparent); }
+/* D: literary text gets soft glow on dark */
+body[data-design="D"] .literary-content { text-shadow: 0 0 14px color-mix(in srgb, var(--gold) 18%, transparent); }
+
+/* B: links underline on hover like print */
+body[data-design="B"] main a:not([class*="bg-"]):hover { text-decoration-thickness: 2px; }
+
+/* hero: per-design silhouettes are rendered by HeroCarousel (React variants);
+   these helpers only tune the strip under the hero */
+body[data-design="B"] .pea-hero-dots button { border-radius: 1px; }
+body[data-design="C"] .pea-hero-dots button { border-radius: 2px; transform: rotate(45deg); }
+
+/* ---------- digital book reader: page-turn animation (spec §9) ---------- */
+.pea-reader-page { transform-origin: center center; backface-visibility: hidden; }
+.pea-flip-next { animation: pea-flip-next 0.48s ease-in-out; }
+.pea-flip-prev { animation: pea-flip-prev 0.48s ease-in-out; }
+@keyframes pea-flip-next {
+  0% { transform: rotateY(0deg); }
+  45% { transform: rotateY(-26deg) scale(0.985); }
+  100% { transform: rotateY(0deg); }
+}
+@keyframes pea-flip-prev {
+  0% { transform: rotateY(0deg); }
+  45% { transform: rotateY(26deg) scale(0.985); }
+  100% { transform: rotateY(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pea-flip-next, .pea-flip-prev { animation: none; }
+}

@@ -24,7 +24,7 @@ export function SiteFooter({
   };
 
   return (
-    <footer className="mt-auto pattern-emerald text-[#eee9d8]">
+    <footer className="pea-footer mt-auto pattern-emerald text-[#eee9d8]">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-4">
         <div className="md:col-span-1">
           <Link href="/" className="inline-block rounded-lg bg-[#f3ead2] p-1.5">

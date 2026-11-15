@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getSettings, homeSectionsFromSettings, watermarkFromSettings, publishDueSchedules, ARTICLE_CATEGORIES } from "@/lib/site";
+import { activeDesign } from "@/lib/design";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { SectionHeading, Divider } from "@/components/site/section-heading";
@@ -100,6 +101,7 @@ export default async function HomePage() {
               title={heroTitle}
               subtitle={heroSubtitle}
               fallbackImage={heroImage}
+              design={activeDesign(settings).version}
             />
           </section>
         )}

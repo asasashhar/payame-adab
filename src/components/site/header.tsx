@@ -181,7 +181,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40">
       {/* ── strip 1 · dark emerald utility bar: date + socials + submit + contact ── */}
-      <div className="hidden pattern-emerald text-[#eee9d8] sm:block">
+      <div className="pea-topbar hidden pattern-emerald text-[#eee9d8] sm:block">
         <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4">
           <UrduDate />
           <div className="flex items-center gap-2">
@@ -213,12 +213,12 @@ export function SiteHeader() {
       </div>
 
       {/* ── strip 2 · ivory brand bar: logo + centered tagline + actions ── */}
-      <div className="border-b border-gold/25 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+      <div className="pea-brandbar border-b border-gold/25 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
           <BrandLock />
 
           {/* decorative center tagline */}
-          <div className="hidden min-w-0 flex-1 flex-col items-center lg:flex" aria-hidden>
+          <div className="pea-tagline hidden min-w-0 flex-1 flex-col items-center lg:flex" aria-hidden>
             <p className="font-nastaliq-tight text-xl leading-loose text-emerald-deep">
               اردو ادب، روایت سے نئی نسل تک
             </p>
@@ -353,7 +353,7 @@ export function SiteHeader() {
       </div>
 
       {/* ── strip 3 · dark emerald nav bar (mockup style) ── */}
-      <div className="border-t border-emerald-ink/60 bg-emerald-ink shadow-sm">
+      <div className="pea-navstrip border-t border-emerald-ink/60 bg-emerald-ink shadow-sm">
         <div className="mx-auto hidden max-w-7xl items-center gap-1 px-4 py-1.5 lg:flex">
           <NavLinks items={navItems} />
         </div>

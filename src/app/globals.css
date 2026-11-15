@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./designs.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,6 +123,45 @@
     font-family: var(--font-urdu-body, "Noto Nastaliq Urdu", serif);
     font-size: var(--font-urdu-body-size, 17px);
   }
+}
+
+/* readability guarantee (site-wide, mobile screenshot bug): typed text in every
+   field always uses the strong foreground color on a light card surface —
+   faint gray-on-ivory input text can never return. Kept unlayered so it
+   outranks utility classes; dark identities get matching treatment. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+textarea,
+select {
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+}
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  opacity: 1;
+}
+select option {
+  color: #26221b;
+  background-color: #fffdf8;
+}
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.dark textarea,
+.dark select,
+.pea-dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.pea-dark textarea,
+.pea-dark select {
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+}
+.dark input::placeholder,
+.dark textarea::placeholder,
+.pea-dark input::placeholder,
+.pea-dark textarea::placeholder {
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  opacity: 1;
+}
+
+@layer base {
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-urdu-heading, var(--font-urdu-body, "Noto Nastaliq Urdu", serif));
   }

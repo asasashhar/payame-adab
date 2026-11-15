@@ -1,5 +1,5 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { db } from "@/lib/db";
 
 const SECRET = process.env.AUTH_SECRET || "payam-e-adab-secret-key-2024";
@@ -79,9 +79,16 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
 export async function setSessionCookie(userId: string, remember = false) {
   const store = await cookies();
+  // When served over HTTPS (the published site and the chat preview iframe),
+  // the app runs inside a cross-site context, so SameSite=Lax cookies are never
+  // sent back — logins would "succeed" but the session never sticks. Pair
+  // SameSite=None with Secure there; plain Lax is correct for local http.
+  const proto = ((await headers()).get("x-forwarded-proto") ?? "").split(",")[0].trim();
+  const https = proto === "https";
   store.set(COOKIE, createToken(userId), {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: https ? "none" : "lax",
+    secure: https,
     path: "/",
     // "remember me" → persistent 30-day cookie, otherwise a browser-session cookie
     ...(remember ? { maxAge: MAX_AGE } : {}),

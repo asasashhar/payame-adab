@@ -153,13 +153,14 @@ async function main() {
     console.log("admin email fixed: mdnematulah1343 -> mdnematullah1343 (password reset to initial)");
   }
 
-  // 2) ensure the three authorized admins
+  // 2) ensure the three authorized admins (darulhuda logs straight in —
+  //    force-change stays only for accounts created from the Admin Panel)
   for (const a of ADMINS) {
     const existing = await db.user.findUnique({ where: { email: a.email } });
     if (existing) {
       await db.user.update({
         where: { email: a.email },
-        data: { role: "ADMIN", status: "ACTIVE", name: a.name },
+        data: { role: "ADMIN", status: "ACTIVE", name: a.name, mustChangePassword: false },
       });
       console.log("admin ensured:", a.email);
     } else {
@@ -170,12 +171,43 @@ async function main() {
           passwordHash: hashPassword("darulhuda"),
           role: "ADMIN",
           status: "ACTIVE",
-          mustChangePassword: true,
+          mustChangePassword: false,
         },
       });
       console.log("admin created:", a.email);
     }
   }
+
+  // 2b) dedicated super-admin: logs in on /admin/login with @admin / darulhuda.
+  //     Stored like any user but with the reserved admin ID "@admin"; it is the
+  //     permanent owner (ownerEmail setting), so it always keeps full control.
+  const SUPER = { email: "@admin", name: "منتظمِ اعلیٰ — پیامِ ادب" };
+  const superAdmin = await db.user.findUnique({ where: { email: SUPER.email } });
+  if (superAdmin) {
+    await db.user.update({
+      where: { email: SUPER.email },
+      data: { role: "ADMIN", status: "ACTIVE", name: SUPER.name, mustChangePassword: false },
+    });
+    console.log("super-admin ensured:", SUPER.email);
+  } else {
+    await db.user.create({
+      data: {
+        email: SUPER.email,
+        name: SUPER.name,
+        passwordHash: hashPassword("darulhuda"),
+        role: "ADMIN",
+        status: "ACTIVE",
+        permissions: "*",
+        mustChangePassword: false,
+      },
+    });
+    console.log("super-admin created:", SUPER.email);
+  }
+  await db.setting.upsert({
+    where: { key: "ownerEmail" },
+    update: { value: SUPER.email },
+    create: { key: "ownerEmail", value: SUPER.email },
+  });
 
   // active admin cap note: 3 active of max 5
   const adminCount = await db.user.count({ where: { role: "ADMIN", status: "ACTIVE" } });

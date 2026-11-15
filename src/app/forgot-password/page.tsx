@@ -22,6 +22,7 @@ export default function ForgotPasswordPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [demoCode, setDemoCode] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
@@ -39,6 +40,8 @@ export default function ForgotPasswordPage() {
         toast({ title: "درخواست نہیں بھیجی جا سکی", description: data.error, variant: "destructive" });
         return;
       }
+      // demo fallback: without SMTP the code is shown here so recovery works
+      setDemoCode(typeof data.demoCode === "string" ? data.demoCode : "");
       setStep(2);
     } finally {
       setBusy(false);
@@ -107,6 +110,14 @@ export default function ForgotPasswordPage() {
               <p className="rounded-lg bg-[#e3f0e6] px-4 py-3 font-naskh text-[13px] leading-6 text-[#2f6d46]">
                 اگر یہ ای میل رجسٹرڈ ہے تو تصدیقی کوڈ بھیج دیا گیا ہے۔ اپنے ان باکس (اور اسپام فولڈر) میں 6 ہندسوں کا کوڈ دیکھیں اور نیچے درج کریں۔
               </p>
+              {demoCode && (
+                <div className="rounded-lg border border-gold/40 bg-accent px-4 py-3 text-center">
+                  <p className="font-naskh text-[13px] leading-6 text-foreground">
+                    ڈیمو موڈ: ای میل ترسیل (SMTP) ترتیب یافتہ نہیں، اس لیے کوڈ یہاں دکھایا جا رہا ہے —
+                  </p>
+                  <p className="mt-1 font-latin text-3xl font-bold tracking-[0.4em] text-primary" dir="ltr">{demoCode}</p>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label className="font-naskh text-[15px]">تصدیقی کوڈ (OTP)</Label>
                 <div className="relative">
