@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
           <div className="mx-auto mb-4 w-fit">
             <LogoMark size={72} />
           </div>
-          <h1 className="font-nastaliq-tight text-2xl leading-[1.9] text-primary">نیا پاس ورڈ مقرر کریں</h1>
+          <h1 className="font-latin text-2xl font-bold text-primary" dir="ltr">Set New Password</h1>
 
           {done ? (
             <div className="mt-5 space-y-4">
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
           ) : (
             <form onSubmit={submit} className="mt-4 space-y-4 text-start">
               <div className="space-y-2">
-                <Label className="font-naskh text-[15px]">نیا پاس ورڈ</Label>
+                <Label className="font-latin text-[15px]" dir="ltr">New Password</Label>
                 <div className="relative">
                   <Input type={showPass ? "text" : "password"} dir="ltr" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 pe-11 text-left font-latin" />
                   <button
@@ -108,14 +108,14 @@ export default function ResetPasswordPage() {
                 <p className="text-xs font-naskh text-muted-foreground">کم از کم 8 حروف، جس میں ایک حرف اور ایک عدد شامل ہو۔</p>
               </div>
               <div className="space-y-2">
-                <Label className="font-naskh text-[15px]">نئے پاس ورڈ کی تصدیق</Label>
+                <Label className="font-latin text-[15px]" dir="ltr">Confirm New Password</Label>
                 <Input type={showPass ? "text" : "password"} dir="ltr" required value={confirm} onChange={(e) => setConfirm(e.target.value)} className={`h-11 text-left font-latin ${confirm && confirm !== password ? "border-destructive" : ""}`} />
                 {confirm && confirm !== password && (
                   <p className="text-xs font-naskh text-destructive">تصدیق پاس ورڈ اصل پاس ورڈ سے مختلف ہے</p>
                 )}
               </div>
               <Button type="submit" disabled={busy} className="h-11 w-full gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />} پاس ورڈ تبدیل کریں
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />} Change Password
               </Button>
               <p className="text-center text-xs font-naskh text-muted-foreground">
                 <Link href="/forgot-password" className="text-primary underline">کوڈ کی تصدیق ابھی باقی ہے؟</Link>

@@ -7,8 +7,10 @@ import { REGISTRY, getDelegate, coerceFields } from "@/lib/api-registry";
 const RESOURCE_MODULE: Record<string, string> = {
   news: "content", books: "content", poets: "content",
   newspaper: "newspaper", words: "newspaper", shers: "newspaper", banners: "newspaper",
+  magazines: "newspaper",
   competitions: "content", events: "content",
   qafiya: "tools", behrs: "tools", users: "users",
+  feedback: "engagement",
 };
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ resource: string }> }) {

@@ -47,6 +47,7 @@ const NAV = [
 ];
 
 const MORE = [
+  { label: "ادبی رسالے", href: "/magazine" },
   { label: "ادبی خبریں", href: "/news" },
   { label: "ادبی مقابلے", href: "/competitions" },
   { label: "ادبی تقریبات", href: "/events" },

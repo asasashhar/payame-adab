@@ -88,7 +88,10 @@ export function BookReader({
       if (!pdfPage) {
         pdfPage = await doc.getPage(n);
         pageCache.current.set(n, pdfPage);
-        if (pageCache.current.size > 24) pageCache.current.delete(pageCache.current.keys().next().value);
+        if (pageCache.current.size > 24) {
+          const oldest = pageCache.current.keys().next().value;
+          if (oldest !== undefined) pageCache.current.delete(oldest);
+        }
       }
       const base = pdfPage.getViewport({ scale: 1 });
       // measure the stage (the scrollable area), not the shrink-wrapped canvas box

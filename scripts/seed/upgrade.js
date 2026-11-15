@@ -43,8 +43,11 @@ const SETTINGS = {
   contactEmail: "payameadab@gmail.com",
   // appearance
   themePreset: "emerald",
-  // the green reference design stays on top; admin can re-enable rotation
-  designOverride: "A",
+  // Master prompt PART 9: the automatic monthly schedule is the default.
+  // Empty designOverride = auto (Asia/Kolkata): 1–6 A, 7–13 B, 14–20 C, 21–end D.
+  // The Super Admin can pin any design in the Admin Panel and restore the
+  // automatic schedule at any time ("بحال کریں" button).
+  designOverride: "",
   designRotation: "1",
   fontBody: "jameel-noori-nastaleeq",
   fontHeading: "jameel-noori-nastaleeq",
@@ -153,8 +156,11 @@ async function main() {
     console.log("admin email fixed: mdnematulah1343 -> mdnematullah1343 (password reset to initial)");
   }
 
-  // 2) ensure the three authorized admins (darulhuda logs straight in —
-  //    force-change stays only for accounts created from the Admin Panel)
+  // 2) ensure the three authorized admins. Login requirement: entering
+  //    darulhuda must open the Admin Dashboard directly — seeded admins get
+  //    mustChangePassword=false; the password can be changed any time from
+  //    Account Settings. Admins created via the Admin Panel still get
+  //    mustChangePassword=true (initial password must be changed there).
   for (const a of ADMINS) {
     const existing = await db.user.findUnique({ where: { email: a.email } });
     if (existing) {
@@ -181,6 +187,8 @@ async function main() {
   // 2b) dedicated super-admin: logs in on /admin/login with @admin / darulhuda.
   //     Stored like any user but with the reserved admin ID "@admin"; it is the
   //     permanent owner (ownerEmail setting), so it always keeps full control.
+  // Login requirement: @admin + darulhuda opens the Admin Dashboard directly.
+  // Changing the initial password stays available in Account Settings.
   const SUPER = { email: "@admin", name: "منتظمِ اعلیٰ — پیامِ ادب" };
   const superAdmin = await db.user.findUnique({ where: { email: SUPER.email } });
   if (superAdmin) {
@@ -213,11 +221,13 @@ async function main() {
   const adminCount = await db.user.count({ where: { role: "ADMIN", status: "ACTIVE" } });
   console.log("active admins:", adminCount, "(max 5)");
 
-  // 3) settings
+  // 3) settings (designOverride is also reset to auto-mode on boot-seed —
+  //    a pinned design is a live admin decision, not a default)
   for (const [key, value] of Object.entries(SETTINGS)) {
     const exists = await db.setting.findUnique({ where: { key } });
     if (!exists) await db.setting.create({ data: { key, value } });
   }
+  await db.setting.upsert({ where: { key: "designOverride" }, update: { value: "" }, create: { key: "designOverride", value: "" } });
   console.log("settings ensured:", Object.keys(SETTINGS).length);
 
   // 4) literary news
@@ -229,6 +239,41 @@ async function main() {
     });
   }
   console.log("news seeded:", NEWS.length);
+
+  // 4b) first magazine issue — assembled from real published site content
+  //     (no fabricated bibliographic data; TOC links actual published works)
+  const magExists = await db.magazineIssue.findFirst({ where: { issueNumber: "۱" } });
+  if (!magExists) {
+    const poemLinks = await db.poem.findMany({ where: { status: "PUBLISHED" }, orderBy: { views: "desc" }, take: 5 });
+    const articleLinks = await db.article.findMany({ where: { status: "PUBLISHED" }, orderBy: { views: "desc" }, take: 4 });
+    const tocLines = [
+      ...poemLinks.map((p) => `${p.title} | ${p.poetName || "—"} | /poetry/${p.id}`),
+      ...articleLinks.map((a) => `${a.title} | ${a.authorName || "—"} | /articles/${a.id}`),
+    ];
+    await db.magazineIssue.create({
+      data: {
+        issueNumber: "۱",
+        title: "پیامِ ادب — افتتاحی ادبی شمارہ",
+        theme: "روایت سے نئی نسل تک",
+        editorial:
+          "پیامِ ادب کا افتتاحی ادبی شمارہ اردو زبان و ادب کے فروغ کے سلسلے میں ادارے کا پہلا مجاز ادبی قدم ہے۔ اس شمارے میں پلیٹ فارم پر مقبول ترین منتخب شاعری اور ادبی و تحقیقی تحریریں یکجا کی گئی ہیں۔ ہر تحریر ادارتی جائزے کے بعد شائع کی گئی ہے اور اصل مصنف کے نام سے منسوب ہے۔\n\nآنے والے شماروں میں نمایاں موضوعات، کتب کے تعارف اور نئے لکھنے والوں کی منتخب تحریریں شامل کی جائیں گی۔ قارئین اپنی رائے شکایات و تجاویز کے ذریعے ادارتی ٹیم تک پہنچا سکتے ہیں۔",
+        toc: tocLines.join("\n"),
+        published: true,
+        publishedAt: new Date(),
+      },
+    });
+    console.log("magazine issue 1 created with", tocLines.length, "TOC entries");
+  }
+
+  // 5) attach the digital sample edition to دیوانِ غالب (idempotent, after wipes)
+  const ghalib = await db.book.findFirst({ where: { title: { contains: "غالب" } } });
+  if (ghalib && !ghalib.pdfUrl) {
+    await db.book.update({
+      where: { id: ghalib.id },
+      data: { pdfUrl: "/books-pdf/divan-e-ghalib-sample.pdf", pages: ghalib.pages || "۵" },
+    });
+    console.log("sample digital edition attached:", ghalib.title);
+  }
 
   console.log("=== upgrade seed complete ===");
 }

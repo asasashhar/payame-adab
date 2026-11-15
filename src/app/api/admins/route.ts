@@ -104,7 +104,12 @@ export async function POST(req: NextRequest) {
       if (!target || target.role !== "ADMIN") {
         return NextResponse.json({ error: "ایڈمنسٹریٹر نہیں ملا" }, { status: 404 });
       }
-      const updated = await db.user.update({ where: { id }, data: { name } });
+      const data: { name: string; mustChangePassword?: boolean } = { name };
+      // optional credential-flag change ("0" = sign straight into the dashboard)
+      if (body.mustChangePassword === "0" || body.mustChangePassword === "1") {
+        data.mustChangePassword = body.mustChangePassword === "1";
+      }
+      const updated = await db.user.update({ where: { id }, data });
       await logActivity("admin-update", target.email, admin.email);
       return NextResponse.json(adminSafe(updated));
     }

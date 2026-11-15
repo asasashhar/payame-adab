@@ -62,6 +62,7 @@ const GROUPS: { title: string; items: { href: string; label: string; icon: React
     title: "اخبار و روزانہ",
     items: [
       { href: "/admin/newspaper", label: "ہفتہ وار شمارے", icon: Newspaper },
+      { href: "/admin/magazines", label: "ادبی رسالے", icon: BookA },
       { href: "/admin/words", label: "آج کا لفظ", icon: BookA },
       { href: "/admin/shers", label: "آج کا شعر", icon: Quote },
       { href: "/admin/banners", label: "بینر میڈیا", icon: ImageIcon },
@@ -74,6 +75,7 @@ const GROUPS: { title: string; items: { href: string; label: string; icon: React
       { href: "/admin/likes", label: "پسندیدگی مینجمنٹ", icon: Heart },
       { href: "/admin/competitions", label: "ادبی مقابلے", icon: Trophy },
       { href: "/admin/events", label: "تقریبات", icon: CalendarDays },
+      { href: "/admin/feedback", label: "شکایات و تجاویز", icon: Inbox },
     ],
   },
   {

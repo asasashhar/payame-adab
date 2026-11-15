@@ -58,23 +58,24 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-6 flex flex-col items-center">
             <LogoMark size={72} className="mb-3 shadow-md" />
-            <h1 className="font-nastaliq-tight text-3xl text-emerald-ink">لاگ اِن کریں</h1>
+            <h1 className="font-latin text-3xl font-bold text-emerald-ink" dir="ltr">Log In</h1>
+            <p className="mt-1 font-naskh text-sm text-muted-foreground">اپنے ادبی اکاؤنٹ میں داخل ہوں</p>
             <p className="mt-1 font-naskh text-base text-muted-foreground">اپنے ادبی اکاؤنٹ میں داخل ہوں</p>
           </div>
 
           <form onSubmit={submit} className="manuscript-frame space-y-5 rounded-xl bg-card p-7">
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-naskh text-[15px]">ای میل</Label>
+              <Label htmlFor="email" className="font-latin text-[15px]" dir="ltr">Email</Label>
               <Input id="email" type="email" dir="ltr" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 text-left font-latin" placeholder="you@example.com" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-naskh text-[15px]">پاس ورڈ</Label>
+              <Label htmlFor="password" className="font-latin text-[15px]" dir="ltr">Password</Label>
               <div className="relative">
                 <Input id="password" type={showPass ? "text" : "password"} dir="ltr" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 pe-11 text-left font-latin" />
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  aria-label={showPass ? "پاس ورڈ چھپائیں" : "پاس ورڈ دکھائیں"}
+                  aria-label={showPass ? "Hide password" : "Show password"}
                   className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   {showPass ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
@@ -82,22 +83,22 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="flex cursor-pointer select-none items-center gap-2 font-naskh text-sm text-muted-foreground">
+              <label className="flex cursor-pointer select-none items-center gap-2 font-latin text-sm text-muted-foreground" dir="ltr">
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-brand" />
-                مجھے یاد رکھیں
+                Remember me
               </label>
-              <Link href="/forgot-password" className="font-naskh text-sm font-semibold text-gold underline hover:text-primary">
-                پاس ورڈ بھول گئے ہیں؟
+              <Link href="/forgot-password" className="font-latin text-sm font-semibold text-gold underline hover:text-primary" dir="ltr">
+                Forgot Password?
               </Link>
             </div>
             <Button type="submit" disabled={loading} className="h-11 w-full bg-primary font-naskh text-[16px] hover:bg-emerald-deep">
-              {loading ? "لاگ اِن ہو رہا ہے…" : "لاگ اِن"}
+              {loading ? "Logging in…" : "Log In"}
             </Button>
 
             {/* Continue with Google */}
             <div className="flex items-center gap-3" aria-hidden>
               <span className="h-px flex-1 bg-gold/30" />
-              <span className="font-naskh text-[13px] text-muted-foreground">یا</span>
+              <span className="font-latin text-[13px] text-muted-foreground" dir="ltr">or</span>
               <span className="h-px flex-1 bg-gold/30" />
             </div>
             <Suspense fallback={null}>
@@ -105,8 +106,8 @@ export default function LoginPage() {
             </Suspense>
 
             <p className="text-center text-[15px] font-naskh text-muted-foreground">
-              اکاؤنٹ نہیں ہے؟{" "}
-              <Link href="/register" className="font-semibold text-primary hover:text-gold">نیا اکاؤنٹ بنائیں</Link>
+              No account yet?{" "}
+              <Link href="/register" className="font-semibold text-primary hover:text-gold">Create Account</Link>
             </p>
           </form>
         </div>

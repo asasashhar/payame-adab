@@ -112,13 +112,13 @@ export function GoogleSignInButton({
             </DialogTitle>
             <DialogDescription className="font-naskh leading-7">
               {admin
-                ? "اپنا مجاز ایڈمن Gmail لکھیں — تصدیق کے بعد براہِ راست ایڈمن پینل کھل جائے گا۔"
-                : "اپنا Gmail لکھیں — رجسٹرڈ اکاؤنٹ فوراً کھل جائے گا، نیا Gmail خودکار رکنیت بنا دے گا۔"}
+                ? "Enter your authorized admin Gmail — after Google verifies you, the Admin Panel opens."
+                : "Enter your Gmail — Google verifies your account, then you are signed in."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="google-email" className="font-naskh">Gmail ای میل</Label>
+              <Label htmlFor="google-email" className="font-latin" dir="ltr">Gmail address</Label>
               <Input
                 id="google-email"
                 type="email"
@@ -136,13 +136,11 @@ export function GoogleSignInButton({
               disabled={busy}
               className="h-11 w-full gap-2 bg-primary font-naskh hover:bg-emerald-deep"
             >
-              {busy && <Loader2 className="h-4 w-4 animate-spin" />} جاری رکھیں
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />} Continue
             </Button>
-            {!admin && (
-              <p className="text-center text-[11px] leading-5 font-naskh text-muted-foreground">
-                نوٹ: حقیقی گوگل تصدیق کے لیے ایڈمن پینل ← ترتیبات میں Google Client ID/Secret محفوظ کریں۔
-              </p>
-            )}
+            <p className="text-center text-[11px] leading-5 font-naskh text-muted-foreground">
+              Real Google verification requires Google OAuth credentials — the site admin saves the Client ID/Secret in Admin Panel → Settings.
+            </p>
           </form>
         </DialogContent>
       </Dialog>

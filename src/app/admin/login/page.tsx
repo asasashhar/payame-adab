@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="admin-id" className="font-naskh">Gmail / ایڈمن آئی ڈی</Label>
+              <Label htmlFor="admin-id" className="font-latin" dir="ltr">Admin ID (Gmail)</Label>
               <div className="relative">
                 <Mail className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="font-naskh">پاس ورڈ</Label>
+              <Label htmlFor="password" className="font-latin" dir="ltr">Password</Label>
               <div className="relative">
                 <Lock className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  aria-label={showPass ? "پاس ورڈ چھپائیں" : "پاس ورڈ دکھائیں"}
+                  aria-label={showPass ? "Hide password" : "Show password"}
                   className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   {showPass ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
@@ -112,7 +112,7 @@ export default function AdminLoginPage() {
 
             <Button type="submit" disabled={busy} className="h-11 w-full gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-              داخلہ حاصل کریں
+              Sign in to Admin Panel
             </Button>
 
             {/* Continue with Google — authorized administrators sign in directly */}

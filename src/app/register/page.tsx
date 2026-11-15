@@ -95,7 +95,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           <div className="mb-6 flex flex-col items-center">
             <LogoMark size={72} className="mb-3 shadow-md" />
-            <h1 className="font-nastaliq-tight text-3xl text-emerald-ink">نیا اکاؤنٹ</h1>
+            <h1 className="font-latin text-3xl font-bold text-emerald-ink" dir="ltr">Create Account</h1>
             <p className="mt-1 font-naskh text-base text-muted-foreground">
               اپنی تحریریں بھیجنے اور اپنی ادبی پروفائل بنانے کے لیے رجسٹر کریں
             </p>
@@ -103,43 +103,43 @@ export default function RegisterPage() {
 
           <form onSubmit={submit} className="manuscript-frame space-y-5 rounded-xl bg-card p-7">
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">اصل نام *</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Full Name *</Label>
               <Input required value={form.name} onChange={set("name")} className="h-11 font-naskh" />
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">قلمی نام (تخلص)</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Pen Name (Takhallus)</Label>
               <Input value={form.penName} onChange={set("penName")} className="h-11 font-nastaliq-tight text-lg" />
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">جی میل / ای میل *</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Gmail / Email *</Label>
               <Input required type="email" dir="ltr" value={form.email} onChange={set("email")} className="h-11 text-left font-latin" placeholder="you@gmail.com" />
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">پاس ورڈ *</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Password *</Label>
               <div className="relative">
                 <Input required type={showPass ? "text" : "password"} dir="ltr" value={form.password} onChange={set("password")} className="h-11 pe-11 text-left font-latin" />
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  aria-label={showPass ? "پاس ورڈ چھپائیں" : "پاس ورڈ دکھائیں"}
+                  aria-label={showPass ? "Hide password" : "Show password"}
                   className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   {showPass ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                 </button>
               </div>
               <p className={`text-xs leading-5 font-naskh ${strength ? "text-destructive" : "text-[#2f6d46]"}`}>
-                {strength ? `پاس ورڈ کمزور ہے: ${strength}` : "پاس ورڈ مضبوط ہے ✓"}
+                {strength ? `Weak password: ${strength}` : "Strong password ✓"}
               </p>
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">پاس ورڈ کی تصدیق *</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Confirm Password *</Label>
               <Input required type={showPass ? "text" : "password"} dir="ltr" value={form.confirm} onChange={set("confirm")} className={`h-11 text-left font-latin ${form.confirm && form.confirm !== form.password ? "border-destructive" : ""}`} />
               {form.confirm && form.confirm !== form.password && (
                 <p className="text-xs font-naskh text-destructive">تصدیق پاس ورڈ اصل پاس ورڈ سے مختلف ہے</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">مختصر تعارف (اختیاری)</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Short Bio (optional)</Label>
               <textarea
                 value={form.bio}
                 onChange={set("bio")}
@@ -149,7 +149,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-naskh text-[15px]">پروفائل تصویر (اختیاری)</Label>
+              <Label className="font-latin text-[15px]" dir="ltr">Profile Photo (optional)</Label>
               <input
                 ref={photoRef}
                 type="file"
@@ -165,13 +165,13 @@ export default function RegisterPage() {
               </span>
             </label>
             <Button type="submit" disabled={loading} className="h-11 w-full bg-primary font-naskh text-[16px] hover:bg-emerald-deep">
-              {loading ? "اکاؤنٹ بنا رہے ہیں…" : "رجسٹر کریں"}
+              {loading ? "Creating account…" : "Create Account"}
             </Button>
 
             {/* Continue with Google — instant membership for Gmail users */}
             <div className="flex items-center gap-3" aria-hidden>
               <span className="h-px flex-1 bg-gold/30" />
-              <span className="font-naskh text-[13px] text-muted-foreground">یا</span>
+              <span className="font-latin text-[13px] text-muted-foreground" dir="ltr">or</span>
               <span className="h-px flex-1 bg-gold/30" />
             </div>
             <Suspense fallback={null}>

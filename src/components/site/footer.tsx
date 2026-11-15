@@ -70,6 +70,7 @@ export function SiteFooter({
               ["تقطیع و بحر", "/taqti"],
               ["لغت", "/dictionary"],
               ["اپنی تحریر بھیجیں", "/submit"],
+              ["شکایات و تجاویز", "/feedback"],
               ["ہمارا تعارف", "/about"],
             ].map(([label, href]) => (
               <li key={href}>

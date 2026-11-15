@@ -77,12 +77,12 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto mb-4 w-fit">
             <LogoMark size={72} />
           </div>
-          <h1 className="font-nastaliq-tight text-2xl leading-[1.9] text-primary">پاس ورڈ بازیابی</h1>
+          <h1 className="font-latin text-2xl font-bold text-primary" dir="ltr">Forgot Password</h1>
 
           {step === 1 && (
             <form onSubmit={requestCode} className="mt-4 space-y-4 text-start">
               <div className="space-y-1.5">
-                <Label className="font-naskh text-[15px]">رجسٹرڈ جی میل / ای میل</Label>
+                <Label className="font-latin text-[15px]" dir="ltr">Registered Gmail / Email</Label>
                 <div className="relative">
                   <MailQuestion className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -94,13 +94,13 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
               <Button type="submit" disabled={busy} className="h-11 w-full gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />} تصدیقی کوڈ بھیجیں
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />} Send Verification Code
               </Button>
               <p className="text-center text-[13px] leading-6 font-naskh text-muted-foreground">
                 اگر یہ ای میل رجسٹرڈ ہے تو 6 ہندسوں کا تصدیقی کوڈ آپ کے ای میل پر بھیج دیا جائے گا۔ کوڈ 15 منٹ کے لیے معتبر ہوتا ہے۔
               </p>
               <p className="text-center text-xs font-naskh text-muted-foreground">
-                <Link href="/login" className="text-primary underline">لاگ اِن پر واپس جائیں</Link>
+                <Link href="/login" className="text-primary underline">Back to Log In</Link>
               </p>
             </form>
           )}
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
               <div className="space-y-1.5">
-                <Label className="font-naskh text-[15px]">تصدیقی کوڈ (OTP)</Label>
+                <Label className="font-latin text-[15px]" dir="ltr">Verification Code (OTP)</Label>
                 <div className="relative">
                   <KeyRound className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
               <Button type="submit" disabled={busy || code.length !== 6} className="h-11 w-full gap-2 bg-primary font-naskh text-[15px] hover:bg-emerald-deep">
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />} کوڈ تصدیق کریں
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />} Verify Code
               </Button>
               <div className="flex items-center justify-between text-xs font-naskh">
                 <button type="button" onClick={() => { setStep(1); setCode(""); }} className="text-primary underline">

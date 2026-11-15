@@ -135,6 +135,8 @@ async function api(path, opts = {}, cookie) {
   check("restricted admin CAN manage content", 201, a4book.status);
   const a4admins = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "create", email: "z@z.com", name: "Z" }) }, a4cookie);
   check("restricted admin blocked from admins (403)", 403, a4admins.status);
+  const a4revoke = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "revoke", id: a4.body.id }) }, adminCookie);
+  check("restricted admin revoked (slot freed)", 200, a4revoke.status);
 
   console.log("== 9. mail resend + test ==");
   const testMail = await api("/api/mail", { method: "POST", body: JSON.stringify({ op: "send-test", to: "admin@testmail.pk" }) }, adminCookie);
@@ -142,13 +144,104 @@ async function api(path, opts = {}, cookie) {
   const resend = await api("/api/mail", { method: "POST", body: JSON.stringify({ op: "resend", id: pubMail.id }) }, adminCookie);
   check("resend op ok", 200, resend.status);
 
+  console.log("== 9b. @admin super-admin + force password change ==");
+  // make the test re-runnable: always start 9b from the canonical credential
+  // state (darulhuda + force-change), regardless of how a previous run ended
+  const adminListPre = await api("/api/admins", {}, adminCookie);
+  const superPre = (adminListPre.body?.admins ?? []).find((a) => a.email === "@admin");
+  if (superPre) {
+    await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "reset-password", id: superPre.id, password: "darulhuda" }) }, adminCookie);
+    // seeded @admin signs straight into the dashboard (password change stays available)
+    await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "update", id: superPre.id, name: superPre.name || "منتظمِ اعلیٰ — پیامِ ادب", mustChangePassword: "0" }) }, adminCookie);
+  }
+  const superLogin = await api("/api/auth/admin-login", { method: "POST", body: JSON.stringify({ email: "@admin", password: "darulhuda" }) });
+  check("@admin login", 200, superLogin.status);
+  const superMe = await api("/api/auth/me", {}, superLogin.setCookie.map((c) => c.split(";")[0]).join("; "));
+  check("@admin opens dashboard directly (mustChangePassword false)", false, superMe.body?.mustChangePassword === true);
+  check("@admin session valid", true, superMe.body?.role === "ADMIN");
+  // password can still be changed securely — and then the old one stops working
+  const superChange = await api("/api/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword: "darulhuda", newPassword: "Darulhuda9" }) }, superLogin.setCookie.map((c) => c.split(";")[0]).join("; "));
+  check("@admin password change ok", 200, superChange.status);
+  const superOld = await api("/api/auth/admin-login", { method: "POST", body: JSON.stringify({ email: "@admin", password: "darulhuda" }) });
+  check("old @admin password rejected (401)", 401, superOld.status);
+  const superNew = await api("/api/auth/admin-login", { method: "POST", body: JSON.stringify({ email: "@admin", password: "Darulhuda9" }) });
+  check("@admin new password works", 200, superNew.status);
+  const superBlockedUser = await api("/api/auth/login", { method: "POST", body: JSON.stringify({ email: "@admin", password: "x" }) });
+  check("@admin blocked on user login (403)", 403, superBlockedUser.status);
+  const superReg = await api("/api/auth/register", { method: "POST", body: JSON.stringify({ name: "X", email: "@admin", password: "test1234" }) });
+  check("@admin reserved from register (400)", 400, superReg.status);
+  const superAdminsList = await api("/api/admins", {}, superNew.setCookie.map((c) => c.split(";")[0]).join("; "));
+  check("@admin sees admins list (owner)", 200, superAdminsList.status);
+  const superAdminsOp = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "create", email: `spx${Date.now()}@payameadab.com`, name: "ایس پی ایکس", permissions: "content" }) }, superNew.setCookie.map((c) => c.split(";")[0]).join("; "));
+  check("@admin can create admins", 201, superAdminsOp.status);
+  const superCleanup = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "revoke", id: superAdminsOp.body.id }) }, superNew.setCookie.map((c) => c.split(";")[0]).join("; "));
+  check("@admin revoke cleanup", 200, superCleanup.status);
+  // restore the initial credential state for the next run: darulhuda, direct dashboard
+  const restore = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "reset-password", id: superMe.body.id, password: "darulhuda" }) }, adminCookie);
+  check("@admin restored to initial darulhuda", 200, restore.status);
+  const restoreFlag = await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "update", id: superMe.body.id, name: "منتظمِ اعلیٰ — پیامِ ادب", mustChangePassword: "0" }) }, adminCookie);
+  check("@admin force-change flag cleared", 200, restoreFlag.status);
+
+  console.log("== 9c. complaints & suggestions inbox ==");
+  const fb = await api("/api/feedback", { method: "POST", body: JSON.stringify({ kind: "COMPLAINT", name: "قارئین E2E", email: "fb@testmail.pk", subject: "آزمائشی شکایت", message: "یہ خودکار جانچ کا پیغام ہے۔", pageUrl: "/books" }) });
+  check("feedback submitted (201)", 201, fb.status);
+  const fbList = await api("/api/feedback?all=1", {}, adminCookie);
+  const fbRow = (fbList.body ?? []).find((r) => r.id === fb.body.id);
+  check("feedback in admin inbox", true, !!fbRow);
+  const fbPatch = await api(`/api/feedback/${fb.body.id}`, { method: "PATCH", body: JSON.stringify({ status: "UNDER_REVIEW" }) }, adminCookie);
+  check("feedback status update", "UNDER_REVIEW", fbPatch.body?.status);
+  const fbDel = await api(`/api/feedback/${fb.body.id}`, { method: "DELETE" }, adminCookie);
+  check("feedback deleted", 200, fbDel.status);
+
+  console.log("== 9d. magazine system ==");
+  const magList = await api("/api/magazines");
+  check("magazine list public", 200, magList.status);
+  check("magazine issue 1 seeded", true, (magList.body ?? []).length >= 1);
+  const magPage = await fetch(`${BASE}/magazine`);
+  check("magazine homepage 200", 200, magPage.status);
+  const magId = magList.body[0]?.id;
+  const magIssue = await fetch(`${BASE}/magazine/${magId}`);
+  check("magazine issue page 200", 200, magIssue.status);
+
+  console.log("== 9e. digital book reader ==");
+  const ghalib = await api("/api/books?all=1", {}, adminCookie);
+  const ghalibBook = (ghalib.body ?? []).find((b) => b.pdfUrl);
+  check("book with digital edition exists", true, !!ghalibBook);
+  const readerPage = await fetch(`${BASE}/books/${ghalibBook.id}/read`);
+  check("reader page 200", 200, readerPage.status);
+  const pdfFile = await fetch(`${BASE}${ghalibBook.pdfUrl}`);
+  check("PDF file served", 200, pdfFile.status);
+  const readerNoPdf = await fetch(`${BASE}/magazine/${magId}/read`);
+  check("magazine read page 200 (no-pdf state ok)", 200, readerNoPdf.status);
+
+  console.log("== 9f. contact page ==");
+  const contactPage = await fetch(`${BASE}/contact`);
+  check("contact page 200", 200, contactPage.status);
+  const contactPost = await api("/api/feedback", { method: "POST", body: JSON.stringify({ kind: "OTHER", name: "رابطہ E2E", email: "c@testmail.pk", subject: "رابطہ جانچ", message: "سلام — یہ رابطہ فارم کی جانچ ہے۔" }) });
+  check("contact form posts (201)", 201, contactPost.status);
+  await api(`/api/feedback/${contactPost.body.id}`, { method: "DELETE" }, adminCookie);
+
+  console.log("== 9f2. google login security ==");
+  const googleUnconfigured = await api("/api/auth/google-start", { method: "POST", body: JSON.stringify({ email: "anyone@gmail.com" }) });
+  check("google sign-in without OAuth creds refused (503)", 503, googleUnconfigured.status);
+  check("no passwordless session minted", true, googleUnconfigured.setCookie.every((c) => !c.startsWith("pea_session=")));
+  const googleAdminUnconfigured = await api("/api/auth/google-start", { method: "POST", body: JSON.stringify({ email: "mdnematullah1343@gmail.com", admin: "1" }) });
+  check("admin google path also requires real OAuth (503)", 503, googleAdminUnconfigured.status);
+
+  console.log("== 9g. four-design system ==");
+  const homeHtml7 = await (await fetch(BASE + "/")).text();
+  check("body carries data-design attribute", true, /data-design="[ABCD]"/.test(homeHtml7));
+  const cssHref = homeHtml7.match(/href="(\/_next\/static\/chunks\/[^"]+\.css)"/)?.[1];
+  const compiledCss = cssHref ? await (await fetch(`${BASE}${cssHref}`)).text() : "";
+  check("four-design CSS compiled (pea-navstrip rules)", true, compiledCss.includes("pea-navstrip"));
+  check("reader flip animation compiled", true, compiledCss.includes("pea-flip-next"));
+
   console.log("== 10. cleanup ==");
   await api(`/api/books/${bookRes.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/books/${a4book.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/articles?id=${art.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/articles?id=${draft.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/ads?id=${ad.body.id}`, { method: "DELETE" }, adminCookie);
-  await api("/api/admins", { method: "POST", body: JSON.stringify({ op: "revoke", id: a4.body.id }) }, adminCookie);
   console.log("  cleanup done");
 
   console.log(`\n==========================================`);

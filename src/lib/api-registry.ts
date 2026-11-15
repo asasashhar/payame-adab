@@ -36,10 +36,33 @@ export const REGISTRY: Record<string, ResourceDef> = {
     write: "admin",
     fields: {
       title: "string", author: "string", translator: "string", category: "string",
-      description: "text", coverUrl: "string", year: "string", pages: "string",
+      description: "text", coverUrl: "string", pdfUrl: "string", year: "string", pages: "string",
       featured: "bool",
     },
     searchFields: ["title", "author", "description"],
+  },
+  magazines: {
+    model: "magazineIssue",
+    publicRead: true,
+    publicWhere: { published: true },
+    write: "admin",
+    fields: {
+      issueNumber: "string", title: "string", theme: "string", coverUrl: "string",
+      editorial: "text", pdfUrl: "string", toc: "text",
+      published: "bool", archive: "bool", publishedAt: "date",
+    },
+    searchFields: ["title", "issueNumber", "theme", "editorial"],
+  },
+  feedback: {
+    model: "feedback",
+    publicRead: false,
+    write: "admin",
+    fields: {
+      kind: "string", name: "string", email: "string", subject: "string",
+      message: "text", pageUrl: "string", status: "string", notes: "text",
+    },
+    searchFields: ["subject", "message", "name", "email"],
+    defaultSort: "createdAt",
   },
   poets: {
     model: "poet",
@@ -73,6 +96,7 @@ export const REGISTRY: Record<string, ResourceDef> = {
       active: "bool",
     },
     searchFields: ["word", "meaning"],
+    defaultSort: "date",
   },
   shers: {
     model: "dailySher",
@@ -80,6 +104,7 @@ export const REGISTRY: Record<string, ResourceDef> = {
     publicWhere: { active: true },
     write: "admin",
     fields: { text: "text", poetName: "string", active: "bool" },
+    defaultSort: "date",
     searchFields: ["text", "poetName"],
   },
   competitions: {
