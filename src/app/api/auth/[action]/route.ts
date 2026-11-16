@@ -444,8 +444,12 @@ export async function PUT(
         data.username = null;
       } else if (!/^[a-zA-Z0-9._]{3,20}$/.test(raw)) {
         return NextResponse.json({ error: "یوزر نیم 3 سے 20 حروف کا ہو، صرف انگریزی حروف، عدد، نقطہ یا _" }, { status: 400 });
+      } else if (["admin", "administrator", "moderator", "moderator", "root", "official", "payameadab"].includes(raw.toLowerCase())) {
+        return NextResponse.json({ error: "یہ یوزر نیم محفوظ ہے — کوئی اور چنیں" }, { status: 409 });
       } else if (raw.toLowerCase() !== (user.username ?? "").toLowerCase()) {
-        const taken = await db.user.findFirst({ where: { username: { equals: raw, mode: "insensitive" } }, select: { id: true } });
+        // SQLite has no insensitive mode — compare the case variants in the query instead
+        const variants = [...new Set([raw, raw.toLowerCase(), raw.toUpperCase(), raw[0].toUpperCase() + raw.slice(1).toLowerCase()])];
+        const taken = await db.user.findFirst({ where: { username: { in: variants } }, select: { id: true } });
         if (taken && taken.id !== user.id) {
           return NextResponse.json({ error: "یہ یوزر نیم کسی اور کے پاس ہے — کوئی اور چنیں" }, { status: 409 });
         }
