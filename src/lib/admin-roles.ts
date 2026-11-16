@@ -6,7 +6,7 @@
  * The owner account (@admin) always keeps "*" regardless of role.
  */
 
-import { PERMISSION_MODULES } from "@/lib/auth";
+import { PERMISSION_MODULES } from "@/lib/permission-modules";
 
 export type RoleId = "super-admin" | "admin" | "editor" | "content-manager";
 

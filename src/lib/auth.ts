@@ -106,22 +106,9 @@ export async function requireAdmin(): Promise<SessionUser | null> {
   return user;
 }
 
-/** Admin permission modules (backend-enforced RBAC). */
-export const PERMISSION_MODULES: { key: string; label: string }[] = [
-  { key: "submissions", label: "منظوری مرکز و شیڈول" },
-  { key: "content", label: "مواد (شاعری، مضامین، خبریں، کتب، شخصیات، مقابلے)" },
-  { key: "newspaper", label: "اخبار، الفاظ، اشعار، بینرز" },
-  { key: "homepage", label: "ہوم پیج مینجمنٹ" },
-  { key: "appearance", label: "لوگو، فونٹس، ظاہری شکل" },
-  { key: "settings", label: "سائٹ ترتیبات و SEO" },
-  { key: "ads", label: "اشتہارات" },
-  { key: "mail", label: "ای میل سینٹر" },
-  { key: "engagement", label: "تبصرے و پسندیدگیاں" },
-  { key: "tools", label: "قافیہ و بحریں" },
-  { key: "users", label: "صارفین و مصنفین" },
-  { key: "admins", label: "ایڈمنسٹریٹرز کا انتظام" },
-  { key: "security", label: "سیکیورٹی، لاگز و بازیافت" },
-];
+/** Admin permission modules live in permission-modules.ts (client-safe data);
+ * auth.ts re-exports for server code. */
+export { PERMISSION_MODULES } from "@/lib/permission-modules";
 
 /**
  * Server-side permission check for an admin module.
