@@ -81,8 +81,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
             </header>
 
             {!item.coverUrl && (
-              <div className="relative z-10 mx-auto mt-6 flex h-40 w-40 items-center justify-center rounded-full bg-secondary">
-                <Megaphone className="h-12 w-12 text-gold" />
+              <div className="relative z-10 mx-auto mt-6 flex h-24 w-24 items-center justify-center rounded-full border border-gold/30 bg-secondary">
+                <Megaphone className="h-8 w-8 text-gold" aria-hidden />
               </div>
             )}
             {item.coverUrl && (

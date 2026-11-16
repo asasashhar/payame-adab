@@ -30,7 +30,7 @@ export default async function NewspaperPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="ڈیجیٹل اخبار" subtitle="ہفتہ وار شمارے — براہِ راست آن لائن مطالعہ" />
+          <SectionHeading title="ڈیجیٹل اخبار" subtitle="ہفتہ وار شمارے — براہِ راست آن لائن مطالعہ"  as="h1" />
 
           {/* current week status */}
           {!hasThisWeek && (

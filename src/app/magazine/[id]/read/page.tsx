@@ -16,12 +16,15 @@ export default async function MagazineReadPage({ params }: { params: Promise<{ i
   return (
     <div className="min-h-screen bg-[#1c2431]">
       {issue.pdfUrl ? (
-        <BookReader
-          pdfUrl={issue.pdfUrl}
-          title={`شمارہ ${issue.issueNumber} — ${issue.title}`}
-          author={issue.theme ?? "پیامِ ادب"}
-          backHref={`/magazine/${issue.id}`}
-        />
+        <>
+          <h1 className="sr-only">شمارہ — مطالعہ</h1>
+          <BookReader
+            pdfUrl={issue.pdfUrl}
+            title={`شمارہ ${issue.issueNumber} — ${issue.title}`}
+            author={issue.theme ?? "پیامِ ادب"}
+            backHref={`/magazine/${issue.id}`}
+          />
+        </>
       ) : (
         <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-24 text-center text-[#e5dfc9]">
           <FileQuestion className="h-14 w-14 text-[#e2c57c]" />

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { LogoMark } from "@/components/site/logo";
+import { SiteHeader } from "@/components/site/header";
+import { SiteFooter } from "@/components/site/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,8 +56,9 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="paper-bg min-h-screen">
-      <div className="mx-auto max-w-2xl px-4 py-10">
+    <div className="paper-bg min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
         <div className="mb-6 text-center">
           <LogoMark size={64} className="mx-auto mb-3 shadow-md" />
           <h1 className="font-nastaliq-tight text-3xl leading-[1.9] text-emerald-ink">شکایات اور تجاویز</h1>
@@ -140,7 +143,8 @@ export default function FeedbackPage() {
             </form>
           )}
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }

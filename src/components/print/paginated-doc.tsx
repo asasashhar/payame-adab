@@ -119,7 +119,7 @@ export function PaginatedDocument({
   return (
     <div className="screen-pdf">
       {/* toolbar */}
-      <div className="no-print sticky top-0 z-10 -mx-4 mb-6 border-b border-gold/25 bg-background/95 px-4 py-3 backdrop-blur">
+      <div className="no-print sticky top-0 z-10 mb-6 border-b border-gold/25 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div>
             <p className="font-nastaliq-tight text-lg text-primary leading-7">PDF پیش منظر — {title}</p>

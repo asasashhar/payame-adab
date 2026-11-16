@@ -16,7 +16,7 @@ export default async function PoetsPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="شعرا و ادبا" subtitle="اردو ادب کی نامور شخصیات کا تعارفی ذخیرہ" />
+          <SectionHeading title="شعرا و ادبا" subtitle="اردو ادب کی نامور شخصیات کا تعارفی ذخیرہ"  as="h1" />
           {poets.length === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">
               <Users className="mx-auto mb-3 h-10 w-10 text-gold" />

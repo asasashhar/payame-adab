@@ -94,11 +94,11 @@ export default function AnalyticsPage() {
       </div>
 
       {/* chart */}
-      <div className="manuscript-frame mt-6 rounded-xl bg-card p-5" dir="ltr">
+      <div className="manuscript-frame mt-6 overflow-hidden rounded-xl bg-card p-5" dir="ltr">
         <h2 className="mb-4 font-nastaliq-tight text-lg text-primary" dir="rtl">
           روزانہ مشاہدات بمقابلہ منفرد زائرین — آخری {days === 365 ? "پورا سال" : `${days} دن`}
         </h2>
-        <div className="h-80 w-full">
+        <div className="h-80 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data?.series ?? []} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
               <defs>

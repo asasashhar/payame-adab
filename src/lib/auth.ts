@@ -50,6 +50,7 @@ export type SessionUser = {
   id: string;
   email: string;
   name: string;
+  username?: string | null;
   penName: string | null;
   bio: string | null;
   photoUrl: string | null;

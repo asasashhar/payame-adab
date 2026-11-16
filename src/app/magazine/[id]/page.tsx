@@ -52,7 +52,7 @@ export default async function MagazineIssuePage({ params }: { params: Promise<{ 
 
           <div className="manuscript-frame relative overflow-hidden rounded-xl bg-[#fffdf7] p-6 sm:p-10">
             <div className="grid gap-8 md:grid-cols-[240px_1fr]">
-              <div>
+              <div className="mx-auto w-full max-w-[260px] md:mx-0 md:max-w-none">
                 {issue.coverUrl ? (
                   <img src={issue.coverUrl} alt={issue.title} className="w-full rounded-lg border border-gold/30 object-cover shadow-md" />
                 ) : (

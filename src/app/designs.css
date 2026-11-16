@@ -157,6 +157,12 @@ body[data-design="B"] .pea-banner.pattern-emerald {
 /* C: parchment banner with ornament frame */
 body[data-design="C"] .pea-banner,
 body[data-design="C"] .pea-banner.pattern-emerald {
+/* C-design banners use the parchment sheet, so cream text would vanish —
+   retune banner text to ink/gold-on-parchment for contrast (audit F-04). */
+body[data-design="C"] .pea-banner .pea-banner-title { color: var(--emerald-ink, #06422a); }
+body[data-design="C"] .pea-banner .pea-banner-subtitle { color: #3a3227; }
+body[data-design="C"] .pea-banner .pea-banner-quote { color: #7a5c14; }
+
   background:
     radial-gradient(color-mix(in srgb, var(--gold) 12%, transparent) 0.7px, transparent 0.7px) 0 0 / 16px 16px,
     var(--secondary);

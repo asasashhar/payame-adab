@@ -13,6 +13,7 @@ export function SectionHeading({
   linkLabel = "سب دیکھیں",
   light = false,
   center = false,
+  as = "h2",
 }: {
   title: string;
   subtitle?: string;
@@ -20,7 +21,9 @@ export function SectionHeading({
   linkLabel?: string;
   light?: boolean;
   center?: boolean;
+  as?: "h1" | "h2";
 }) {
+  const H2 = as;
   if (center) {
     /* centered variant: title flanked by the twin decorative rules */
     return (
@@ -33,14 +36,14 @@ export function SectionHeading({
               <span className="rule-line opacity-50" />
             </span>
           </div>
-          <h2
+          <H2
             className={cn(
               "whitespace-nowrap font-nastaliq-tight text-3xl md:text-[2rem]",
               light ? "text-[#f3ead2]" : "text-[color:var(--accent-text)]"
             )}
           >
             {title}
-          </h2>
+          </H2>
           <div className="decor-rule flex-1" aria-hidden>
             <span className="rule-track">
               <span className="rule-line" />
@@ -59,14 +62,14 @@ export function SectionHeading({
   return (
     <div className="mb-6">
       <div className="flex items-center gap-4">
-        <h2
+        <H2
           className={cn(
             "shrink-0 whitespace-nowrap font-nastaliq-tight text-[1.7rem] md:text-[2rem]",
             light ? "text-[#f3ead2]" : "text-[color:var(--accent-text)]"
           )}
         >
           {title}
-        </h2>
+        </H2>
         <div className="decor-rule min-w-8 flex-1 opacity-70" aria-hidden>
           <span className="rule-track">
             <span className="rule-line" />

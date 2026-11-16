@@ -31,7 +31,7 @@ export function BrandLock({ compact = false }: { compact?: boolean }) {
         <img
           src="/brand/logo-horizontal.png"
           alt="پیامِ ادب — PAYAM-E-ADAB"
-          className="h-[56px] w-auto select-none object-contain transition-transform group-hover:scale-[1.02]"
+          className="hidden h-[56px] w-auto select-none object-contain transition-transform group-hover:scale-[1.02] min-[480px]:block"
         />
       ) : (
         <>
@@ -47,7 +47,7 @@ export function BrandLock({ compact = false }: { compact?: boolean }) {
         </>
       )}
       {!compact && (
-        <span className="flex flex-col items-start sm:hidden">
+        <span className="flex flex-col items-start min-[480px]:hidden">
           <span className="font-nastaliq-tight text-xl leading-snug text-primary">پیامِ ادب</span>
           <span className="text-[10px] tracking-wide text-muted-foreground font-latin">PAYAM-E-ADAB</span>
         </span>

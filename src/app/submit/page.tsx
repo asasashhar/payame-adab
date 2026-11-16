@@ -197,6 +197,7 @@ export default function SubmitPage() {
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-3xl px-4 py-10">
           <SectionHeading
+            as="h1"
             title={editingId ? "اپنی تحریر میں ترمیم" : "اپنی تحریر بھیجیں"}
             subtitle={editingId ? "ترمیم کے بعد تحریر دوبارہ ادارتی جائزے میں چلی جائے گی" : "تحریر ادارتی معائنے کے بعد شائع کی جائے گی"}
           />

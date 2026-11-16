@@ -16,7 +16,7 @@ export default async function EventsPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="آنے والی تقریبات" subtitle="مشاعرے، سیمینار، ورکشاپ اور کتاب رونمائی" />
+          <SectionHeading title="آنے والی تقریبات" subtitle="مشاعرے، سیمینار، ورکشاپ اور کتاب رونمائی"  as="h1" />
           {events.length === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">
               <CalendarDays className="mx-auto mb-3 h-10 w-10 text-gold" />

@@ -41,7 +41,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
           <div className="manuscript-frame relative overflow-hidden rounded-xl bg-[#fffdf7] p-6 sm:p-10">
             {wmOn && <Watermark config={wm} />}
             <div className="relative z-10 grid gap-8 md:grid-cols-[240px_1fr]">
-              <div>
+              <div className="mx-auto w-full max-w-[260px] md:mx-0 md:max-w-none">
                 {book.coverUrl ? (
                    
                   <img src={book.coverUrl} alt={book.title} className="w-full rounded-lg border border-gold/30 shadow-md object-cover" />

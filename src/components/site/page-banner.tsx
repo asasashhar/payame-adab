@@ -39,15 +39,15 @@ export function PageBanner({
       )}
       <div className={cn("relative mx-auto max-w-7xl px-4 py-10 text-center md:py-12", image ? "text-emerald-ink" : "text-[#f3ead2]")}>
         {quote && (
-          <p className={cn("mb-2 font-nastaliq text-sm leading-8 md:text-base", image ? "text-[#26221b]/80" : "text-[#e9c979]/90")}>
+          <p className={cn("pea-banner-quote mb-2 font-nastaliq text-sm leading-8 md:text-base", image ? "text-[#26221b]/80" : "text-[#e9c979]/90")}>
             {quote}
           </p>
         )}
-        <h1 className={cn("font-nastaliq-tight text-4xl leading-[1.7] md:text-5xl md:leading-[1.7]", image ? "text-emerald-ink drop-shadow-sm" : "text-[#f3ead2]")}>
+        <h1 className={cn("pea-banner-title font-nastaliq-tight text-4xl leading-[1.7] md:text-5xl md:leading-[1.7]", image ? "text-emerald-ink drop-shadow-sm" : "text-[#f3ead2]")}>
           {title}
         </h1>
         {subtitle && (
-          <p className={cn("mx-auto mt-2 max-w-2xl font-naskh text-base leading-8 md:text-lg", image ? "text-[#26221b]/85" : "text-[#e5dfc9]/85")}>
+          <p className={cn("pea-banner-subtitle mx-auto mt-2 max-w-2xl font-naskh text-base leading-8 md:text-lg", image ? "text-[#26221b]/85" : "text-[#e5dfc9]/85")}>
             {subtitle}
           </p>
         )}

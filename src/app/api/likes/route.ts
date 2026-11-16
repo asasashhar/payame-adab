@@ -45,6 +45,30 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ poems, articles });
   }
 
+  // admin listing — recent likes with item titles and liker names
+  if (sp.get("admin") === "1") {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ error: "صرف ایڈمن کے لیے" }, { status: 403 });
+    const likes = await db.like.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+    const poemIds = likes.filter((l) => l.resourceType === "poem").map((l) => l.resourceId);
+    const articleIds = likes.filter((l) => l.resourceType === "article").map((l) => l.resourceId);
+    const [poems, articles, users] = await Promise.all([
+      poemIds.length ? db.poem.findMany({ where: { id: { in: poemIds } }, select: { id: true, title: true } }) : Promise.resolve([]),
+      articleIds.length ? db.article.findMany({ where: { id: { in: articleIds } }, select: { id: true, title: true } }) : Promise.resolve([]),
+      db.user.findMany({ where: { id: { in: likes.map((l) => l.userId).filter((v): v is string => Boolean(v)) } }, select: { id: true, name: true, penName: true } }),
+    ]);
+    const titleOf = (t: string, id2: string) =>
+      t === "poem" ? poems.find((x) => x.id === id2)?.title ?? null
+      : t === "article" ? articles.find((x) => x.id === id2)?.title ?? null
+      : null;
+    const nameOf = (uid: string | null) =>
+      uid ? users.find((u) => u.id === uid)?.penName ?? users.find((u) => u.id === uid)?.name ?? null : null;
+    return NextResponse.json({
+      likes: likes.map((l) => ({ ...l, title: titleOf(l.resourceType, l.resourceId), likerName: nameOf(l.userId) })),
+      totals: { all: likes.length },
+    });
+  }
+
   const type = sp.get("resourceType") ?? "";
   const id = sp.get("resourceId") ?? "";
   if (!RESOURCE_PUBLISHED[type] || !id) {

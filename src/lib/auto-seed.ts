@@ -47,13 +47,16 @@ export async function ensureSeeded(): Promise<void> {
   const fs = req("fs") as unknown as { existsSync: (p: string) => boolean };
   const path = req("path") as unknown as { join: (...p: string[]) => string };
   try {
-    const [users, settings, poems] = await Promise.all([
+    const [users, settings, poems, words, editions] = await Promise.all([
       db.user.count(),
       db.setting.count(),
       db.poem.count(),
+      db.wordOfDay.count(),
+      db.newspaperEdition.count(),
     ]);
-    // healthy DB: the four seeded admins (3 Gmail + @admin) plus content
-    if (users >= 4 && settings > 0 && poems > 0) return;
+    // healthy DB: the four seeded admins (3 Gmail + @admin), content and the
+    // dictionary/newspaper seeds (older databases may predate those seeds)
+    if (users >= 4 && settings > 0 && poems > 0 && words > 0 && editions > 0) return;
 
     console.log(
       `[auto-seed] database looks empty (users=${users}, settings=${settings}, poems=${poems}) — restoring…`

@@ -437,6 +437,21 @@ export async function PUT(
       if (k in body) data[k] = body[k]?.trim() || null;
       if (k === "name" && body.name?.trim()) data[k] = body.name.trim();
     }
+    // public handle: 3-20 chars, latin letters/digits/dot/underscore; must be unique
+    if ("username" in body) {
+      const raw = (body.username ?? "").trim().replace(/^@/, "");
+      if (!raw) {
+        data.username = null;
+      } else if (!/^[a-zA-Z0-9._]{3,20}$/.test(raw)) {
+        return NextResponse.json({ error: "یوزر نیم 3 سے 20 حروف کا ہو، صرف انگریزی حروف، عدد، نقطہ یا _" }, { status: 400 });
+      } else if (raw.toLowerCase() !== (user.username ?? "").toLowerCase()) {
+        const taken = await db.user.findFirst({ where: { username: { equals: raw, mode: "insensitive" } }, select: { id: true } });
+        if (taken && taken.id !== user.id) {
+          return NextResponse.json({ error: "یہ یوزر نیم کسی اور کے پاس ہے — کوئی اور چنیں" }, { status: 409 });
+        }
+        data.username = raw;
+      }
+    }
     const updated = await db.user.update({ where: { id: user.id }, data });
     const { passwordHash: _p, ...safe } = updated;
     return NextResponse.json(safe);

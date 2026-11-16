@@ -80,9 +80,10 @@ export default function RegisterPage() {
           description: "تصدیقی لنک آپ کے ای میل پر بھیج دیا گیا ہے (اسپام فولڈر بھی دیکھیں)۔ تصدیق کے بعد آپ تحریریں بھیج سکیں گے۔",
         });
       } else {
-        toast({ title: "خوش آمدید!", description: "آپ کا اکاؤنٹ بنا دیا گیا ہے — خوش آمدید ای میل بھی بھیج دی گئی ہے۔" });
+        toast({ title: "خوش آمدید!", description: "اکاؤنٹ بنا دیا گیا — اب اپنی پروفائل مکمل کریں (تصویر، یوزر نیم اور تعارف)۔" });
       }
-      router.push("/dashboard");
+      // take the new user straight to profile setup
+      router.push("/dashboard?tab=profile&setup=1");
       router.refresh();
     } finally {
       setLoading(false);

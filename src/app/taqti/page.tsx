@@ -61,7 +61,7 @@ export default function TaqtiPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-4xl px-4 py-10">
-          <SectionHeading
+          <SectionHeading as="h1"
             title="تقطیع و بحر کی جانچ"
             subtitle="اردو عروض کی بنیاد پر ہجائے کوتاہ و بلند، ارکان اور بحر کی نشاندہی"
           />

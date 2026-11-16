@@ -45,6 +45,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
                 {user.penName && user.name && (
                   <p className="font-naskh text-sm text-muted-foreground">اصل نام: {user.name}</p>
                 )}
+                {user.username && (
+                  <p className="font-latin text-sm text-muted-foreground" dir="ltr">@{user.username}</p>
+                )}
                 {user.bio && (
                   <p className="mx-auto mt-2 max-w-2xl font-naskh text-sm leading-8 text-foreground/80 sm:mx-0">
                     {user.bio}

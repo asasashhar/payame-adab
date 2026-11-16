@@ -19,7 +19,7 @@ export default async function DictionaryPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="لغتِ اردو" subtitle="روز کا نیا لفظ، معنی، مترادف اور استعمال" />
+          <SectionHeading title="لغتِ اردو" subtitle="روز کا نیا لفظ، معنی، مترادف اور استعمال"  as="h1" />
           {words.length === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">
               <BookA className="mx-auto mb-3 h-10 w-10 text-gold" />

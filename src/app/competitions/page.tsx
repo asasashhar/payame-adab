@@ -19,7 +19,7 @@ export default async function CompetitionsPage() {
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="ادبی مقابلے" subtitle="شاعری، مضامین اور افسانہ نگاری کے مقابلے" />
+          <SectionHeading title="ادبی مقابلے" subtitle="شاعری، مضامین اور افسانہ نگاری کے مقابلے"  as="h1" />
           {competitions.length === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">
               <Trophy className="mx-auto mb-3 h-10 w-10 text-gold" />

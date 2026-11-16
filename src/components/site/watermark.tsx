@@ -44,7 +44,7 @@ export function Watermark({
       <img
         src="/brand/watermark.png"
         alt=""
-        className="max-w-full"
+        className="max-w-full max-md:!opacity-[0.04]"
         style={{ width: size, height: size, objectFit: "contain", opacity: print ? undefined : opacity }}
         draggable={false}
       />

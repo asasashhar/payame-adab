@@ -33,7 +33,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       <SiteHeader />
       <main className="flex-1 paper-bg">
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <SectionHeading title="تلاش کے نتائج" subtitle={query ? `«${query}» کے لیے ${total} نتائج` : "کوئی لفظ درج نہیں کیا گیا"} />
+          <SectionHeading as="h1" title="تلاش کے نتائج" subtitle={query ? `«${query}» کے لیے ${total} نتائج` : "کوئی لفظ درج نہیں کیا گیا"} />
 
           {!query || total === 0 ? (
             <div className="manuscript-frame rounded-xl bg-card p-14 text-center">

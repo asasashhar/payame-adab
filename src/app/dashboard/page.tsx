@@ -21,7 +21,7 @@ type Work = {
   category: string; views: number; createdAt: string;
 };
 type Me = {
-  id: string; name: string; penName: string | null; emailVerified?: boolean;
+  id: string; name: string; username?: string | null; penName: string | null; emailVerified?: boolean;
   bio?: string | null; photoUrl?: string | null; socials?: string | null;
 } | null;
 
@@ -42,6 +42,7 @@ export default function DashboardPage() {
 function DashboardInner() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab | null) ?? "works";
+  const setupMode = searchParams.get("setup") === "1";
   const [me, setMe] = useState<Me>(null);
   const [poems, setPoems] = useState<Work[] | null>(null);
   const [articles, setArticles] = useState<Work[] | null>(null);
@@ -143,6 +144,19 @@ function DashboardInner() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8">
+          {setupMode && (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#8a6d1a]/40 bg-[#fdf3d7] p-4">
+              <div>
+                <p className="font-nastaliq-tight text-xl leading-9 text-[#6d5311]">خوش آمدید — اب اپنی پروفائل مکمل کریں</p>
+                <p className="mt-1 text-sm font-naskh leading-7 text-[#6d5311]/90">
+                  نیچے «پروفائل» ٹیب کھلا ہے: اپنی تصویر اپلوڈ کریں، یوزر نیم چنیں، تعارف لکھیں اور «پروفائل محفوظ کریں» پر کلک کریں۔
+                </p>
+              </div>
+              <Button onClick={() => setTab("profile")} size="sm" className="gap-2 bg-[#8a6d1a] font-naskh hover:bg-[#6d5311]">
+                <UserRound className="h-4 w-4" /> پروفائل مکمل کریں
+              </Button>
+            </div>
+          )}
           {/* profile summary card — mockup avatar card */}
           <div className="manuscript-frame mb-6 flex flex-wrap items-center gap-5 rounded-xl bg-card p-5">
             {me.photoUrl ? (
@@ -154,7 +168,9 @@ function DashboardInner() {
             )}
             <div className="min-w-0 flex-1">
               <h2 className="font-nastaliq-tight text-2xl leading-9 text-foreground">{me.penName || me.name}</h2>
-              <p className="text-sm font-naskh text-muted-foreground">{me.name}{me.penName ? ` — قلمی نام: ${me.penName}` : ""}</p>
+              <p className="text-sm font-naskh text-muted-foreground">
+                {me.name}{me.penName ? ` — قلمی نام: ${me.penName}` : ""}{me.username ? <span className="font-latin" dir="ltr"> · @{me.username}</span> : null}
+              </p>
               {me.bio && <p className="mt-1 line-clamp-2 text-[13px] font-naskh leading-6 text-foreground/70">{me.bio}</p>}
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -254,7 +270,7 @@ function DashboardInner() {
 
 /* ---------------- profile tab ---------------- */
 function ProfileTab({ me, onSaved }: { me: NonNullable<Me>; onSaved: (m: Me) => void }) {
-  const [form, setForm] = useState({ name: me.name, penName: me.penName ?? "", bio: me.bio ?? "", socials: me.socials ?? "" });
+  const [form, setForm] = useState({ name: me.name, username: me.username ?? "", penName: me.penName ?? "", bio: me.bio ?? "", socials: me.socials ?? "" });
   const [photoUrl, setPhotoUrl] = useState(me.photoUrl ?? "");
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -329,6 +345,17 @@ function ProfileTab({ me, onSaved }: { me: NonNullable<Me>; onSaved: (m: Me) => 
           <Label className="font-naskh text-[15px]">قلمی نام (تخلص)</Label>
           <Input value={form.penName} onChange={(e) => setForm({ ...form, penName: e.target.value })} className="h-11 font-nastaliq-tight text-lg" />
         </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="font-naskh text-[15px]">یوزر نیم (عوامی پہچان)</Label>
+        <Input
+          value={form.username}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
+          dir="ltr"
+          className="h-11 text-left font-latin"
+          placeholder="e.g. ahmad.writer"
+        />
+        <p className="text-xs font-naskh text-muted-foreground">انگریزی حروف، عدد، نقطہ یا _ — 3 سے 20 حروف۔ یہی آپ کے عوامی پروفائل کی پہچان بنے گا۔</p>
       </div>
       <div className="space-y-2">
         <Label className="font-naskh text-[15px]">تعارف (سوانح)</Label>
