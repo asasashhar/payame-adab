@@ -231,7 +231,7 @@ async function api(path, opts = {}, cookie) {
   console.log("== 9g. four-design system ==");
   const homeHtml7 = await (await fetch(BASE + "/")).text();
   check("body carries data-design attribute", true, /data-design="[ABCD]"/.test(homeHtml7));
-  const cssHref = homeHtml7.match(/href="(\/_next\/static\/chunks\/[^"]+\.css)"/)?.[1];
+  const cssHref = homeHtml7.match(/href="(\/_next\/static\/(?:chunks|css)\/[^"]+\.css)"/)?.[1];
   const compiledCss = cssHref ? await (await fetch(`${BASE}${cssHref}`)).text() : "";
   check("four-design CSS compiled (pea-navstrip rules)", true, compiledCss.includes("pea-navstrip"));
   check("reader flip animation compiled", true, compiledCss.includes("pea-flip-next"));
