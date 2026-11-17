@@ -364,47 +364,6 @@ export async function POST(
     }
   }
 
-  // ---- "Continue with Google" -------------------------------------------------
-  // With real OAuth credentials configured (Admin Panel → Settings) the client
-  // is redirected to Google itself (see /api/auth/google). Without credentials
-  // the button runs in demo mode: registered accounts — and always the three
-  // authorized administrators — sign in directly with their Gmail address.
-  if (action === "google-start") {
-    // "Continue with Google" entry point. Real Google OAuth only — the app
-    // never signs anyone in with an email address alone (that demo shortcut
-    // allowed account impersonation and has been removed deliberately).
-    try {
-      const body = (await req.json()) as Record<string, string>;
-      const email = (body.email ?? "").trim().toLowerCase();
-      const adminIntent = body.admin === "1";
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return NextResponse.json({ error: "درست ای میل لکھیں" }, { status: 400 });
-      }
-      const settings = await getSettings();
-      const oauthReady =
-        settings.googleEnabled === "1" &&
-        (settings.googleClientId ?? "").length > 0 &&
-        (settings.googleClientSecret ?? "").length > 0;
-      if (!oauthReady) {
-        return NextResponse.json(
-          {
-            error:
-              "Google sign-in is not configured yet — the site admin must save a Google OAuth Client ID and Secret in Admin Panel → Settings. / گوگل سائن اِن ابھی ترتیب سے باہر ہے: ایڈمن پینل ← سیٹنگز میں Google Client ID اور Secret محفوظ کریں۔",
-          },
-          { status: 503 }
-        );
-      }
-      // real Google verification for both the public site and the admin door
-      const base = siteUrlFrom(req, settings);
-      return NextResponse.json({
-        mode: "oauth",
-        redirectUrl: `${base}/api/auth/google?intent=${adminIntent ? "admin" : "user"}`,
-      });
-    } catch (e) {
-      return NextResponse.json({ error: "گوگل سائن اِن میں خرابی", detail: String(e) }, { status: 400 });
-    }
-  }
-
   return NextResponse.json({ error: "نامعلوم کارروائی" }, { status: 404 });
 }
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogoMark } from "@/components/site/logo";
-import { GoogleSignInButton } from "@/components/site/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,15 +94,6 @@ export default function LoginPage() {
               {loading ? "Logging in…" : "Log In"}
             </Button>
 
-            {/* Continue with Google */}
-            <div className="flex items-center gap-3" aria-hidden>
-              <span className="h-px flex-1 bg-gold/30" />
-              <span className="font-latin text-[13px] text-muted-foreground" dir="ltr">or</span>
-              <span className="h-px flex-1 bg-gold/30" />
-            </div>
-            <Suspense fallback={null}>
-              <GoogleSignInButton full />
-            </Suspense>
 
             <p className="text-center text-[15px] font-naskh text-muted-foreground">
               No account yet?{" "}

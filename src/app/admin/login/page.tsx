@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogoMark } from "@/components/site/logo";
-import { GoogleSignInButton } from "@/components/site/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -115,15 +114,6 @@ export default function AdminLoginPage() {
               Sign in to Admin Panel
             </Button>
 
-            {/* Continue with Google — authorized administrators sign in directly */}
-            <div className="flex items-center gap-3" aria-hidden>
-              <span className="h-px flex-1 bg-gold/30" />
-              <span className="font-naskh text-[13px] text-muted-foreground">یا</span>
-              <span className="h-px flex-1 bg-gold/30" />
-            </div>
-            <Suspense fallback={null}>
-              <GoogleSignInButton admin full label="Continue with Google — Admin" />
-            </Suspense>
           </form>
 
           <p className="mt-5 text-center text-xs font-naskh text-muted-foreground">

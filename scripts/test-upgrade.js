@@ -221,12 +221,12 @@ async function api(path, opts = {}, cookie) {
   check("contact form posts (201)", 201, contactPost.status);
   await api(`/api/feedback/${contactPost.body.id}`, { method: "DELETE" }, adminCookie);
 
-  console.log("== 9f2. google login security ==");
-  const googleUnconfigured = await api("/api/auth/google-start", { method: "POST", body: JSON.stringify({ email: "anyone@gmail.com" }) });
-  check("google sign-in without OAuth creds refused (503)", 503, googleUnconfigured.status);
-  check("no passwordless session minted", true, googleUnconfigured.setCookie.every((c) => !c.startsWith("pea_session=")));
-  const googleAdminUnconfigured = await api("/api/auth/google-start", { method: "POST", body: JSON.stringify({ email: "mdnematullah1343@gmail.com", admin: "1" }) });
-  check("admin google path also requires real OAuth (503)", 503, googleAdminUnconfigured.status);
+  console.log("== 9f2. google login removed (simple email/password only) ==");
+  const googleGone = await api("/api/auth/google-start", { method: "POST", body: JSON.stringify({ email: "anyone@gmail.com" }) });
+  check("google-start endpoint removed (404)", 404, googleGone.status);
+  check("no passwordless session minted", true, googleGone.setCookie.every((c) => !c.startsWith("pea_session=")));
+  const googleRouteGone = await fetch(BASE + "/api/auth/google");
+  check("google OAuth route removed (404)", 404, googleRouteGone.status);
 
   console.log("== 9g. four-design system ==");
   const homeHtml7 = await (await fetch(BASE + "/")).text();

@@ -4,14 +4,14 @@ import fs from "fs";
 
 const BASE = "http://localhost:3000";
 const ids = {
-  poem: "cmwir2pid000aoqx7drp2n183",
-  article: "cmwir2pit000soqx7sdmbet1w",
-  news: "cmwir2pre0003oqxl61s0tip1",
-  book: "cmwir2pj3000zoqx7nnbv3qfz",
-  poet: "cmwir2pi50002oqx7c93p7fzm",
-  paper: "cmwir2pjb0017oqx7jmweiofu",
-  mag: "cmwir2prn0007oqxlljt92y7g",
-  user: "cmwir2phz0001oqx7qbn292qc",
+  poem: "cmwjzw8rt000argyhp4jq83fz",
+  article: "cmwjzw8td000srgyhwv7b9thh",
+  news: "cmwjzwek60003rgzgyb0xv7dy",
+  book: "cmwjzw8tr000zrgyhmeilvpis",
+  poet: "cmwjzw8ri0002rgyh99pwgkk6",
+  paper: "cmwjzw8u50017rgyhfs2bmxu8",
+  mag: "cmwjzwekd0007rgzgl57wczpp",
+  user: "cmwjzfnyi0002rgw6l1xw5iua",
 };
 
 const PAGES = [

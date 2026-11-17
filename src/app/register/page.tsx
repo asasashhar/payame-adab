@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogoMark } from "@/components/site/logo";
-import { GoogleSignInButton } from "@/components/site/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -169,15 +168,6 @@ export default function RegisterPage() {
               {loading ? "Creating account…" : "Create Account"}
             </Button>
 
-            {/* Continue with Google — instant membership for Gmail users */}
-            <div className="flex items-center gap-3" aria-hidden>
-              <span className="h-px flex-1 bg-gold/30" />
-              <span className="font-latin text-[13px] text-muted-foreground" dir="ltr">or</span>
-              <span className="h-px flex-1 bg-gold/30" />
-            </div>
-            <Suspense fallback={null}>
-              <GoogleSignInButton full label="Sign up with Google" />
-            </Suspense>
 
             <p className="text-center text-[15px] font-naskh text-muted-foreground">
               اکاؤنٹ موجود ہے؟{" "}
