@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Server-side gate for /admin/* — verifies the HMAC session cookie BEFORE the
- * page renders and redirects unauthenticated visitors to /admin/login.
+ * page renders and redirects unauthenticated visitors to /login (the only
+ * login page; admins are then routed straight into the panel).
  * (Role checks + data access remain enforced on every admin API via requireAdmin.)
  */
 const COOKIE = "pea_session";
@@ -52,21 +53,29 @@ async function verifyToken(token: string): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // ONE login page: the public /login. Unauthenticated /admin/* visitors —
+  // including the legacy /admin/login URL — go there; after signing in, an
+  // ADMIN is routed straight into the panel by the login page itself.
+  if (pathname.startsWith("/admin")) {
     const token = req.cookies.get(COOKIE)?.value;
     const valid = token ? await verifyToken(token) : false;
     if (!valid) {
       const url = req.nextUrl.clone();
-      url.pathname = "/admin/login";
+      url.pathname = "/login";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    // legacy bookmark: authenticated admins asking for the old admin-login
+    // page simply land in the panel (a dead session still exits via the
+    // panel layout to /login, so this cannot ping-pong).
+    if (pathname === "/admin/login") {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin";
       url.search = "";
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
-
-  // NOTE: /admin/login always renders. Redirecting holders of a still-valid
-  // cookie to /admin would ping-pong forever with a dead session (deleted or
-  // suspended user): /admin/login → /admin → client sees me=null → /admin/login …
 
   return NextResponse.next();
 }

@@ -128,7 +128,7 @@ export function ContactForm({ contactEmail, contactPhone }: { contactEmail: stri
               <h2 className="font-nastaliq-tight text-xl leading-[1.9] text-emerald-ink">ایڈمن لاگ اِن</h2>
               <p className="mt-2 font-naskh text-[13px] leading-7 text-muted-foreground">
                 ادارتی ٹیم کے افراد کے لیے علیحدہ{" "}
-                <Link href="/admin/login" className="font-semibold text-primary underline">ایڈمن لاگ اِن</Link>{" "}
+                <Link href="/login" className="font-semibold text-primary underline">ایڈمن لاگ اِن</Link>{" "}
                 صفحہ موجود ہے۔
               </p>
             </div>

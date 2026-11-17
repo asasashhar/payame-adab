@@ -114,12 +114,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       .then((r) => r.json())
       .then((d) => {
         if (!d?.id || d.role !== "ADMIN") {
-          router.push("/admin/login");
+          router.push("/login");
         } else {
           setMe(d);
         }
       })
-      .catch(() => router.push("/admin/login"));
+      .catch(() => router.push("/login"));
   }, [router]);
 
   useEffect(() => setSidebarOpen(false), [pathname]);
@@ -143,7 +143,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   };
 

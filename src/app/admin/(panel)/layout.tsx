@@ -8,7 +8,7 @@ export const metadata = { title: "ایڈمن پینل" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect("/login");
   if (user.role !== "ADMIN") redirect("/dashboard");
   // security: an admin created with the initial password (or reset by the
   // Super Admin) MUST set a personal password before using the panel
