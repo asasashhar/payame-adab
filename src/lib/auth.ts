@@ -80,16 +80,28 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
 export async function setSessionCookie(userId: string, remember = false) {
   const store = await cookies();
-  // When served over HTTPS (the published site and the chat preview iframe),
-  // the app runs inside a cross-site context, so SameSite=Lax cookies are never
-  // sent back — logins would "succeed" but the session never sticks. Pair
-  // SameSite=None with Secure there; plain Lax is correct for local http.
-  const proto = ((await headers()).get("x-forwarded-proto") ?? "").split(",")[0].trim();
-  const https = proto === "https";
+  // When the app runs inside a cross-site context (the chat preview iframe on
+  // *.space-z.ai, the published *.zite.so domain), a SameSite=Lax cookie is
+  // never sent back — logins "succeed" but the session never sticks, bouncing
+  // the visitor between /login, /dashboard and /admin until the browser
+  // reports too many redirects. The proxy chain terminates TLS upstream and
+  // reaches the app as plain http with a rewritten Host, so neither the
+  // forwarded protocol nor the hostname reveals the original front. Treat any
+  // request NOT hitting the app directly on localhost as cross-site: proxied
+  // visitors get SameSite=None + Secure (the browser itself is on https), while
+  // direct local access keeps plain Lax (a Secure cookie would be dropped over
+  // plain http). PEA_CROSS_SITE_COOKIES=1 forces the cross-site behaviour.
+  const h = await headers();
+  const proto = (h.get("x-forwarded-proto") ?? "").split(",")[0].trim().toLowerCase();
+  const host = (h.get("host") ?? "").toLowerCase();
+  const localDirect =
+    host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("[::1]");
+  const crossSite =
+    !localDirect || proto === "https" || process.env.PEA_CROSS_SITE_COOKIES === "1";
   store.set(COOKIE, createToken(userId), {
     httpOnly: true,
-    sameSite: https ? "none" : "lax",
-    secure: https,
+    sameSite: crossSite ? "none" : "lax",
+    secure: crossSite,
     path: "/",
     // "remember me" → persistent 30-day cookie, otherwise a browser-session cookie
     ...(remember ? { maxAge: MAX_AGE } : {}),

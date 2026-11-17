@@ -37,6 +37,11 @@ export async function POST(
       if (!email || !password || !name) {
         return NextResponse.json({ error: "نام، ای میل اور پاس ورڈ ضروری ہیں" }, { status: 400 });
       }
+      // a real mailbox is required — entries like "name@gmail" (no TLD) can
+      // never receive verification or password-reset mail
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        return NextResponse.json({ error: "درست ای میل لکھیں — مثلاً name@example.com" }, { status: 400 });
+      }
       // reserved administrator IDs can never become ordinary user accounts
       if (email.startsWith("@") || email === "admin") {
         return NextResponse.json({ error: "یہ آئی ڈی ایڈمنسٹریٹرز کے لیے محفوظ ہے — براہ کرم اپنا ای میل استعمال کریں" }, { status: 400 });
