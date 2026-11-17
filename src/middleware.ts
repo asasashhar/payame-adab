@@ -64,17 +64,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/admin/login") {
-    // already authenticated admins skip the login page
-    const token = req.cookies.get(COOKIE)?.value;
-    const valid = token ? await verifyToken(token) : false;
-    if (valid) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/admin";
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-  }
+  // NOTE: /admin/login always renders. Redirecting holders of a still-valid
+  // cookie to /admin would ping-pong forever with a dead session (deleted or
+  // suspended user): /admin/login → /admin → client sees me=null → /admin/login …
 
   return NextResponse.next();
 }

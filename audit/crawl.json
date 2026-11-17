@@ -458,8 +458,8 @@
     },
     {
       "path": "/api/auth/me",
-      "status": 405,
-      "type": ""
+      "status": 200,
+      "type": "application/json"
     },
     {
       "path": "/api/magazines",
