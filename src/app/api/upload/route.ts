@@ -61,5 +61,5 @@ export async function POST(req: NextRequest) {
   const buf = Buffer.from(await file.arrayBuffer());
   fs.writeFileSync(path.join(targetDir, name), buf);
 
-  return NextResponse.json({ url: `/uploads/${dir}/${name}` });
+  return NextResponse.json({ url: `/uploads/${dir}/${name}` }, { status: 201 });
 }
