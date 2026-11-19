@@ -10,7 +10,15 @@ const { POETS, POEMS } = require("./content-poets");
 const { ARTICLES, BOOKS } = require("./content-articles");
 const { DAILY_SHERS, WORDS_OF_DAY, COMPETITIONS, EVENTS, BEHRS, QAFIYA } = require("./content-misc");
 
-const db = new PrismaClient();
+// Turso/libSQL when configured, local SQLite file otherwise
+const db = process.env.TURSO_DATABASE_URL
+  ? new PrismaClient({
+      adapter: new (require("@prisma/adapter-libsql").PrismaLibSQL)({
+        url: process.env.TURSO_DATABASE_URL,
+        authToken: process.env.TURSO_AUTH_TOKEN ?? "",
+      }),
+    })
+  : new PrismaClient();
 
 function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
