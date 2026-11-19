@@ -65,7 +65,15 @@ const cookie = () => jar[jar.length - 1] ?? "";
   const rr = await req("/api/auth/request-reset", { method: "POST", body: { email } });
   check("reset code requested", 200, rr.status);
   const { PrismaClient } = await import("@prisma/client");
-  const db = new PrismaClient();
+  // same database the app uses: Turso/libSQL when configured, local file otherwise
+  const db = process.env.TURSO_DATABASE_URL
+    ? new PrismaClient({
+        adapter: new (require("@prisma/adapter-libsql").PrismaLibSQL)({
+          url: process.env.TURSO_DATABASE_URL,
+          authToken: process.env.TURSO_AUTH_TOKEN ?? "",
+        }),
+      })
+    : new PrismaClient();
   const mail = await db.mailLog.findFirst({ where: { toEmail: email, kind: "RESET" }, orderBy: { createdAt: "desc" } });
   const codeMatch = mail?.bodyHtml?.match(/\b(\d{6})\b/);
   const code = rr.body?.demoCode ?? codeMatch?.[1];

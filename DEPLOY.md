@@ -1,0 +1,97 @@
+# Deploying Payam-e-Adab to Vercel
+
+The site is a Next.js (App Router) application backed by a **Turso (libSQL)**
+database through Prisma driver adapters. Deploying takes about five minutes:
+import the GitHub repository, set three environment variables, deploy.
+
+## 1. Prerequisites
+
+| Account | Purpose |
+|---|---|
+| GitHub | Source code — `github.com/asasashhar/payame-adab` |
+| Vercel | Hosting — [vercel.com](https://vercel.com) (Hobby plan is enough) |
+| Turso | Database — [turso.tech](https://turso.tech) |
+
+A Turso database already exists (`payame-adab` in `ap-south-1`), seeded with
+the full site content. You only need its **URL** and **auth token**:
+
+```bash
+turso db show payame-adab          # database URL
+turso db tokens create payame-adab # auth token
+```
+
+## 2. Import the project into Vercel
+
+1. Vercel dashboard → **Add New… → Project** → import `asasashhar/payame-adab`.
+2. Framework preset is detected automatically (Next.js). Build command and
+   output need no changes — `npm run build` runs `prisma generate` first.
+3. **Region**: `vercel.json` pins functions to **bom1 (Mumbai)**, next to the
+   Turso database, for minimum query latency.
+4. Click **Deploy** — the first build appears once environment variables from
+   step 3 are set (do them before or right after this build; a redeploy picks
+   them up).
+
+## 3. Environment variables
+
+Vercel → Project → **Settings → Environment Variables** (all environments):
+
+| Variable | Required | Value |
+|---|---|---|
+| `TURSO_DATABASE_URL` | ✅ | `libsql://payame-adab-….turso.io` |
+| `TURSO_AUTH_TOKEN` | ✅ | token from `turso db tokens create` |
+| `AUTH_SECRET` | recommended | long random string (`openssl rand -hex 32`) |
+| `BLOB_READ_WRITE_TOKEN` | optional | set automatically when connecting Vercel Blob (step 5) |
+
+`DATABASE_URL` is **not** needed on Vercel (it only configures the local
+SQLite fallback and the Prisma CLI). See `.env.example` for details.
+
+## 4. First verification checklist
+
+After the deploy finishes, open the production URL:
+
+- Home page renders with site name پیامِ ادب and poems (reads from Turso).
+- `/register` → create a member → profile setup opens, no redirect loop.
+- `/login` with an admin email + password → lands directly in the admin panel.
+- Admin panel → Settings shows the 44 seeded rows.
+
+If the database ever needs reseeding (fresh Turso database), run locally with
+the Turso credentials in `.env`:
+
+```bash
+npm install
+npm run seed
+```
+
+## 5. File uploads (profile photos, submissions, admin resources)
+
+Vercel's filesystem is read-only, so the local-disk upload path used in the
+sandbox does not apply. Connect a Blob store once:
+
+1. Vercel → Project → **Storage** → **Create Database → Blob**.
+2. **Connect to project** → select this project → all environments.
+3. Vercel injects `BLOB_READ_WRITE_TOKEN` and redeploys.
+
+The upload API detects the token automatically and stores files in Blob,
+returning absolute URLs that work everywhere. Until Blob is connected,
+upload attempts return a clear Urdu error while everything else keeps
+working.
+
+## 6. Custom domain (optional)
+
+Vercel → Project → **Settings → Domains** → add e.g. `payameadab.com`,
+point the DNS records as instructed. HTTPS is automatic; session cookies
+switch to `SameSite=None; Secure` on any HTTPS front by themselves (the
+cookie logic detects proxied HTTPS and the preview-iframe context).
+
+## How the pieces fit
+
+- **Next.js 16** (App Router) — build runs `prisma generate` before
+  `next build`; the sandbox-only standalone-prep steps are skipped on Vercel
+  (`VERCEL=1` is set by the platform).
+- **Prisma + `@prisma/adapter-libsql`** — every process talks to the same
+  remote Turso database; data survives redeploys and sandbox recycles.
+- **`src/instrumentation.ts`** — on boot the app checks database health and
+  self-seeds when empty (a safety net; with Turso seeded it is a no-op of a
+  few count queries per cold start).
+- **Session cookies** — cross-site-safe (`SameSite=None; Secure`) on any
+  HTTPS deployment, so logins stick on custom domains and preview frames.
