@@ -67,3 +67,6 @@ tool-results/
 
 # runtime uploads (user/profile/admin media) — served by GET /uploads/*
 public/uploads/
+
+# git archives are build artifacts, not source
+download/*.zip
