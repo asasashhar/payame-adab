@@ -56,7 +56,9 @@ export async function middleware(req: NextRequest) {
   // ONE login page: the public /login. Unauthenticated /admin/* visitors —
   // including the legacy /admin/login URL — go there; after signing in, an
   // ADMIN is routed straight into the panel by the login page itself.
-  if (pathname.startsWith("/admin")) {
+  // (Checked against the slash-normalized path so /admin/ is gated too.)
+  const canonical = pathname.replace(/\/+$/, "") || "/";
+  if (canonical === "/admin" || canonical.startsWith("/admin/")) {
     const token = req.cookies.get(COOKIE)?.value;
     const valid = token ? await verifyToken(token) : false;
     if (!valid) {
@@ -68,7 +70,7 @@ export async function middleware(req: NextRequest) {
     // legacy bookmark: authenticated admins asking for the old admin-login
     // page simply land in the panel (a dead session still exits via the
     // panel layout to /login, so this cannot ping-pong).
-    if (pathname === "/admin/login") {
+    if (canonical === "/admin/login") {
       const url = req.nextUrl.clone();
       url.pathname = "/admin";
       url.search = "";
@@ -77,9 +79,24 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // The platform preview proxy 301s directory-style paths to their
+  // trailing-slash form (/dashboard?tab=profile → /dashboard/?tab=profile)
+  // while Next itself 308s the slashed form back to the bare one — the two
+  // redirects ping-pong until the browser gives up with
+  // ERR_TOO_MANY_REDIRECTS ("redirected you too many times"). Serve the page
+  // directly instead of redirecting: rewrite the slashed path to its
+  // canonical form and let the browser keep the URL it requested.
+  if (pathname.length > 1 && pathname.endsWith("/") && !pathname.startsWith("/_next")) {
+    const url = req.nextUrl.clone();
+    url.pathname = canonical;
+    return NextResponse.rewrite(url);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  // run on everything except API routes and Next internals — the slash
+  // rewrite must see page requests before Next's own trailing-slash 308
+  matcher: ["/((?!api/|_next/|favicon.ico).*)"],
 };
