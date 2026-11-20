@@ -121,7 +121,12 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   smtpUser: "",
   smtpPass: "",
   smtpFrom: "پیامِ ادب <payameadab@gmail.com>",
-  requireEmailVerification: "1",
+  // member submissions need a verified e-mail — default OFF so new accounts can
+  // submit for review right away (every submission still sits in the admin
+  // moderation queue before it can go public). Turn this ON only once SMTP is
+  // configured (Admin Panel → Settings), otherwise the verification mail can
+  // never arrive and members would be locked out of submitting entirely.
+  requireEmailVerification: "0",
   // "Continue with Google" sign-in. With real OAuth credentials (Admin Panel →
   // Settings) users authenticate through Google itself; without credentials the
   // button runs in demo mode — registered accounts (and always the three

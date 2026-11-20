@@ -53,30 +53,49 @@ async function api(path, opts = {}, cookie) {
   const email = `writer${Date.now()}@testmail.pk`;
   const reg = await api("/api/auth/register", { method: "POST", body: JSON.stringify({ name: "آزمائشی مصنف", email, password: "test@1234" }) });
   check("register 201", 201, reg.status);
-  check("needsVerification true", true, reg.body?.needsVerification === true);
+  // requireEmailVerification defaults OFF: members sign up verified and can
+  // submit right away — the admin moderation queue stays the quality gate
+  check("needsVerification false (default)", false, reg.body?.needsVerification === true);
   const userCookie = reg.setCookie.map((c) => c.split(";")[0]).join("; ");
+  const meDefault = await api("/api/auth/me", {}, userCookie);
+  check("auto-verified when not required", true, meDefault.body?.emailVerified === true);
+  const freeSub = await api("/api/articles", { method: "POST", body: JSON.stringify({ title: "X", content: "Y" }) }, userCookie);
+  check("member submit allowed 201", 201, freeSub.status);
+  check("submission starts PENDING", "PENDING", freeSub.body?.status);
+
+  // the verification gate still works when the admin explicitly turns it ON:
+  // flip the setting, register a fresh user, verify the full flow, restore
+  const setOn = await api("/api/settings", { method: "PUT", body: JSON.stringify({ requireEmailVerification: "1" }) }, adminCookie);
+  check("admin can enable verification gate", 200, setOn.status);
+  const email2 = `upg2-${Date.now()}@testmail.pk`;
+  const reg2 = await api("/api/auth/register", { method: "POST", body: JSON.stringify({ name: "دوم", email: email2, password: "testpass123", confirm: "testpass123", agree: true }) }, "");
+  check("gated register 201", 201, reg2.status);
+  check("needsVerification true (gate ON)", true, reg2.body?.needsVerification === true);
+  const userCookie2 = reg2.setCookie.map((c) => c.split(";")[0]).join("; ");
 
   // unverified user blocked from submitting
-  const blocked = await api("/api/articles", { method: "POST", body: JSON.stringify({ title: "X", content: "Y" }) }, userCookie);
+  const blocked = await api("/api/articles", { method: "POST", body: JSON.stringify({ title: "X", content: "Y" }) }, userCookie2);
   check("unverified submit blocked 403", 403, blocked.status);
 
   // verification email logged
   const mail1 = await api("/api/mail", {}, adminCookie);
-  const verifyMail = mail1.body.logs.find((l) => l.kind === "VERIFY" && l.toEmail === email);
+  const verifyMail = mail1.body.logs.find((l) => l.kind === "VERIFY" && l.toEmail === email2);
   check("VERIFY email logged", true, !!verifyMail);
   check("email status PENDING (no SMTP yet)", "PENDING", verifyMail?.status);
 
   // extract token from stored mail body via DB-ish trick: use admin users list + manual verify path instead
   const users = await api("/api/users?all=1", {}, adminCookie);
-  const newUser = (users.body ?? []).find((u) => u.email === email);
+  const newUser = (users.body ?? []).find((u) => u.email === email2);
   check("user appears in admin users list", true, !!newUser);
   check("user shows unverified", false, newUser?.emailVerified);
   const verifyOp = await api("/api/users-actions", { method: "POST", body: JSON.stringify({ id: newUser.id, op: "verify" }) }, adminCookie);
   check("admin manual verify ok", 200, verifyOp.status);
 
   // me now verified
-  const me = await api("/api/auth/me", {}, userCookie);
+  const me = await api("/api/auth/me", {}, userCookie2);
   check("me.emailVerified true", true, me.body?.emailVerified === true);
+  const setOff = await api("/api/settings", { method: "PUT", body: JSON.stringify({ requireEmailVerification: "0" }) }, adminCookie);
+  check("gate restored to default OFF", 200, setOff.status);
 
   console.log("== 5. submission → moderation message → email ==");
   const art = await api("/api/articles", { method: "POST", body: JSON.stringify({ title: "آزمائشی مضمون — E2E", content: "یہ خودکار جانچ کا مضمون ہے۔ " .repeat(5), category: "ادبی مضامین" }) }, userCookie);
@@ -242,6 +261,24 @@ async function api(path, opts = {}, cookie) {
   await api(`/api/articles?id=${art.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/articles?id=${draft.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/ads?id=${ad.body.id}`, { method: "DELETE" }, adminCookie);
+  // remove both throwaway test accounts and their submissions (direct DB —
+  // users-actions has no delete op)
+  const { PrismaClient } = await import("@prisma/client");
+  const { PrismaLibSQL } = await import("@prisma/adapter-libsql");
+  const tdb = process.env.TURSO_DATABASE_URL
+    ? new PrismaClient({ adapter: new PrismaLibSQL({ url: process.env.TURSO_DATABASE_URL, authToken: process.env.TURSO_AUTH_TOKEN }) })
+    : new PrismaClient();
+  for (const em of [email, email2]) {
+    const u = await tdb.user.findUnique({ where: { email: em }, select: { id: true } });
+    if (u) {
+      await tdb.poem.deleteMany({ where: { userId: u.id } });
+      await tdb.article.deleteMany({ where: { userId: u.id } });
+      await tdb.like.deleteMany({ where: { userId: u.id } });
+      await tdb.mailLog.deleteMany({ where: { toEmail: em } });
+      await tdb.user.delete({ where: { id: u.id } });
+    }
+  }
+  await tdb.$disconnect();
   console.log("  cleanup done");
 
   console.log(`\n==========================================`);

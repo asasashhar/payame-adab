@@ -96,6 +96,27 @@ const cookie = () => jar[jar.length - 1] ?? "";
   const newLogin = await req("/api/auth/login", { method: "POST", body: { email, password: newPassword } });
   check("login with new password", 200, newLogin.status);
 
+  console.log("== 7. member submits a writing → admin publishes → public page ==");
+  const meMid = await req("/api/auth/me", { cookie: cookie() });
+  const memberId = meMid.body?.id;
+  const sub = await req("/api/poems", { method: "POST", cookie: cookie(), body: { title: "فلو ٹیسٹ غزل", content: "یہ ایک تجرباتی شعر ہے\nجسے ایڈمن شائع کرے گا", category: "غزل", poetName: "قلمِ تجربہ" } });
+  check("submission accepted (201)", 201, sub.status);
+  check("submission starts PENDING", "PENDING", sub.body?.status);
+  const mine = await req("/api/poems?mine=1", { cookie: cookie() });
+  check("dashboard mine=1 lists it", true, Array.isArray(mine.body) && mine.body.some((w) => w.id === sub.body.id));
+  // admin publishes it through the moderation PATCH (same call the panel makes)
+  const adminLogin = await req("/api/auth/admin-login", { method: "POST", body: { email: "mdnematullah1343@gmail.com", password: "darulhuda" } });
+  check("admin login for moderation", 200, adminLogin.status);
+  const pub = await req("/api/poems", { method: "PATCH", cookie: cookie(), body: { id: sub.body.id, status: "PUBLISHED", feedback: "مبارک ہو — شائع کر دی گئی۔" } });
+  check("admin publish works", 200, pub.status);
+  const pubPage = await fetch(`${BASE}/poetry`);
+  const pubHtml = await pubPage.text();
+  check("published poem on public /poetry", true, pubHtml.includes("فلو ٹیسٹ غزل"));
+  const profPage2 = await fetch(`${BASE}/profile/${memberId}`);
+  const profHtml2 = await profPage2.text();
+  check("published poem on public profile", true, profHtml2.includes("فلو ٹیسٹ غزل"));
+  jar.pop(); // drop the admin session — cleanup below must act as the member
+
   console.log("== cleanup ==");
   const meFinal = await req("/api/auth/me", { cookie: cookie() });
   const uid = meFinal.body?.id;
