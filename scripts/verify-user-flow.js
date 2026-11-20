@@ -51,6 +51,14 @@ const cookie = () => jar[jar.length - 1] ?? "";
   const bad = await req("/api/auth/profile", { method: "PUT", cookie: cookie(), body: { username: "!!" } });
   check("invalid username rejected", 400, bad.status);
 
+  console.log("== 4b. public profile page shows the new member's data ==");
+  const profPage = await fetch(`${BASE}/profile/${me1.body.id}`);
+  const profHtml = await profPage.text();
+  check("public profile 200", 200, profPage.status);
+  check("pen name visible on public profile", true, profHtml.includes("قلمِ تجربہ"));
+  check("bio visible on public profile", true, profHtml.includes("تبصہ نگار و شاعر"));
+  check("zero-works empty state shown", true, profHtml.includes("ابھی کوئی شاعری شائع نہیں ہوئی"));
+
   console.log("== 5. logout and log back in ==");
   await req("/api/auth/logout", { method: "POST", cookie: cookie() });
   jar.length = 0; // logout clears the cookie in the browser — mirror that here

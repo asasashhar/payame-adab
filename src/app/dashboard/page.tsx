@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import {
   PenLine, Loader2, Eye, EyeOff, MessageSquareWarning, MailWarning, Send,
-  UserRound, ShieldCheck, Heart, BookOpenText,
+  UserRound, ShieldCheck, Heart, BookOpenText, RefreshCw, ServerOff,
 } from "lucide-react";
 
 type Work = {
@@ -46,21 +46,37 @@ function DashboardInner() {
   const [me, setMe] = useState<Me>(null);
   const [poems, setPoems] = useState<Work[] | null>(null);
   const [articles, setArticles] = useState<Work[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [resending, setResending] = useState(false);
   const [tab, setTab] = useState<Tab>(initialTab);
   const router = useRouter();
 
-  useEffect(() => {
+  // load dashboard data; a failed request (server briefly unreachable,
+  // cold start, dropped connection) must show a visible retry state,
+  // never an endless spinner
+  const load = () => {
+    setLoadError(false);
+    setMe(null);
+    setPoems(null);
+    setArticles(null);
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => {
         if (!d?.id) { router.push("/login"); return; }
         setMe(d);
-      });
+      })
+      .catch(() => setLoadError(true));
     Promise.all([
       fetch("/api/poems?mine=1").then((r) => r.json()),
       fetch("/api/articles?mine=1").then((r) => r.json()),
-    ]).then(([p, a]) => { setPoems(p); setArticles(a); });
+    ])
+      .then(([p, a]) => { setPoems(p); setArticles(a); })
+      .catch(() => setLoadError(true));
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const resendVerification = async () => {
@@ -76,6 +92,27 @@ function DashboardInner() {
   };
 
   if (!me || !poems || !articles) {
+    if (loadError) {
+      return (
+        <UserShell>
+          <div className="mx-auto flex h-[70vh] max-w-md flex-col items-center justify-center px-4 text-center">
+            <ServerOff className="mb-4 h-10 w-10 text-gold" />
+            <h1 className="font-nastaliq-tight text-2xl leading-10 text-foreground">ڈیٹا لوڈ نہیں ہو سکا</h1>
+            <p className="mt-2 text-sm font-naskh leading-7 text-muted-foreground">
+              سرور سے رابطہ عارضی طور پر منقطع ہے — براہ کرم دوبارہ کوشش کریں۔
+            </p>
+            <div className="mt-6 flex items-center gap-3">
+              <Button onClick={load} size="sm" className="gap-2 bg-[#8a6d1a] font-naskh hover:bg-[#6d5311]">
+                <RefreshCw className="h-4 w-4" /> دوبارہ کوشش کریں
+              </Button>
+              <Button asChild size="sm" variant="outline" className="font-naskh">
+                <Link href="/">ہوم صفحہ</Link>
+              </Button>
+            </div>
+          </div>
+        </UserShell>
+      );
+    }
     return (
       <UserShell>
         <div className="flex h-[70vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -308,6 +345,8 @@ function ProfileTab({ me, onSaved }: { me: NonNullable<Me>; onSaved: (m: Me) => 
       onSaved(data);
       toast({ title: "پروفائل محفوظ ہو گئی" });
       router.refresh();
+    } catch {
+      toast({ title: "محفوظ نہیں ہو سکا", description: "سرور سے رابطہ ناکام — دوبارہ کوشش کریں", variant: "destructive" });
     } finally {
       setBusy(false);
     }
@@ -418,6 +457,8 @@ function SecurityTab() {
       }
       toast({ title: "پاس ورڈ تبدیل ہو گیا", description: "تصدیقی ای میل بھی بھیج دی گئی ہے" });
       setCurrent(""); setNext(""); setConfirm("");
+    } catch {
+      toast({ title: "پاس ورڈ تبدیل نہیں ہو سکا", description: "سرور سے رابطہ ناکام — دوبارہ کوشش کریں", variant: "destructive" });
     } finally {
       setBusy(false);
     }

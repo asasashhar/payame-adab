@@ -84,6 +84,13 @@ export default function RegisterPage() {
       // take the new user straight to profile setup
       router.push("/dashboard?tab=profile&setup=1");
       router.refresh();
+    } catch {
+      // network/server unreachable — never leave the button silently doing nothing
+      toast({
+        title: "سرور سے رابطہ ناکام",
+        description: "سائٹ عارضی طور پر دستیاب نہیں ہے — چند لمحے بعد دوبارہ کوشش کریں",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

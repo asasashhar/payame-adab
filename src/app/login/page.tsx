@@ -46,6 +46,8 @@ export default function LoginPage() {
       toast({ title: "خوش آمدید!", description: "آپ کامیابی سے لاگ اِن ہو گئے۔" });
       router.push(data.role === "ADMIN" ? "/admin" : "/dashboard");
       router.refresh();
+    } catch {
+      toast({ title: "سرور سے رابطہ ناکام", description: "سائٹ عارضی طور پر دستیاب نہیں ہے — چند لمحے بعد دوبارہ کوشش کریں", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,6 @@ export default function LoginPage() {
           <div className="mb-6 flex flex-col items-center">
             <LogoMark size={72} className="mb-3 shadow-md" />
             <h1 className="font-latin text-3xl font-bold text-emerald-ink" dir="ltr">Log In</h1>
-            <p className="mt-1 font-naskh text-sm text-muted-foreground">اپنے ادبی اکاؤنٹ میں داخل ہوں</p>
             <p className="mt-1 font-naskh text-base text-muted-foreground">اپنے ادبی اکاؤنٹ میں داخل ہوں</p>
           </div>
 
