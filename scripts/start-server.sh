@@ -116,7 +116,13 @@ set -a; . ./.env; set +a
 export NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
 export APP_ROOT=/home/z/my-project
 export AUTO_SEED=1
-( cd .next/standalone && nohup node server.js > /tmp/prodserver.log 2>&1 & )
+# fully detach the server process: every std fd redirected away from any
+# caller-owned pipe, stdin closed, job dropped from bash's table — the script
+# must never linger waiting on the server it spawned
+cd .next/standalone
+nohup node server.js > /tmp/prodserver.log 2>&1 < /dev/null &
+disown
+cd /home/z/my-project
 sleep 10
 
 code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ --max-time 15)
