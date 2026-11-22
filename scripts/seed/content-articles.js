@@ -76,6 +76,7 @@ const ARTICLES = [
 const BOOKS = [
   {
     title: "دیوانِ غالبؔ",
+    coverUrl: "/books-covers/diwan-ghalib.jpg",
     author: "مرزا اسد اللہ خان غالبؔ",
     category: "شاعری",
     year: "۱۸۲۱ء (مرتب)",
@@ -85,6 +86,7 @@ const BOOKS = [
   },
   {
     title: "بانگِ درا",
+    coverUrl: "/books-covers/bang-e-dara.jpg",
     author: "علامہ محمد اقبالؔ",
     category: "شاعری",
     year: "۱۹۲۴ء",
@@ -94,6 +96,7 @@ const BOOKS = [
   },
   {
     title: "کلیاتِ میرؔ",
+    coverUrl: "/books-covers/kulliyat-mir.jpg",
     author: "میر تقی میرؔ",
     category: "شاعری",
     year: "مرتبہ جدید",
@@ -103,6 +106,7 @@ const BOOKS = [
   },
   {
     title: "نقد حالت",
+    coverUrl: "/books-covers/naqad-halat.jpg",
     author: "فیض احمد فیضؔ",
     category: "شاعری",
     year: "۱۹۴۱ء",
@@ -112,6 +116,7 @@ const BOOKS = [
   },
   {
     title: "اردو غزل کا ارتقا",
+    coverUrl: "/books-covers/urdu-ghzal-irtiqa.jpg",
     author: "ادارتی تصنیف",
     category: "تحقیق",
     year: "مرتبہ جدید",
@@ -121,6 +126,7 @@ const BOOKS = [
   },
   {
     title: "اردو قواعد و انشا",
+    coverUrl: "/books-covers/urdu-qawaid.jpg",
     author: "ادارتی تصنیف",
     category: "زبان و قواعد",
     year: "مرتبہ جدید",
@@ -130,6 +136,7 @@ const BOOKS = [
   },
   {
     title: "بچوں کا ادبی خزانہ",
+    coverUrl: "/books-covers/bachon-khazana.jpg",
     author: "مختلف مصنفین",
     category: "بچوں کا ادب",
     year: "مرتبہ جدید",
@@ -139,6 +146,7 @@ const BOOKS = [
   },
   {
     title: "اردو تنقید کے اصول",
+    coverUrl: "/books-covers/urdu-tanqeed.jpg",
     author: "ادارتی تصنیف",
     category: "تنقید",
     year: "مرتبہ جدید",

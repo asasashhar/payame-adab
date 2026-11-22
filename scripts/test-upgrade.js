@@ -290,10 +290,31 @@ async function api(path, opts = {}, cookie) {
   const memDel = await api(`/api/memories/${memNew.body.id}`, { method: "DELETE" }, adminCookie);
   check("admin deletes memory", 200, memDel.status);
 
+  console.log("== 9j. admin edits a submission then publishes ==");
+  const editSub = await api("/api/articles", { method: "POST", body: JSON.stringify({ title: "ترمیم آزمائش — اصل عنوان", content: "یہ اصل متن ہے جس میں غلطیاں ہیں۔ " .repeat(3), category: "تحقیق", coverUrl: "/uploads/e2e-author.png", topicImageUrl: "/uploads/e2e-topic.png" }) }, userCookie);
+  check("member submits with author + topic images", 201, editSub.status);
+  const adminEdit = await api("/api/articles", { method: "PATCH", body: JSON.stringify({ id: editSub.body.id, title: "ترمیم آزمائش — درست شدہ عنوان", content: "یہ ادارتی درست کردہ متن ہے — املا اور جملے درست کیے گئے۔" }) }, adminCookie);
+  check("admin saves corrected title+content", 200, adminEdit.status);
+  const afterEdit = await api("/api/articles?all=1", {}, adminCookie);
+  const editedRow = (afterEdit.body.items ?? afterEdit.body).find?.((x) => x.id === editSub.body.id);
+  check("corrected text persisted in DB", true, editedRow?.title === "ترمیم آزمائش — درست شدہ عنوان" && editedRow?.content.includes("درست کیے گئے"));
+  const pubEdit = await api("/api/articles", { method: "PATCH", body: JSON.stringify({ id: editSub.body.id, status: "PUBLISHED", feedback: "درست کر کے شائع کر دی گئی۔ مبارک ہو!" }) }, adminCookie);
+  check("admin publishes the corrected submission", 200, pubEdit.status);
+  const editedPage = await fetch(`${BASE}/articles/${editSub.body.id}`);
+  const editedHtml = await editedPage.text();
+  check("published page shows corrected title", true, editedHtml.includes("درست شدہ عنوان"));
+  check("published page shows author photo", true, editedHtml.includes("/uploads/e2e-author.png"));
+  check("published page shows topic photo", true, editedHtml.includes("/uploads/e2e-topic.png"));
+  const homeAfterEdit = await (await fetch(BASE + "/")).text();
+  check("homepage latest-articles shows the new publication", true, homeAfterEdit.includes("درست شدہ عنوان"));
+  check("homepage has مزید مضامین پڑھیے link", true, homeAfterEdit.includes("مزید مضامین پڑھیے"));
+  check("homepage has مزید شاعری پڑھیے link", true, homeAfterEdit.includes("مزید شاعری پڑھیے"));
+
   console.log("== 10. cleanup ==");
   await api(`/api/books/${bookRes.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/books/${a4book.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/articles?id=${art.body.id}`, { method: "DELETE" }, adminCookie);
+  await api(`/api/articles?id=${editSub.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/articles?id=${draft.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/ads?id=${ad.body.id}`, { method: "DELETE" }, adminCookie);
   // remove both throwaway test accounts and their submissions (direct DB —

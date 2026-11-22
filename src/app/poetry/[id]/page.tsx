@@ -93,12 +93,17 @@ export default async function PoemPage({ params }: { params: Promise<{ id: strin
                 {poem.title}
               </h1>
               {poetLabel && (
-                <Link
-                  href={poem.poetId ? `/poets/${poem.poetId}` : `/search?q=${encodeURIComponent(poetLabel)}`}
-                  className="mt-1 inline-block font-naskh text-base text-gold hover:text-primary"
-                >
-                  — {poetLabel}
-                </Link>
+                <span className="mt-1 flex items-center justify-center gap-3">
+                  {poem.coverUrl && (
+                    <img src={poem.coverUrl} alt={poetLabel} className="h-12 w-12 rounded-full border border-gold/50 object-cover" />
+                  )}
+                  <Link
+                    href={poem.poetId ? `/poets/${poem.poetId}` : `/search?q=${encodeURIComponent(poetLabel)}`}
+                    className="font-naskh text-base text-gold hover:text-primary"
+                  >
+                    — {poetLabel}
+                  </Link>
+                </span>
               )}
               <div className="mx-auto mt-4 flex items-center justify-center gap-3" aria-hidden>
                 <span className="h-px w-20 bg-gold/50" />

@@ -90,7 +90,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               <h1 className="mt-3 font-nastaliq-tight text-3xl leading-[1.9] text-emerald-ink md:text-4xl">
                 {article.title}
               </h1>
-              {author && <p className="mt-1 font-naskh text-base text-gold">تحریر: {author}</p>}
+              {author && (
+                <p className="mt-1 flex items-center justify-center gap-2 font-naskh text-base text-gold">
+                  {article.coverUrl && (
+                    <img src={article.coverUrl} alt={author} className="h-10 w-10 rounded-full border border-gold/50 object-cover" />
+                  )}
+                  تحریر: {author}
+                </p>
+              )}
               <div className="mx-auto mt-4 flex items-center justify-center gap-3" aria-hidden>
                 <span className="h-px w-20 bg-gold/50" />
                 <span className="h-2 w-2 rotate-45 border border-gold" />

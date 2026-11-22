@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WhatsAppIcon } from "./footer";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BrandLock } from "@/components/site/logo";
@@ -68,6 +69,7 @@ const socialIcon = (p: string, cls = "h-3.5 w-3.5") => {
   if (/twitter|x\.com/i.test(p)) return <Twitter className={cls} />;
   if (/instagram/i.test(p)) return <Instagram className={cls} />;
   if (/youtube/i.test(p)) return <Youtube className={cls} />;
+  if (/whatsapp/i.test(p)) return <WhatsAppIcon className={cls} />;
   return <Globe className={cls} />;
 };
 

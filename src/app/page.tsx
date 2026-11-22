@@ -45,7 +45,7 @@ export default async function HomePage() {
     db.article.findMany({ where: { status: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 6 }),
     featuredArticleId ? db.article.findFirst({ where: { status: "PUBLISHED", id: featuredArticleId } }) : Promise.resolve(null),
     db.article.findFirst({ where: { status: "PUBLISHED", featured: true }, orderBy: { createdAt: "desc" } }),
-    db.news.findMany({ where: { status: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 4 }),
+    db.news.findMany({ where: { status: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 5 }),
     db.poem.findMany({ where: { status: "PUBLISHED" }, orderBy: { views: "desc" }, take: 5, include: { user: { select: { penName: true, name: true } } } }),
     db.article.findMany({ where: { status: "PUBLISHED" }, orderBy: { views: "desc" }, take: 5 }),
     db.book.findMany({ orderBy: { views: "desc" }, take: 5 }),
@@ -206,9 +206,16 @@ export default async function HomePage() {
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {latestPoems.slice(0, 4).map((p) => (
+                    {latestPoems.slice(0, 5).map((p) => (
                       <PoemCard key={p.id} poem={p} showViews={showViews} />
                     ))}
+                  </div>
+                )}
+                {latestPoems.length > 0 && (
+                  <div className="mt-6 text-center">
+                    <a href="/poetry" className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary px-6 py-2.5 text-sm font-naskh font-semibold text-primary transition-colors hover:bg-accent">
+                      مزید شاعری پڑھیے <span aria-hidden>←</span>
+                    </a>
                   </div>
                 )}
               </div>
@@ -299,9 +306,16 @@ export default async function HomePage() {
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {latestArticles.slice(0, 4).map((a) => (
+                    {latestArticles.slice(0, 5).map((a) => (
                       <ArticleCard key={a.id} article={a} showViews={showViews} />
                     ))}
+                  </div>
+                )}
+                {latestArticles.length > 0 && (
+                  <div className="mt-6 text-center">
+                    <a href="/articles" className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary px-6 py-2.5 text-sm font-naskh font-semibold text-primary transition-colors hover:bg-accent">
+                      مزید مضامین پڑھیے <span aria-hidden>←</span>
+                    </a>
                   </div>
                 )}
               </div>
@@ -395,7 +409,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {latestNews.map((n) => (
+                {latestNews.slice(0, 5).map((n) => (
                   <Link key={n.id} href={`/news/${n.id}`} className="group manuscript-frame flex flex-col overflow-hidden rounded-xl bg-card transition-shadow hover:shadow-lg">
                     <div className="flex h-36 items-center justify-center overflow-hidden bg-secondary">
                       {n.coverUrl ? (
@@ -415,6 +429,13 @@ export default async function HomePage() {
                     </div>
                   </Link>
                 ))}
+              </div>
+            )}
+            {latestNews.length > 0 && (
+              <div className="mt-6 text-center">
+                <a href="/news" className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary px-6 py-2.5 text-sm font-naskh font-semibold text-primary transition-colors hover:bg-accent">
+                  مزید خبریں پڑھیے <span aria-hidden>←</span>
+                </a>
               </div>
             )}
           </section>
@@ -441,7 +462,7 @@ export default async function HomePage() {
                     <p className="py-8 text-center font-naskh text-sm text-muted-foreground">کتب خانہ میں جلد اضافہ ہوگا۔</p>
                   ) : (
                     <div className="grid grid-cols-3 gap-2.5">
-                      {(featuredBook ? [featuredBook, ...newBooks.filter((b) => b.id !== featuredBook.id)] : newBooks).slice(0, 3).map((b) => (
+                      {(featuredBook ? [featuredBook, ...newBooks.filter((b) => b.id !== featuredBook.id)] : newBooks).slice(0, 5).map((b) => (
                         <Link key={b.id} href={`/books/${b.id}`} className="group block">
                           <span className="block overflow-hidden rounded-lg border border-gold/25">
                             {b.coverUrl ? (

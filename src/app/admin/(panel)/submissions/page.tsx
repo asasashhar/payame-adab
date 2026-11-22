@@ -4,18 +4,20 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/site/cards";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Check, X, PenLine, BookOpen, Quote, Eye, Inbox, Megaphone } from "lucide-react";
+import { Loader2, Check, X, PenLine, BookOpen, Quote, Eye, Inbox, Megaphone, Save, Trash2, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Work = {
   id: string; title: string; content: string; status: string; feedback: string | null;
   category: string; createdAt: string;
   poetName?: string | null; authorName?: string | null;
+  topicImageUrl?: string | null; coverUrl?: string | null;
   user?: { id: string; name: string; penName: string | null } | null;
 };
 
@@ -36,6 +38,10 @@ export default function SubmissionsPage() {
   const [items, setItems] = useState<Work[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [reviewing, setReviewing] = useState<Work | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [action, setAction] = useState<"PUBLISHED" | "APPROVED" | "REJECTED" | "REVISION" | "PENDING" | null>(null);
 
@@ -56,7 +62,7 @@ export default function SubmissionsPage() {
       const res = await fetch(`/api/${api}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status, feedback: fb || null }),
+        body: JSON.stringify({ id, status, feedback: fb || null, title: editTitle || undefined, content: editContent || undefined }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -72,6 +78,60 @@ export default function SubmissionsPage() {
       });
       setReviewing(null);
       setFeedback("");
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // whenever a submission is opened (for viewing or an action), load its text
+  // into the editor fields — the admin can correct spelling/wording before
+  // approving or publishing; the same corrected text is sent with the action
+  useEffect(() => {
+    if (reviewing) {
+      setEditTitle(reviewing.title);
+      setEditContent(reviewing.content);
+      setEditing(false);
+    }
+  }, [reviewing]);
+
+  const apiFor = () => (kind === "poem" ? "poems" : kind === "article" ? "articles" : "news");
+
+  const saveEdits = async () => {
+    if (!reviewing) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/${apiFor()}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: reviewing.id, title: editTitle, content: editContent }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        toast({ title: "محفوظ نہیں ہو سکا", description: d.error, variant: "destructive" });
+        return;
+      }
+      setReviewing({ ...reviewing, title: editTitle, content: editContent });
+      toast({ title: "تبدیلیاں محفوظ ہو گئیں" });
+      await load();
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const deleteWork = async () => {
+    if (!reviewing) return;
+    if (!window.confirm("کیا آپ واقعی یہ تحریر مٹانا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔")) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/${apiFor()}?id=${encodeURIComponent(reviewing.id)}`, { method: "DELETE" });
+      if (!res.ok) {
+        const d = await res.json();
+        toast({ title: "مٹانا ناکام", description: d.error, variant: "destructive" });
+        return;
+      }
+      toast({ title: "تحریر مٹا دی گئی" });
+      setReviewing(null);
       await load();
     } finally {
       setBusy(false);
@@ -201,16 +261,66 @@ export default function SubmissionsPage() {
 
           {reviewing && (
             <>
-              <h3 className="font-nastaliq-tight text-2xl leading-10 text-emerald-ink">{reviewing.title}</h3>
               <p className="text-sm font-naskh text-muted-foreground">
                 {reviewing.poetName || reviewing.authorName || reviewing.user?.penName || reviewing.user?.name || "گمنام"} · {reviewing.category}
                 {reviewing.user ? " · فیصلہ مصنف کے ای میل پر جائے گا" : " · (بغیر اکاؤنٹ تحریر — کوئی ای میل نہیں)"}
               </p>
-              <div className="max-h-72 overflow-y-auto nice-scroll rounded-lg bg-secondary/50 p-4">
-                <p className="whitespace-pre-line font-nastaliq text-base leading-[2.4] text-foreground/90">
-                  {reviewing.content}
-                </p>
+
+              {(reviewing.topicImageUrl || reviewing.coverUrl) && (
+                <div className="flex flex-wrap gap-3">
+                  {reviewing.coverUrl && (
+                    <figure className="text-center">
+                      <img src={reviewing.coverUrl} alt="لکھنے والے کی تصویر" className="h-28 w-24 rounded-lg border border-gold/30 object-cover" />
+                      <figcaption className="mt-1 text-[10px] font-naskh text-muted-foreground">لکھنے والے کی تصویر</figcaption>
+                    </figure>
+                  )}
+                  {reviewing.topicImageUrl && (
+                    <figure className="flex-1 text-center">
+                      <img src={reviewing.topicImageUrl} alt="موضوع کی تصویر" className="max-h-56 w-full rounded-lg border border-gold/30 object-cover" />
+                      <figcaption className="mt-1 text-[10px] font-naskh text-muted-foreground">موضوع سے متعلق تصویر</figcaption>
+                    </figure>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-naskh font-semibold text-muted-foreground">عنوان (درست کر کے محفوظ کریں)</label>
+                  <button
+                    onClick={() => setEditing((v) => !v)}
+                    className="rounded-full border border-gold/40 bg-secondary px-3 py-0.5 text-[11px] font-naskh text-primary hover:bg-accent"
+                  >
+                    {editing ? "صرف مطالعہ" : "ترمیم کریں"}
+                  </button>
+                </div>
+                {editing ? (
+                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="font-nastaliq-tight text-xl" />
+                ) : (
+                  <h3 className="font-nastaliq-tight text-2xl leading-10 text-emerald-ink">{editTitle}</h3>
+                )}
               </div>
+              {editing ? (
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  rows={10}
+                  className="whitespace-pre-line font-nastaliq text-base leading-[2.4]"
+                  aria-label="تحریر کا متن — ترمیم کے لیے"
+                />
+              ) : (
+                <div className="max-h-72 overflow-y-auto nice-scroll rounded-lg bg-secondary/50 p-4">
+                  <p className="whitespace-pre-line font-nastaliq text-base leading-[2.4] text-foreground/90">
+                    {editContent}
+                  </p>
+                </div>
+              )}
+              <Button
+                variant="outline" size="sm" disabled={savingEdit || busy || (editTitle === reviewing.title && editContent === reviewing.content)}
+                onClick={saveEdits}
+                className="w-fit gap-1.5 border-emerald-deep/50 font-naskh text-emerald-deep hover:bg-[#eef6f0]"
+              >
+                {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} تبدیل شدہ متن محفوظ کریں
+              </Button>
 
               {action !== null && (
                 <div className="space-y-2">
@@ -227,6 +337,12 @@ export default function SubmissionsPage() {
 
               <DialogFooter className="gap-2">
                 <Button variant="outline" onClick={() => setReviewing(null)} className="font-naskh">بند کریں</Button>
+                <Button
+                  variant="outline" disabled={busy} onClick={deleteWork}
+                  className="gap-1.5 border-destructive/50 font-naskh text-destructive hover:bg-[#fbe4e4]"
+                >
+                  <Trash2 className="h-4 w-4" /> مٹائیں
+                </Button>
                 {action === "PUBLISHED" && (
                   <Button
                     disabled={busy}
