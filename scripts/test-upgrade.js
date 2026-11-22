@@ -255,6 +255,16 @@ async function api(path, opts = {}, cookie) {
   check("four-design CSS compiled (pea-navstrip rules)", true, compiledCss.includes("pea-navstrip"));
   check("reader flip animation compiled", true, compiledCss.includes("pea-flip-next"));
 
+  console.log("== 9h. qafiya & taqti tools ==");
+  const qafiyaList = await api("/api/qafiya", {}, "");
+  check("qafiya public API non-empty", true, Array.isArray(qafiyaList.body) && qafiyaList.body.length > 0);
+  const qNew = await api("/api/qafiya", { method: "POST", body: JSON.stringify({ word: "جانچ-گروہ", pattern: "ہ", meaning: "E2E جانچ", rhymes: JSON.stringify(["ٹیسٹ۱", "ٹیسٹ۲"]) }) }, adminCookie);
+  check("admin creates qafiya group", 201, qNew.status);
+  const qDel = await api(`/api/qafiya/${qNew.body.id}`, { method: "DELETE" }, adminCookie);
+  check("admin deletes qafiya group", 200, qDel.status);
+  const taqti = await api("/api/taqti", { method: "POST", body: JSON.stringify({ text: "سراپا درد ہے دل سراپا درد ہے ہجراں" }) }, "");
+  check("taqti scansion API responds", 200, taqti.status);
+
   console.log("== 10. cleanup ==");
   await api(`/api/books/${bookRes.body.id}`, { method: "DELETE" }, adminCookie);
   await api(`/api/books/${a4book.body.id}`, { method: "DELETE" }, adminCookie);

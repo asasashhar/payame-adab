@@ -81,8 +81,10 @@ export default function RegisterPage() {
       } else {
         toast({ title: "خوش آمدید!", description: "اکاؤنٹ بنا دیا گیا — اب اپنی پروفائل مکمل کریں (تصویر، یوزر نیم اور تعارف)۔" });
       }
-      // take the new user straight to profile setup
-      router.push("/dashboard?tab=profile&setup=1");
+      // land on the dashboard itself — the welcome banner there points to the
+      // profile tab (members must see their dashboard with works & submit
+      // options first, not a forced profile screen)
+      router.push("/dashboard?setup=1");
       router.refresh();
     } catch {
       // network/server unreachable — never leave the button silently doing nothing

@@ -184,9 +184,9 @@ function DashboardInner() {
           {setupMode && (
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#8a6d1a]/40 bg-[#fdf3d7] p-4">
               <div>
-                <p className="font-nastaliq-tight text-xl leading-9 text-[#6d5311]">خوش آمدید — اب اپنی پروفائل مکمل کریں</p>
+                <p className="font-nastaliq-tight text-xl leading-9 text-[#6d5311]">خوش آمدید — یہ آپ کا ڈیش بورڈ ہے</p>
                 <p className="mt-1 text-sm font-naskh leading-7 text-[#6d5311]/90">
-                  نیچے «پروفائل» ٹیب کھلا ہے: اپنی تصویر اپلوڈ کریں، یوزر نیم چنیں، تعارف لکھیں اور «پروفائل محفوظ کریں» پر کلک کریں۔
+                  یہاں آپ کی تحریریں اور ان کی حالت نظر آتی ہے، اور «نئی تحریر بھیجیں» سے نئی شاعری یا مضمون بھیج سکتے ہیں — پروفائل مکمل کرنے کے لیے «پروفائل مکمل کریں» پر کلک کریں: تصویر، یوزر نیم اور تعارف۔
                 </p>
               </div>
               <Button onClick={() => setTab("profile")} size="sm" className="gap-2 bg-[#8a6d1a] font-naskh hover:bg-[#6d5311]">
