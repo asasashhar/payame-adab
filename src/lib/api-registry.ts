@@ -17,6 +17,18 @@ export type ResourceDef = {
 };
 
 export const REGISTRY: Record<string, ResourceDef> = {
+  memories: {
+    model: "memory",
+    publicRead: true,
+    publicWhere: { published: true },
+    write: "admin",
+    fields: {
+      title: "string", date: "string", description: "text",
+      imageUrl: "string", published: "bool", sortOrder: "int",
+    },
+    /** no createdAt column ordering guarantee — keep admin order stable */
+    defaultSort: "sortOrder",
+  },
   news: {
     model: "news",
     publicRead: true,
@@ -147,7 +159,7 @@ export const REGISTRY: Record<string, ResourceDef> = {
     defaultSort: "word",
     fields: {
       word: "string", meaning: "string", pattern: "string",
-      notes: "text", rhymes: "text",
+      notes: "text", rhymes: "text", wazan: "string",
     },
     searchFields: ["word", "meaning", "pattern", "rhymes"],
   },

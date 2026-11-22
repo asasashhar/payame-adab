@@ -55,17 +55,14 @@ const BEHRS = [
 ];
 
 (async () => {
-  const qCount = await db.qafiyaEntry.count();
-  const bCount = await db.behr.count();
-  if (qCount > 0 || bCount > 0) {
-    console.log(`already seeded (qafiya:${qCount}, behr:${bCount}) — nothing to do`);
-    await db.$disconnect();
-    process.exit(0);
-  }
+  // MERGE, not skip: the app's own seed may already have created a few groups
+  // or behrs — restore anything missing without touching admin edits
   let q = 0;
   for (const g of QAFIYA_GROUPS) {
     const rhymes = g.rhymes.filter((r) => /^[\u0600-\u06FF\s]+$/.test(r) && !r.includes("نہیں"));
     if (!rhymes.length) continue;
+    const exists = await db.qafiyaEntry.findFirst({ where: { word: g.word }, select: { id: true } });
+    if (exists) continue;
     await db.qafiyaEntry.create({
       data: { word: g.word, pattern: g.pattern, meaning: g.meaning, notes: g.notes, rhymes: JSON.stringify(rhymes) },
     });
@@ -73,10 +70,27 @@ const BEHRS = [
   }
   let b = 0;
   for (const m of BEHRS) {
+    const exists = await db.behr.findFirst({ where: { name: m.name }, select: { id: true } });
+    if (exists) continue;
     await db.behr.create({ data: m });
     b++;
   }
-  const totalWords = QAFIYA_GROUPS.reduce((n, g) => n + g.rhymes.filter((r) => /^[\u0600-\u06FF\s]+$/.test(r) && !r.includes("نہیں")).length, 0) + q;
-  console.log(`seeded ${q} qafiya groups (${q + totalWords} words incl. group heads) + ${b} behrs`);
+  // seed one launch memory so the ہماری یادیں gallery is not empty (admin can
+  // edit/delete freely — merge by title)
+  const memTitle = "پائامِ ادب کا باقاعدہ آغاز";
+  const memExists = await db.memory.findFirst({ where: { title: memTitle }, select: { id: true } });
+  if (!memExists) {
+    await db.memory.create({
+      data: {
+        title: memTitle,
+        date: "2026",
+        description: "ادب دوستوں کے لیے پائامِ ادب پلیٹ فارم کا باقاعدہ آغاز — شاعری، نثر، رسالے اور ادبی خدمات کا مستقل سفر۔",
+        published: true,
+        sortOrder: 0,
+      },
+    });
+    console.log("seeded 1 memory (ہماری یادیں)");
+  }
+  console.log(`seeded ${q} new qafiya groups + ${b} new behrs (merge mode)`);
   await db.$disconnect();
 })().catch((e) => { console.error("SEED FAILED:", e); process.exit(1); });

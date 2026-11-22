@@ -250,6 +250,7 @@ export const ADMIN_RESOURCES: Record<string, ResourceConfig> = {
       { key: "word", label: "بنیادی قافیہ / گروہ", type: "text" },
       { key: "pattern", label: "قافیے کا سانچہ (آخری حروف)", type: "text", hint: "مثلاً: انی، ار، ام" },
       { key: "meaning", label: "معنی / نوٹ", type: "text" },
+      { key: "wazan", label: "بحر / وزن (جہاں یہ قافیہ عام ہے)", type: "text", hint: "مثلاً: طویل، رمل، ہزج — صارف وزن کے مطابق بھی تلاش کر سکتے ہیں" },
       { key: "rhymes", label: "قافیے کے الفاظ (ہر سطر پر ایک لفظ)", type: "textarea", full: true, hint: "مثلاً پانی کے گروہ میں: کہانی، ثمانی، نشانی…" },
       { key: "notes", label: "اضافی نوٹ", type: "textarea", full: true },
     ],
@@ -257,6 +258,23 @@ export const ADMIN_RESOURCES: Record<string, ResourceConfig> = {
       { key: "word", label: "گروہ" },
       { key: "pattern", label: "سانچہ" },
       { key: "rhymes", label: "الفاظ" },
+    ],
+  },
+  memories: {
+    key: "memories", title: "ہماری یادیں", subtitle: "پائامِ ادب کی تاریخ کی تصاویر — صرف منتظم اپلوڈ کر سکتا ہے",
+    searchHint: "یاد تلاش کریں…",
+    fields: [
+      { key: "title", label: "عنوان", type: "text" },
+      { key: "date", label: "تاریخ (نمائش کے لیے، مثلاً: مارچ 2026)", type: "text" },
+      { key: "imageUrl", label: "تصویر", type: "image", full: true, hint: "یاد سے متعلق تصویر اپلوڈ کریں" },
+      { key: "description", label: "تفصیل", type: "textarea", full: true },
+      { key: "published", label: "شائع شدہ", type: "bool" },
+      { key: "sortOrder", label: "ترتیب (چھوٹا نمبر پہلے)", type: "number" },
+    ],
+    columns: [
+      { key: "title", label: "عنوان" },
+      { key: "date", label: "تاریخ" },
+      { key: "published", label: "حالت" },
     ],
   },
   behrs: {

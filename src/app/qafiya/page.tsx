@@ -12,14 +12,23 @@ import { Sparkles, Search, Copy } from "lucide-react";
 import { rhymeTail, tailScore } from "@/lib/qafiya";
 
 type QafiyaEntry = {
-  id: string; word: string; meaning?: string | null; pattern?: string | null; rhymes: string;
+  id: string; word: string; meaning?: string | null; pattern?: string | null; wazan?: string | null; rhymes: string;
 };
 
 export default function QafiyaPage() {
   const [word, setWord] = useState("");
+  const [wazan, setWazan] = useState("");
   const [entries, setEntries] = useState<QafiyaEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState("");
+  const [searchedWazan, setSearchedWazan] = useState("");
+
+  // وزن (بحر) سے تلاش: جس گروہ کا wazan اس بحر سے ملتا ہے وہ سب دکھائیں
+  const wazanResults = useMemo(() => {
+    if (!entries || !searchedWazan) return null;
+    const q = searchedWazan.trim();
+    return entries.filter((e) => (e.wazan ?? "").includes(q) || e.word === q);
+  }, [entries, searchedWazan]);
 
   const results = useMemo(() => {
     if (!entries || !searched) return null;
@@ -33,7 +42,7 @@ export default function QafiyaPage() {
         if (!w) continue;
         const s = tailScore(rhymeTail(w), tail);
         if (w !== searched && s >= 2) {
-          scored.push({ word: w, meaning: e.meaning, score: s, group: e.word });
+          scored.push({ word: w, meaning: e.meaning, score: s, group: e.word, wazan: e.wazan ?? null });
         }
       }
     }
@@ -44,13 +53,14 @@ export default function QafiyaPage() {
 
   const find = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!word.trim()) return;
+    if (!word.trim() && !wazan.trim()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/qafiya");
       const data = await res.json();
       setEntries(data);
       setSearched(word.trim());
+      setSearchedWazan(wazan.trim());
     } finally {
       setLoading(false);
     }
@@ -72,12 +82,20 @@ export default function QafiyaPage() {
                 dir="rtl"
                 value={word}
                 onChange={(e) => setWord(e.target.value)}
-                placeholder="مثلاً: دل، چمن، ہستی، امید…"
+                placeholder="قافیے کے لیے لفظ: دل، چمن، ہستی…"
                 className="h-12 font-nastaliq-tight text-xl text-right"
                 aria-label="قافیے کے لیے لفظ"
               />
+              <Input
+                dir="rtl"
+                value={wazan}
+                onChange={(e) => setWazan(e.target.value)}
+                placeholder="وزن/بحر: طویل، رمل…"
+                className="h-12 w-44 font-nastaliq-tight text-lg text-right"
+                aria-label="وزن سے تلاش"
+              />
               <Button type="submit" disabled={loading} className="h-12 shrink-0 gap-2 bg-primary px-6 font-naskh text-[15px] hover:bg-emerald-deep">
-                <Search className="h-4.5 w-4.5" /> {loading ? "تلاش…" : "قافیہ تلاش کریں"}
+                <Search className="h-4.5 w-4.5" /> {loading ? "تلاش…" : "تلاش کریں"}
               </Button>
             </form>
 
@@ -97,6 +115,34 @@ export default function QafiyaPage() {
           {loading && (
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
+            </div>
+          )}
+
+          {wazanResults && !loading && (
+            <div className="mt-8">
+              <div className="mb-4 flex items-center gap-2 text-sm font-naskh text-muted-foreground">
+                <Sparkles className="h-4 w-4 text-gold" />
+                وزن «{searchedWazan}» کے قافیے: <span>({wazanResults.length} گروہ)</span>
+              </div>
+              {wazanResults.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-gold/40 bg-card p-10 text-center font-naskh text-sm text-muted-foreground">
+                  اس وزن کا کوئی قافیہ گروہ ابھی موجود نہیں — منتظم نئے گروہ شامل کر رہا ہے۔
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  {wazanResults.map((e) => (
+                    <div key={e.id} className="manuscript-frame rounded-xl bg-card p-4">
+                      <p className="font-nastaliq-tight text-xl leading-8 text-emerald-ink">{e.word}</p>
+                      {e.wazan && <p className="mt-0.5 text-[11px] font-naskh font-semibold text-gold">وزن: {e.wazan}</p>}
+                      {e.meaning && <p className="mt-1 text-xs font-naskh leading-6 text-muted-foreground">{e.meaning}</p>}
+                      <p className="mt-1.5 text-[11px] font-naskh text-primary/80">
+                        {(JSON.parse(e.rhymes || "[]") as string[]).slice(0, 6).join("، ")}
+                        {(JSON.parse(e.rhymes || "[]") as string[]).length > 6 ? "…" : ""}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

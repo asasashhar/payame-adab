@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { FlaskConical, Info, Eraser } from "lucide-react";
+import { FlaskConical, Info, Eraser, AlertTriangle, Lightbulb, HeartHandshake } from "lucide-react";
 
 type TaqtiResponse = {
   lines: {
@@ -20,11 +20,22 @@ type TaqtiResponse = {
       confidence: "exact" | "probable" | "none";
       segments: { name: string; pattern: string }[];
     } | null;
+    errors: {
+      word: string; wordIndex: number; syllableText: string; kind: "sub" | "ins" | "del";
+      expected: string; got: string; note: string;
+    }[];
+    suggestions: string[];
   }[];
   verdict: string;
   sameMeter: boolean | null;
   detectedBehr: string | null;
   confidence: "exact" | "probable" | "none";
+  poetryCheck: {
+    qafiyaOk: boolean | null;
+    qafiyaNote: string;
+    radif: string | null;
+    radifNote: string;
+  } | null;
 };
 
 const SAMPLES = [
@@ -63,7 +74,7 @@ export default function TaqtiPage() {
         <div className="mx-auto max-w-4xl px-4 py-10">
           <SectionHeading as="h1"
             title="تقطیع و بحر کی جانچ"
-            subtitle="اردو عروض کی بنیاد پر ہجائے کوتاہ و بلند، ارکان اور بحر کی نشاندہی"
+            subtitle="اردو عروض کی بنیاد پر ہجائے کوتاہ و بلند، ارکان، بحر کی نشاندہی، غلط ہجوں کی نشان دہی اور قافیہ و ردیف کی جانچ"
           />
 
           <div className="manuscript-frame rounded-xl bg-card p-6">
@@ -166,8 +177,49 @@ export default function TaqtiPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* errors & corrections */}
+                  {l.errors.length > 0 && (
+                    <div className="mt-3 rounded-lg border border-[#a33b2b]/30 bg-[#fbeae6] p-3">
+                      <p className="mb-2 flex items-center gap-1.5 text-sm font-naskh font-bold text-[#8d3324]">
+                        <AlertTriangle className="h-4 w-4" /> وزن میں خلل کے مقامات
+                      </p>
+                      <ul className="space-y-1.5">
+                        {l.errors.map((e, ei) => (
+                          <li key={ei} className="text-[13px] font-naskh leading-6 text-[#8d3324]/90">
+                            «<span className="font-nastaliq-tight text-base">{e.word}</span>» — {e.note}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {l.suggestions.length > 0 && (
+                    <div className="mt-2 rounded-lg border border-emerald-deep/30 bg-[#eef6f0] p-3">
+                      <p className="mb-2 flex items-center gap-1.5 text-sm font-naskh font-bold text-emerald-deep">
+                        <Lightbulb className="h-4 w-4" /> تجاویز برائے اصلاح
+                      </p>
+                      <ul className="list-inside list-disc space-y-1">
+                        {l.suggestions.map((s, si) => (
+                          <li key={si} className="text-[13px] font-naskh leading-6 text-emerald-ink/85">{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ))}
+
+              {/* qafiya & radif check */}
+              {result.poetryCheck && (
+                <div className="manuscript-frame rounded-xl bg-card p-5">
+                  <p className="mb-3 flex items-center gap-2 font-nastaliq-tight text-xl text-emerald-ink">
+                    <HeartHandshake className="h-5 w-5 text-gold" /> قافیہ و ردیف کی جانچ
+                  </p>
+                  <p className={`text-[14px] font-naskh leading-7 ${result.poetryCheck.qafiyaOk ? "text-emerald-ink/85" : "text-[#8d3324]/90"}`}>
+                    {result.poetryCheck.qafiyaNote}
+                  </p>
+                  <p className="mt-1.5 text-[14px] font-naskh leading-7 text-foreground/75">{result.poetryCheck.radifNote}</p>
+                </div>
+              )}
 
               {/* legend */}
               <div className="rounded-xl bg-secondary/60 p-4 text-xs font-naskh text-muted-foreground">

@@ -18,8 +18,7 @@ import {
   Inbox, Settings, ExternalLink, Loader2, ShieldCheck, Menu,
   Megaphone, BarChart3, MessagesSquare, Heart, LayoutTemplate, Palette,
   ScrollText, Trash2, Clock, KeyRound, LogOut, Mail, DollarSign,
-  Bell, Eye,
-} from "lucide-react";
+  Bell, Eye, Images } from "lucide-react";
 
 type Me = { id: string; name: string; email: string; penName: string | null; mustChangePassword?: boolean } | null;
 
@@ -82,6 +81,7 @@ const GROUPS: { title: string; items: { href: string; label: string; icon: React
     title: "اوزار",
     items: [
       { href: "/admin/qafiya", label: "قافیہ مینجمنٹ", icon: Sparkles },
+      { href: "/admin/memories", label: "ہماری یادیں", icon: Images },
       { href: "/admin/behrs", label: "بحریں و ارکان", icon: FlaskConical },
     ],
   },

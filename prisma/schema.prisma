@@ -291,6 +291,7 @@ model QafiyaEntry {
   word    String
   meaning String?
   pattern String?
+  wazan   String? // بحر/وزن جہاں یہ قافیہ عام ہے، مثلاً "طویل، رمل"
   notes   String?
   rhymes  String  @default("[]") // JSON array of rhyming words
 }
@@ -347,4 +348,16 @@ model ActivityLog {
   detail     String?
   actorEmail String?
   createdAt  DateTime @default(now())
+}
+
+/// ہماری یادیں — Payam-e-Adab's photographic history, admin-curated only
+model Memory {
+  id          String   @id @default(cuid())
+  title       String
+  date        String? // display date, e.g. "مارچ 2026"
+  description String?
+  imageUrl    String?
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
 }

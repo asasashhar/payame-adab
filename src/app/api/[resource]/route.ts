@@ -9,7 +9,7 @@ const RESOURCE_MODULE: Record<string, string> = {
   newspaper: "newspaper", words: "newspaper", shers: "newspaper", banners: "newspaper",
   magazines: "newspaper",
   competitions: "content", events: "content",
-  qafiya: "tools", behrs: "tools", users: "users",
+  qafiya: "tools", behrs: "tools", memories: "content", users: "users",
   feedback: "engagement",
 };
 

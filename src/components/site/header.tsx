@@ -52,6 +52,7 @@ const MORE = [
   { label: "ادبی مقابلے", href: "/competitions" },
   { label: "ادبی تقریبات", href: "/events" },
   { label: "لغت اور آج کا لفظ", href: "/dictionary" },
+  { label: "ہماری یادیں", href: "/memories" },
   { label: "ہمارا تعارف", href: "/about" },
 ];
 
