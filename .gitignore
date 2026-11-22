@@ -56,7 +56,10 @@ server.log
 # databases (contain user data - never publish)
 db/*.db
 db/*.db-journal
-db/backups/
+db/backups/*
+# the rolling DB snapshot is tracked so every push carries the newest data
+# (accounts, settings, submissions) — recycles restore from it
+!db/backups/latest.db
 *.sqlite
 *.sqlite3
 
@@ -67,7 +70,9 @@ tool-results/
 /upload/
 
 # runtime uploads (user/profile/admin media) — served by GET /uploads/*
-public/uploads/
+# tracked: user media must survive workspace recycles
+!public/uploads/
+!public/uploads/**
 
 # git archives are build artifacts, not source
 download/*.zip
