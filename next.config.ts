@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   // libSQL/Turso driver packages ship native binaries and dynamic requires —
   // keep them out of the webpack bundle and load them at runtime instead.
   serverExternalPackages: ["@prisma/adapter-libsql", "@libsql/client", "libsql", "@libsql/isomorphic-ws"],
+  outputFileTracingIncludes: {
+    "/*": ["./scripts/seed/**/*", "./scripts/seed-qafiya-behr.js"],
+  },
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

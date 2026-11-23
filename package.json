@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "build:post": "mkdir -p db && DATABASE_URL=\"file:$(pwd)/db/custom.db\" npx prisma db push --skip-generate && DATABASE_URL=\"file:$(pwd)/db/custom.db\" TURSO_DATABASE_URL=\"\" npm run seed && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && cp -r scripts .next/standalone/scripts && cp -r db .next/standalone/db && rm -rf .next/standalone/node_modules/.prisma .next/standalone/node_modules/@prisma && cp -r node_modules/.prisma .next/standalone/node_modules/ && cp -r node_modules/@prisma .next/standalone/node_modules/",
+    "build:post": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && cp -r scripts .next/standalone/scripts && rm -rf .next/standalone/node_modules/.prisma .next/standalone/node_modules/@prisma && cp -r node_modules/.prisma .next/standalone/node_modules/ && cp -r node_modules/@prisma .next/standalone/node_modules/",
     "seed": "node scripts/seed/index.js && node scripts/seed/upgrade.js && node scripts/seed-qafiya-behr.js"
   },
   "dependencies": {

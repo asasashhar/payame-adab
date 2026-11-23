@@ -14,6 +14,10 @@ export function resolveLocalSqliteUrl(): string {
   if (envUrl && envUrl.startsWith('file:/')) {
     return envUrl
   }
+  // Vercel serverless filesystems (/var/task) are read-only; /tmp is writable.
+  if (process.env.VERCEL === '1') {
+    return 'file:/tmp/payame-adab.db'
+  }
   const cwd = (
     process.env.APP_ROOT ||
     (typeof process !== 'undefined' && typeof process.cwd === 'function'
@@ -27,9 +31,10 @@ export function resolveLocalSqliteUrl(): string {
   return `file:${root}/db/custom.db`
 }
 
-// Local SQLite is used by default in preview/sandbox environments (auto-created
-// and seeded via instrumentation on boot). On Vercel (VERCEL=1) or when
-// USE_TURSO=1 is set with TURSO_DATABASE_URL, Prisma connects to remote libSQL.
+// Local SQLite is used when remote Turso is not configured (using /tmp on
+// Vercel so SQLite remains writable even without Turso env vars). On Vercel
+// (VERCEL=1) or when USE_TURSO=1 is set with TURSO_DATABASE_URL, Prisma
+// connects to remote Turso/libSQL.
 function makeClient(): PrismaClient {
   if (useTurso && process.env.TURSO_DATABASE_URL) {
     const adapter = new PrismaLibSQL({

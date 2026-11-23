@@ -1,24 +1,39 @@
 import { db, dbMode, resolveLocalSqliteUrl } from "@/lib/db";
 
 /**
- * Boot-time self-healing for the database (sandbox recycle resilience).
+ * Boot-time self-healing for the database (sandbox recycle & Vercel cold-start resilience).
  *
- * The hosting sandbox wipes untracked files (db/custom.db, .env) whenever the
- * process is recycled. On every server start we check whether the database is
- * still healthy; if not, the canonical idempotent seed scripts run immediately,
- * restoring the admins, settings, and literary content before traffic arrives.
- *
- * Node builtins are loaded with webpackIgnore dynamic imports so Next.js can
- * also compile instrumentation for the edge runtime without bundling errors.
+ * Ensures the SQLite/Turso schema exists and is populated before requests hit
+ * the database. Memoized via a single per-process Promise so repeated calls
+ * from request handlers cost virtually nothing.
  */
 
 let checked = false;
+let readyPromise: Promise<void> | null = null;
 
 type Spawn = typeof import("child_process").spawn;
 
+export function ensureDbReady(): Promise<void> {
+  if (process.env.NEXT_RUNTIME && process.env.NEXT_RUNTIME !== "nodejs") {
+    return Promise.resolve();
+  }
+  if (!readyPromise) {
+    readyPromise = (async () => {
+      try {
+        const { ensureSchema } = await import("@/lib/schema-ensure");
+        await ensureSchema();
+      } catch (e) {
+        console.error("[db-ready] schema-ensure error:", String(e).slice(0, 300));
+      }
+      await ensureSeeded();
+    })();
+  }
+  return readyPromise;
+}
+
 export async function ensureSeeded(): Promise<void> {
   if (process.env.NEXT_RUNTIME && process.env.NEXT_RUNTIME !== "nodejs") return;
-  if (process.env.AUTO_SEED === "0") return; // explicit opt-out (e.g. serverless)
+  if (process.env.AUTO_SEED === "0") return; // explicit opt-out
   if (checked) return;
   checked = true;
   try {
@@ -65,9 +80,7 @@ export async function ensureSeeded(): Promise<void> {
         child.on("error", reject);
       });
 
-    // find scripts/seed: the project root (APP_ROOT) first, then relative to
-    // the runtime (dev; standalone build where build:post copies scripts/ next
-    // to server.js)
+    // find scripts/seed: APP_ROOT, cwd, or parent dirs (standalone/Vercel)
     const candidates = [
       process.env.APP_ROOT,
       process.cwd(),

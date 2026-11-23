@@ -821,6 +821,9 @@ async function ensureSchema(): Promise<SchemaEnsureReport> {
       );
     }
     for (const e of report.errors) console.error("[schema-ensure] statement error:", e);
+    if (typeof (client as { close?: () => void }).close === "function") {
+      (client as { close: () => void }).close();
+    }
   } catch (e) {
     report.errors.push(String(e).slice(0, 300));
     console.error("[schema-ensure] failed:", String(e).slice(0, 300));

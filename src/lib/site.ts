@@ -278,6 +278,8 @@ export async function getSettings(): Promise<Record<string, string>> {
     ...EXTENDED_SETTING_DEFAULTS,
   };
   try {
+    const { ensureDbReady } = await import("@/lib/auto-seed");
+    await ensureDbReady();
     const rows = await db.setting.findMany();
     for (const r of rows) map[r.key] = r.value;
     return map;

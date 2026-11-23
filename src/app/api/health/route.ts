@@ -27,6 +27,8 @@ const TABLES: { model: keyof typeof db; label: string }[] = [
 ];
 
 export async function GET() {
+  const { ensureDbReady } = await import("@/lib/auto-seed");
+  await ensureDbReady();
   // Report the mode the live client was actually built with (see db.ts) —
   // re-reading env here could disagree with the connection below.
   const mode = dbMode;
