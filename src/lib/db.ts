@@ -20,6 +20,13 @@ function makeClient(): PrismaClient {
   })
 }
 
+// The mode the ACTUAL client was built with — health must report this, not
+// re-read env per request, or a mid-process env change makes diagnostics lie
+// (client still local while health claims turso).
+export const dbMode: 'turso' | 'local-sqlite' = process.env.TURSO_DATABASE_URL
+  ? 'turso'
+  : 'local-sqlite'
+
 export const db =
   globalForPrisma.prisma ?? makeClient()
 

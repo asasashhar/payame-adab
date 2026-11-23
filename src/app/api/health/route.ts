@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbMode } from "@/lib/db";
 
 /**
  * Deployment diagnostic — GET /api/health
@@ -27,7 +27,9 @@ const TABLES: { model: keyof typeof db; label: string }[] = [
 ];
 
 export async function GET() {
-  const mode = process.env.TURSO_DATABASE_URL ? "turso" : "local-sqlite";
+  // Report the mode the live client was actually built with (see db.ts) —
+  // re-reading env here could disagree with the connection below.
+  const mode = dbMode;
   const tables: Record<string, { ok: boolean; count?: number; error?: string }> = {};
 
   let connected = false;
