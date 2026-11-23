@@ -3,16 +3,16 @@
   "version": "0.2.1",
   "private": true,
   "scripts": {
-    "dev": "if [ -f .next/standalone/server.js ] && [ -d .next/standalone/.next/static ]; then set -a && . ./.env && set +a && export NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 && cd .next/standalone && node server.js 2>&1 | tee ../../server.log; else next dev -p 3000 2>&1 | tee dev.log; fi",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "prisma generate && next build --webpack && ([ \"$VERCEL\" = \"1\" ] || npm run build:post)",
-    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "start": "NODE_ENV=production PORT=${PORT:-3000} HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "build:post": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && cp -r scripts .next/standalone/scripts && rm -rf .next/standalone/node_modules/.prisma .next/standalone/node_modules/@prisma && cp -r node_modules/.prisma .next/standalone/node_modules/ && cp -r node_modules/@prisma .next/standalone/node_modules/",
-    "seed": "node scripts/seed/index.js && node scripts/seed/upgrade.js"
+    "build:post": "mkdir -p db && DATABASE_URL=\"file:$(pwd)/db/custom.db\" npx prisma db push --skip-generate && DATABASE_URL=\"file:$(pwd)/db/custom.db\" TURSO_DATABASE_URL=\"\" npm run seed && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && cp -r scripts .next/standalone/scripts && cp -r db .next/standalone/db && rm -rf .next/standalone/node_modules/.prisma .next/standalone/node_modules/@prisma && cp -r node_modules/.prisma .next/standalone/node_modules/ && cp -r node_modules/@prisma .next/standalone/node_modules/",
+    "seed": "node scripts/seed/index.js && node scripts/seed/upgrade.js && node scripts/seed-qafiya-behr.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

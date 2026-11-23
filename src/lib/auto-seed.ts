@@ -1,20 +1,15 @@
-import { db } from "@/lib/db";
+import { db, dbMode, resolveLocalSqliteUrl } from "@/lib/db";
 
 /**
  * Boot-time self-healing for the database (sandbox recycle resilience).
  *
  * The hosting sandbox wipes untracked files (db/custom.db, .env) whenever the
- * process is recycled, which previously left the live site without admins,
- * settings or content. On every server start we check whether the database
- * is still healthy; if not, the canonical idempotent seed scripts run
- * immediately, restoring the @admin super-admin, the three Gmail
- * administrators, settings and the literary content — before traffic arrives.
+ * process is recycled. On every server start we check whether the database is
+ * still healthy; if not, the canonical idempotent seed scripts run immediately,
+ * restoring the admins, settings, and literary content before traffic arrives.
  *
- * Node builtins are loaded with webpackIgnore dynamic imports: the bundler
- * must not touch them (this module graph is also compiled for the edge
- * runtime, where they do not exist), while the Node standalone server needs
- * them resolved natively at runtime — a bundled `require` is unavailable
- * there, which silently skipped the whole self-heal before.
+ * Node builtins are loaded with webpackIgnore dynamic imports so Next.js can
+ * also compile instrumentation for the edge runtime without bundling errors.
  */
 
 let checked = false;
@@ -35,7 +30,7 @@ export async function ensureSeeded(): Promise<void> {
       db.newspaperEdition.count(),
     ]);
     // healthy DB: the four seeded admins (3 Gmail + @admin), content and the
-    // dictionary/newspaper seeds (older databases may predate those seeds)
+    // dictionary/newspaper seeds
     if (users >= 4 && settings > 0 && poems > 0 && words > 0 && editions > 0) return;
 
     console.log(
@@ -48,14 +43,25 @@ export async function ensureSeeded(): Promise<void> {
     const fs = (await import(/* webpackIgnore: true */ "fs")) as typeof import("fs");
     const path = (await import(/* webpackIgnore: true */ "path")) as typeof import("path");
 
+    const seedEnv: NodeJS.ProcessEnv =
+      dbMode === "turso"
+        ? { ...process.env }
+        : {
+            ...process.env,
+            DATABASE_URL: resolveLocalSqliteUrl(),
+            TURSO_DATABASE_URL: "",
+          };
+
     const runSeedScript = (cwd: string, script: string) =>
       new Promise<void>((resolve, reject) => {
         const child: ReturnType<Spawn> = spawn(process.execPath, [path.join(cwd, script)], {
           cwd,
-          env: process.env,
+          env: seedEnv,
           stdio: "inherit",
         });
-        child.on("exit", (code) => ((code as number) === 0 ? resolve() : reject(new Error(`${script} exited with ${code}`))));
+        child.on("exit", (code) =>
+          (code as number) === 0 ? resolve() : reject(new Error(`${script} exited with ${code}`))
+        );
         child.on("error", reject);
       });
 
