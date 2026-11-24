@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSessionUser, requireAdmin, logActivity } from "@/lib/auth";
+import { getSessionUser, requireAdmin, requireAdminPerm, logActivity } from "@/lib/auth";
 import { getSettings } from "@/lib/site";
 import { getOrCreateVisitorId } from "@/lib/visitor";
 
@@ -126,9 +126,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  // admin removal of suspicious likes
+  // admin removal of suspicious likes — engagement-module gated like comments
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "اجازت نہیں" }, { status: 403 });
+  if (!(await requireAdminPerm(admin, "engagement"))) {
+    return NextResponse.json({ error: "اس حصے کی اجازت آپ کو نہیں ہے" }, { status: 403 });
+  }
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id ضروری ہے" }, { status: 400 });
   await db.like.delete({ where: { id } });

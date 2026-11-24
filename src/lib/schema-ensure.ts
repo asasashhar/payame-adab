@@ -294,6 +294,15 @@ CREATE TABLE "QafiyaEntry" (
     "rhymes" TEXT NOT NULL DEFAULT '[]'
 );
 
+CREATE TABLE "QafiyaAIQuery" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "word" TEXT NOT NULL,
+    "response" TEXT NOT NULL,
+    "hits" INTEGER NOT NULL DEFAULT 1,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
 CREATE TABLE "Behr" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
@@ -360,6 +369,8 @@ CREATE TABLE "Memory" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+CREATE UNIQUE INDEX "QafiyaAIQuery_word_key" ON "QafiyaAIQuery"("word");
 
 
 
@@ -562,6 +573,11 @@ ALTER TABLE "QafiyaEntry" ADD COLUMN "pattern" TEXT;
 ALTER TABLE "QafiyaEntry" ADD COLUMN "wazan" TEXT;
 ALTER TABLE "QafiyaEntry" ADD COLUMN "notes" TEXT;
 ALTER TABLE "QafiyaEntry" ADD COLUMN "rhymes" TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE "QafiyaAIQuery" ADD COLUMN "word" TEXT;
+ALTER TABLE "QafiyaAIQuery" ADD COLUMN "response" TEXT;
+ALTER TABLE "QafiyaAIQuery" ADD COLUMN "hits" INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE "QafiyaAIQuery" ADD COLUMN "createdAt" DATETIME;
+ALTER TABLE "QafiyaAIQuery" ADD COLUMN "updatedAt" DATETIME;
 ALTER TABLE "Behr" ADD COLUMN "name" TEXT;
 ALTER TABLE "Behr" ADD COLUMN "nameEn" TEXT;
 ALTER TABLE "Behr" ADD COLUMN "arkan" TEXT;
@@ -694,30 +710,14 @@ function primaryKeyFromDdl(createSql: string): Set<string> {
 }
 
 async function ensureSchema(): Promise<SchemaEnsureReport> {
+  const url = process.env.TURSO_DATABASE_URL;
+  if (!url) return report; // local SQLite: schema managed via `prisma db push`
   if (ran) return report;
   ran = true;
-  const useTurso =
-    Boolean(process.env.TURSO_DATABASE_URL) &&
-    (process.env.VERCEL === "1" || process.env.USE_TURSO === "1");
-  const { resolveLocalSqliteUrl } = await import("@/lib/db");
-  const url = useTurso ? process.env.TURSO_DATABASE_URL! : resolveLocalSqliteUrl();
-  report = {
-    ...report,
-    ran: true,
-    mode: useTurso ? "turso" : "local-sqlite",
-    checkedAt: new Date().toISOString(),
-  };
+  report = { ...report, ran: true, mode: "turso", checkedAt: new Date().toISOString() };
   try {
-    if (!useTurso && url.startsWith("file:")) {
-      const fs = (await import(/* webpackIgnore: true */ "fs")) as typeof import("fs");
-      const path = (await import(/* webpackIgnore: true */ "path")) as typeof import("path");
-      const dbPath = url.slice(5).split("?")[0];
-      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    }
     const { createClient } = await import("@libsql/client");
-    const client = createClient(
-      useTurso ? { url, authToken: process.env.TURSO_AUTH_TOKEN ?? "" } : { url }
-    ) as unknown as LibsqlClient;
+    const client = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN ?? "" }) as unknown as LibsqlClient;
 
     // one introspection round-trip: existing tables, their DDL, existing indexes
     const master = (await client.execute({
@@ -821,9 +821,6 @@ async function ensureSchema(): Promise<SchemaEnsureReport> {
       );
     }
     for (const e of report.errors) console.error("[schema-ensure] statement error:", e);
-    if (typeof (client as { close?: () => void }).close === "function") {
-      (client as { close: () => void }).close();
-    }
   } catch (e) {
     report.errors.push(String(e).slice(0, 300));
     console.error("[schema-ensure] failed:", String(e).slice(0, 300));

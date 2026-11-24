@@ -151,6 +151,10 @@ export const EXTENDED_SETTING_DEFAULTS: Record<string, string> = {
   footerLinks: "",
   // admin-created custom pages (spec Part 2.4) — JSON: [{slug,title,content,visible}]
   customPages: "[]",
+  // homepage featured picks (Admin → Homepage) — content ids, "" = automatic
+  featuredPoemId: "",
+  featuredArticleId: "",
+  featuredBookId: "",
 };
 
 /** Every admin-writable setting key (brand + extended). */

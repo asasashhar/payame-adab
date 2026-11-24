@@ -2,8 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSessionUser, requireAdminPerm, logActivity } from "@/lib/auth";
 
-/** GET /api/ads — active advertisements for the public homepage rails. */
+/**
+ * GET /api/ads — active advertisements for the public homepage rails.
+ * Admins (permission: ads) get ALL ads including deactivated ones —
+ * otherwise an ad toggled off would vanish from the admin list and could
+ * never be re-enabled through the UI.
+ */
 export async function GET() {
+  const admin = await getSessionUser();
+  const isAdmin = Boolean(admin && admin.role === "ADMIN" && (await requireAdminPerm(admin, "ads")));
+  if (isAdmin) {
+    const [left, right] = await Promise.all([
+      db.advertisement.findMany({ where: { slot: "LEFT" }, orderBy: { sortOrder: "asc" } }),
+      db.advertisement.findMany({ where: { slot: "RIGHT" }, orderBy: { sortOrder: "asc" } }),
+    ]);
+    return NextResponse.json({ left, right, all: true });
+  }
   const [left, right] = await Promise.all([
     db.advertisement.findMany({ where: { slot: "LEFT", active: true }, orderBy: { sortOrder: "asc" } }),
     db.advertisement.findMany({ where: { slot: "RIGHT", active: true }, orderBy: { sortOrder: "asc" } }),

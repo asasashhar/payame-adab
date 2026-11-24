@@ -15,7 +15,9 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   // libSQL/Turso driver packages ship native binaries and dynamic requires —
   // keep them out of the webpack bundle and load them at runtime instead.
-  serverExternalPackages: ["@prisma/adapter-libsql", "@libsql/client", "libsql", "@libsql/isomorphic-ws"],
+  // z-ai-web-dev-sdk likewise resolves platform credentials/dynamic deps at
+  // runtime and must not be bundled into the server build.
+  serverExternalPackages: ["@prisma/adapter-libsql", "@libsql/client", "libsql", "@libsql/isomorphic-ws", "z-ai-web-dev-sdk"],
   outputFileTracingIncludes: {
     "/*": ["./scripts/seed/**/*", "./scripts/seed-qafiya-behr.js"],
   },

@@ -8,11 +8,33 @@ export function SiteFooter({
 }: {
   settings?: {
     contactEmail?: string; contactPhone?: string; footerNote?: string;
-    tagline?: string; socialLinks?: string;
+    tagline?: string; socialLinks?: string; footerLinks?: string;
   };
 }) {
   let social: SocialLink[] = [];
   try { social = JSON.parse(settings?.socialLinks ?? "[]"); } catch { /* ignore */ }
+
+  // Admin-managed footer links (Setting: footerLinks, JSON [{label,href}]).
+  // When non-empty they replace the tools/services column; empty keeps the
+  // built-in defaults — both shapes stay valid for older data.
+  type FooterLink = { label: string; href: string };
+  const TOOLS_DEFAULT: FooterLink[] = [
+    { label: "قافیہ تلاش", href: "/qafiya" },
+    { label: "تقطیع و بحر", href: "/taqti" },
+    { label: "لغت", href: "/dictionary" },
+    { label: "اپنی تحریر بھیجیں", href: "/submit" },
+    { label: "شکایات و تجاویز", href: "/feedback" },
+    { label: "ہمارا تعارف", href: "/about" },
+  ];
+  let footerLinks: FooterLink[] = TOOLS_DEFAULT;
+  try {
+    const parsed = JSON.parse(settings?.footerLinks ?? "[]");
+    if (Array.isArray(parsed) && parsed.length) {
+      footerLinks = parsed
+        .filter((l) => l && typeof l.label === "string" && typeof l.href === "string")
+        .slice(0, 10);
+    }
+  } catch { /* keep defaults */ }
 
   const socialIcon = (p: string) => {
     const cls = "h-4 w-4";
@@ -66,14 +88,7 @@ export function SiteFooter({
         <nav aria-label="اوزار و خدمات">
           <h3 className="mb-4 font-nastaliq-tight text-lg text-[#e2c57c]">اوزار و خدمات</h3>
           <ul className="space-y-2 text-sm font-naskh">
-            {[
-              ["قافیہ تلاش", "/qafiya"],
-              ["تقطیع و بحر", "/taqti"],
-              ["لغت", "/dictionary"],
-              ["اپنی تحریر بھیجیں", "/submit"],
-              ["شکایات و تجاویز", "/feedback"],
-              ["ہمارا تعارف", "/about"],
-            ].map(([label, href]) => (
+            {footerLinks.map(({ label, href }) => (
               <li key={href}>
                 <Link href={href} className="text-[#e5dfc9]/85 hover:text-[#e2c57c] transition-colors">
                   {label}

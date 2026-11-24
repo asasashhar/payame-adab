@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/admin-shell";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Heart, Trash2 } from "lucide-react";
 
 type LikeRow = {
   id: string;
@@ -24,19 +25,33 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default function AdminLikesPage() {
   const [likes, setLikes] = useState<LikeRow[] | null>(null);
+  const [busy, setBusy] = useState("");
 
-  useEffect(() => {
+  const load = () => {
     fetch("/api/likes?admin=1")
       .then((r) => r.json())
       .then((d) => setLikes(d.likes ?? []))
       .catch(() => setLikes([]));
-  }, []);
+  };
+
+  useEffect(load, []);
+
+  const removeLike = async (id: string) => {
+    if (busy) return;
+    setBusy(id);
+    try {
+      const res = await fetch(`/api/likes?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (res.ok) setLikes((cur) => (cur ?? []).filter((l) => l.id !== id));
+    } finally {
+      setBusy("");
+    }
+  };
 
   return (
     <>
       <AdminPageHeader
         title="پسندیدگیاں"
-        subtitle="قارئین کی پسند کی گئی تحریریں — تازہ ترین 200"
+        subtitle="قارئین کی پسند کی گئی تحریریں — تازہ ترین 200 (مشکوک پسندیدگی حذف کی جا سکتی ہے)"
       />
       {likes === null ? (
         <div className="space-y-3">
@@ -59,6 +74,7 @@ export default function AdminLikesPage() {
                 <th className="px-4 py-3 text-start font-naskh text-muted-foreground">قسم</th>
                 <th className="px-4 py-3 text-start font-naskh text-muted-foreground">پسند کرنے والا</th>
                 <th className="px-4 py-3 text-start font-naskh text-muted-foreground">تاریخ</th>
+                <th className="px-4 py-3 text-start font-naskh text-muted-foreground">کارروائی</th>
               </tr>
             </thead>
             <tbody>
@@ -73,6 +89,18 @@ export default function AdminLikesPage() {
                   <td className="px-4 py-3 font-naskh text-muted-foreground">{l.likerName ?? "مہمان قاریئن"}</td>
                   <td className="px-4 py-3 font-latin text-xs text-muted-foreground" dir="ltr">
                     {new Date(l.createdAt).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={busy === l.id}
+                      onClick={() => removeLike(l.id)}
+                      className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      title="پسندیدگی حذف کریں"
+                    >
+                      <Trash2 className="h-4 w-4" /> حذف
+                    </Button>
                   </td>
                 </tr>
               ))}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { cn } from "@/lib/utils";
+import { AdClickLink } from "@/components/site/ad-click-link";
 
 export type AdItem = {
   id: string;
@@ -66,15 +67,14 @@ export async function AdRail({
           return (
             <div key={ad.id} className="flex justify-center">
               {ad.linkUrl ? (
-                <a
+                <AdClickLink
+                  id={ad.id}
                   href={ad.linkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
                   title={ad.title}
                   className="block transition-transform hover:scale-[1.015]"
                 >
                   {img}
-                </a>
+                </AdClickLink>
               ) : (
                 img
               )}

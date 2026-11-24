@@ -15,7 +15,15 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "اجازت نہیں" }, { status: 403 });
-  if (!(await requireAdminPerm(admin, "settings"))) {
+  // /admin/settings, /admin/homepage and /admin/appearance all save through
+  // this endpoint — grant save rights to ANY of the three matching modules,
+  // otherwise role-limited admins (homepage/appearance without full
+  // settings) could view their page but every save 403'd.
+  const canSave =
+    (await requireAdminPerm(admin, "settings")) ||
+    (await requireAdminPerm(admin, "homepage")) ||
+    (await requireAdminPerm(admin, "appearance"));
+  if (!canSave) {
     return NextResponse.json({ error: "اس حصے کی اجازت آپ کو نہیں ہے" }, { status: 403 });
   }
   try {

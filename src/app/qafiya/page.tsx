@@ -15,6 +15,16 @@ type QafiyaEntry = {
   id: string; word: string; meaning?: string | null; pattern?: string | null; wazan?: string | null; rhymes: string;
 };
 
+type AiRhyme = {
+  word: string; meaningUrdu?: string; meaningEnglish?: string; pronunciation?: string;
+  rhymeType: "exact" | "approximate"; example?: string;
+};
+
+type AiResponse = {
+  ok: boolean; source?: "ai" | "cache" | "local" | "none"; word?: string;
+  rhymes?: AiRhyme[]; error?: string;
+};
+
 export default function QafiyaPage() {
   const [word, setWord] = useState("");
   const [wazan, setWazan] = useState("");
@@ -22,6 +32,44 @@ export default function QafiyaPage() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState("");
   const [searchedWazan, setSearchedWazan] = useState("");
+
+  // اے آئی قافیہ فائنڈر کی حالت
+  const [aiWord, setAiWord] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<AiResponse | null>(null);
+  const [aiError, setAiError] = useState("");
+  const [aiSearched, setAiSearched] = useState("");
+
+  const aiFind = async (e?: React.FormEvent, preset?: string) => {
+    e?.preventDefault();
+    const q = (preset ?? aiWord).trim();
+    if (!q) return;
+    if (preset) setAiWord(preset);
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const res = await fetch("/api/qafiya/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word: q }),
+      });
+      const data: AiResponse = await res.json().catch(() => ({ ok: false, error: "سروس سے رابطہ نہ ہو سکا" }));
+      if (data.ok && (data.rhymes?.length ?? 0) > 0) {
+        setAiResult(data);
+        setAiSearched(data.word ?? q);
+        setAiError("");
+      } else {
+        setAiResult(null);
+        setAiSearched(q);
+        setAiError(data.error || "ابھی کوئی تجویز دستیاب نہیں — دوبارہ کوشش کریں");
+      }
+    } catch {
+      setAiResult(null);
+      setAiError("سروس سے رابطہ نہ ہو سکا — انٹرنیٹ چیک کر کے دوبارہ کوشش کریں");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // وزن (بحر) سے تلاش: جس گروہ کا wazan اس بحر سے ملتا ہے وہ سب دکھائیں
   const wazanResults = useMemo(() => {
@@ -75,6 +123,94 @@ export default function QafiyaPage() {
             title="قافیہ تلاش"
             subtitle="لفظ لکھیں اور مطابق قافیے حاصل کریں — تلفظ اور قافیے کے سانچے کی بنیاد پر"
           />
+
+          {/* اے آئی قافیہ فائنڈر — AI analyzes poetic pronunciation, returns
+              rhymes with meanings, pronunciation, rhyme type and examples */}
+          <div className="mt-8 manuscript-frame rounded-xl bg-card p-6 ring-1 ring-gold/40">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-gold" />
+              <h2 className="font-nastaliq-tight text-2xl leading-10 text-primary">اے آئی قافیہ فائنڈر</h2>
+              <Badge className="bg-gold/15 font-nastaliq-tight text-sm text-gold">ذہانی تلاش</Badge>
+            </div>
+            <p className="mt-1 text-xs font-naskh leading-6 text-muted-foreground">
+              کوئی بھی اردو لفظ لکھیں — اے آئی شاعرانہ تلفظ کی بنیاد پر قافیے، ان کے معنی (اردو و انگریزی)، تلفظ اور استعمال کی مثالیں فراہم کرتا ہے۔
+            </p>
+            <form onSubmit={aiFind} className="mt-4 flex gap-3">
+              <Input
+                dir="rtl"
+                value={aiWord}
+                onChange={(e) => setAiWord(e.target.value)}
+                placeholder="لفظ لکھیں: یاد، محبت، وفا، چاند…"
+                className="h-12 font-nastaliq-tight text-xl text-right"
+                aria-label="اے آئی قافیہ تلاش کے لیے لفظ"
+              />
+              <Button type="submit" disabled={aiLoading} className="h-12 shrink-0 gap-2 bg-gold px-6 font-naskh text-[15px] text-primary hover:bg-gold/90">
+                <Sparkles className="h-4.5 w-4.5" /> {aiLoading ? "اے آئی سوچ رہا ہے…" : "قافیہ دریافت کریں"}
+              </Button>
+            </form>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {["یاد", "دل", "وفا", "محبت", "چاند", "آنکھ", "زندگی", "خواب"].map((w) => (
+                <button
+                  key={w}
+                  onClick={() => aiFind(undefined, w)}
+                  className="rounded-full border border-gold/40 bg-secondary px-3.5 py-1 text-sm font-nastaliq-tight text-primary hover:bg-accent"
+                >
+                  {w}
+                </button>
+              ))}
+            </div>
+
+            {aiLoading && (
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+              </div>
+            )}
+
+            {!aiLoading && aiError && (
+              <div className="mt-5 rounded-xl border border-dashed border-gold/40 bg-card p-8 text-center font-naskh text-sm leading-7 text-muted-foreground">
+                {aiError}
+              </div>
+            )}
+
+            {!aiLoading && aiResult && (
+              <div className="mt-5">
+                <div className="mb-3 flex flex-wrap items-center gap-2 text-sm font-naskh text-muted-foreground">
+                  <Sparkles className="h-4 w-4 text-gold" />
+                  «<span className="font-nastaliq-tight text-lg text-primary">{aiSearched}</span>» کے قافیے
+                  <span>({aiResult.rhymes?.length ?? 0} تجاویز)</span>
+                  {aiResult.source === "local" && (
+                    <span className="text-[11px] text-gold">· اے آئی عارضیاً دستیاب نہیں — مقامی قافیہ ذخیرے سے تجاویز</span>
+                  )}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {aiResult.rhymes?.map((r) => (
+                    <div key={r.word} className="manuscript-frame rounded-xl bg-card p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <button
+                          onClick={() => navigator.clipboard.writeText(r.word).catch(() => {})}
+                          className="font-nastaliq-tight text-2xl leading-10 text-emerald-ink hover:text-primary"
+                          title="کاپی کرنے کے لیے کلک کریں"
+                        >
+                          {r.word}
+                        </button>
+                        {r.rhymeType === "exact" ? (
+                          <Badge className="shrink-0 bg-primary font-nastaliq-tight text-xs text-primary-foreground">مکمل قافیہ</Badge>
+                        ) : (
+                          <Badge variant="outline" className="shrink-0 border-gold/50 font-nastaliq-tight text-xs text-gold">قریبی قافیہ</Badge>
+                        )}
+                      </div>
+                      {r.meaningUrdu && <p className="mt-1 text-sm font-naskh leading-6 text-foreground/90">معنی: {r.meaningUrdu}</p>}
+                      {r.meaningEnglish && <p dir="ltr" className="mt-0.5 text-left text-[11px] font-naskh leading-5 text-muted-foreground">{r.meaningEnglish}</p>}
+                      {r.pronunciation && <p dir="ltr" className="mt-0.5 text-left text-[11px] font-naskh italic leading-5 text-primary/80">talfuz: {r.pronunciation}</p>}
+                      {r.example && (
+                        <p className="mt-2 border-r-2 border-gold/50 pr-2 text-xs font-nastaliq-tight leading-7 text-foreground/75">{r.example}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="manuscript-frame rounded-xl bg-card p-6">
             <form onSubmit={find} className="flex gap-3">

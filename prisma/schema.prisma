@@ -296,6 +296,18 @@ model QafiyaEntry {
   rhymes  String  @default("[]") // JSON array of rhyming words
 }
 
+// AI Qafiya Finder cache — one row per normalized searched word; the AI
+// response is stored so repeat searches are instant and the tool keeps
+// working (from cache) even when the AI service is unreachable.
+model QafiyaAIQuery {
+  id        String   @id @default(cuid())
+  word      String   @unique
+  response  String // JSON array of rhyme suggestions
+  hits      Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Behr {
   id      String  @id @default(cuid())
   name    String

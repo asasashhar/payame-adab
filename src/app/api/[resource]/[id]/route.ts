@@ -11,6 +11,9 @@ const RESOURCE_MODULE: Record<string, string> = {
   newspaper: "newspaper", words: "newspaper", shers: "newspaper", banners: "newspaper",
   competitions: "content", events: "content",
   qafiya: "tools", behrs: "tools", users: "users",
+  // same mapping as the collection route — without these, admins WITHOUT the
+  // module could still PATCH/DELETE those resources by id (RBAC bypass)
+  magazines: "newspaper", memories: "content", feedback: "engagement",
 };
 
 const MODERATION_KINDS: Record<string, "PUBLISHED" | "APPROVED" | "REJECTED" | "REVISION" | "PENDING"> = {

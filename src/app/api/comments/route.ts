@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSessionUser, requireAdmin, logActivity } from "@/lib/auth";
+import { getSessionUser, requireAdmin, requireAdminPerm, logActivity } from "@/lib/auth";
 import { getSettings } from "@/lib/site";
 
 const RESOURCE_MODELS = { poem: "poem", article: "article", book: "book", news: "news" } as const;
@@ -127,6 +127,9 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "اجازت نہیں" }, { status: 403 });
+  if (!(await requireAdminPerm(admin, "engagement"))) {
+    return NextResponse.json({ error: "اس حصے کی اجازت آپ کو نہیں ہے" }, { status: 403 });
+  }
   const body = (await req.json()) as Record<string, string>;
   const id = String(body.id ?? "");
   const status = String(body.status ?? "");
@@ -141,6 +144,9 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "اجازت نہیں" }, { status: 403 });
+  if (!(await requireAdminPerm(admin, "engagement"))) {
+    return NextResponse.json({ error: "اس حصے کی اجازت آپ کو نہیں ہے" }, { status: 403 });
+  }
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id ضروری ہے" }, { status: 400 });
   await db.comment.delete({ where: { id } });
